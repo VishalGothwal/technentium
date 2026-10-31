@@ -182,6 +182,7 @@
     "useEmail": "Use email & password instead",
     "usePhone": "Use mobile number instead",
     "phoneStarts": "Indian mobile numbers start with 6, 7, 8 or 9.",
+    "sendFailed": "We couldn't send the code right now. Please try again in a minute, or continue with Google.",
     "sendCode": "Send code",
     "codeSent": "We sent a code to {phone}.",
     "code": "Verification code",

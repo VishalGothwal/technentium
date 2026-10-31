@@ -70,7 +70,8 @@ export function PhoneOtpForm({ onSuccess, autoFocus }: { onSuccess: () => void; 
     const res = await authClient.phoneNumber.sendOtp({ phoneNumber: target });
     setPending(false);
     if (res.error) {
-      setError(res.error.status === 429 ? t("auth.tooMany") : t("validation.phone"));
+      // 400 = the number was rejected; anything else is on our side (e.g. the SMS provider is down).
+      setError(res.error.status === 429 ? t("auth.tooMany") : res.error.status === 400 ? t("validation.phone") : t("auth.sendFailed"));
       return;
     }
     setNormalized(target);
