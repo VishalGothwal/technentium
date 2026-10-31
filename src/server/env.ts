@@ -17,7 +17,14 @@ const schema = z.object({
   NOTIFY_EMAIL_DRIVER: z.enum(["console", "smtp"]).default("console"),
   SMTP_URL: z.string().optional(),
   EMAIL_FROM: z.string().default("Technentium <no-reply@example.com>"),
-  SMS_DRIVER: z.enum(["console"]).default("console"),
+  SMS_DRIVER: z.enum(["console", "fast2sms"]).default("console"),
+  FAST2SMS_API_KEY: z.string().optional(),
+  /** "otp" (Fast2SMS ready OTP route, no DLT registration) or "dlt" (your registered sender + template). */
+  FAST2SMS_ROUTE: z.enum(["otp", "dlt"]).default("otp"),
+  FAST2SMS_SENDER_ID: z.string().optional(),
+  FAST2SMS_TEMPLATE_ID: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 });
 
 export type Env = z.infer<typeof schema>;

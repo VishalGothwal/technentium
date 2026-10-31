@@ -111,6 +111,7 @@ async function deliver(channel: string, event: EventRow): Promise<Outcome> {
       if (!user.phoneNumber || !user.phoneNumberVerified) return { status: "SKIPPED", provider: "none", note: "no verified phone" };
       // WhatsApp shares the console stub until a BSP and approved templates exist.
       const adapter = smsAdapter();
+      if (!adapter.supportsText) return { status: "SKIPPED", provider: adapter.name, note: "SMS provider sends OTP codes only" };
       const res = await adapter.send(user.phoneNumber, `${msg.title}. ${msg.body}`);
       return { status: "SENT", provider: `${adapter.name}:${channel}`, providerMessageId: res.providerMessageId };
     }

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Alert } from "@/components/ui/surface";
 import { useI18n } from "@/i18n/client";
 import { INDIAN_STATES } from "@/lib/schemas/shop";
@@ -59,7 +60,7 @@ export function CheckoutForm({ defaults }: { defaults: Partial<Values> }) {
             {(p) => <Input {...p} autoComplete="name" value={values.contactName} onChange={set("contactName")} />}
           </Field>
           <Field label={t("checkout.phone")} error={errors.contactPhone} required>
-            {(p) => <Input {...p} type="tel" inputMode="tel" autoComplete="tel-national" value={values.contactPhone} onChange={set("contactPhone")} />}
+            {(p) => <PhoneInput {...p} value={values.contactPhone} onChange={(d) => setValues((v) => ({ ...v, contactPhone: d }))} />}
           </Field>
         </div>
       </fieldset>

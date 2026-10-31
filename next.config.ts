@@ -10,6 +10,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Lets client components show "Continue with Google" only when the server has Google OAuth credentials.
+  env: { NEXT_PUBLIC_GOOGLE_SIGN_IN: process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? "1" : "" },
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,

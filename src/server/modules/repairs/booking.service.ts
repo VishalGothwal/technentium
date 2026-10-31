@@ -134,6 +134,25 @@ export async function submitBooking(actor: Actor | null, rawInput: unknown, idem
 
 // ───────────────────────────── Customer: read & act ─────────────────────────────
 
+/**
+ * Contact name, phone and address from the customer's most recent booking, so a returning customer
+ * doesn't retype them (the address only if that booking had one).
+ */
+export async function lastBookingContact(userId: string) {
+  const last = await db.repairBooking.findFirst({
+    where: { customerId: userId },
+    orderBy: { createdAt: "desc" },
+    select: { contactName: true, contactPhone: true, handover: { select: { addressLine1: true, addressLine2: true, landmark: true, pincode: true } } },
+  });
+  if (!last) return null;
+  const h = last.handover;
+  return {
+    contactName: last.contactName,
+    contactPhone: last.contactPhone,
+    address: h?.addressLine1 && h.pincode ? { addressLine1: h.addressLine1, addressLine2: h.addressLine2 ?? "", landmark: h.landmark ?? "", pincode: h.pincode } : null,
+  };
+}
+
 export async function listMyBookings(actor: Actor | null) {
   requireUser(actor);
   return db.repairBooking.findMany({

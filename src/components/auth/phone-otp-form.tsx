@@ -1,10 +1,11 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { normalizeIndianMobile } from "@/lib/phone";
+import { isCompleteNational, normalizeIndianMobile } from "@/lib/phone";
 import { useI18n } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 const RESEND_SECONDS = 30;
 
@@ -14,7 +15,7 @@ const formatPhone = (e164: string) => `${e164.slice(0, 3)} ${e164.slice(3, 8)} $
 type OtpCredential = Credential & { code: string };
 
 /** Mobile OTP sign-in (creates the account on first verification). Used on the sign-in page and inside the booking wizard. */
-export function PhoneOtpForm({ onSuccess }: { onSuccess: () => void }) {
+export function PhoneOtpForm({ onSuccess, autoFocus }: { onSuccess: () => void; autoFocus?: boolean }) {
   const { t } = useI18n();
   const [phone, setPhone] = useState("");
   const [normalized, setNormalized] = useState<string | null>(null);
@@ -89,26 +90,26 @@ export function PhoneOtpForm({ onSuccess }: { onSuccess: () => void }) {
           void sendCode(n);
         }}
       >
-        <Field label={t("auth.phone")} hint={t("auth.phoneHint")} error={error} required>
+        <Field
+          label={t("auth.phone")}
+          hint={phone && !/^[6-9]/.test(phone) ? t("auth.phoneStarts") : t("auth.phoneHint")}
+          error={error}
+          required
+        >
           {(p) => (
-            <div className="flex">
-              <span className="flex items-center gap-1.5 rounded-l-lg border border-r-0 border-border bg-surface-muted px-3 text-sm font-medium text-muted" aria-hidden>
-                +91
-              </span>
-              <Input
-                {...p}
-                className="rounded-l-none text-lg tracking-wide sm:text-base"
-                type="tel"
-                inputMode="numeric"
-                autoComplete="tel-national"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/[^\d\s+]/g, "").slice(0, 14))}
-                placeholder="98765 43210"
-              />
-            </div>
+            <PhoneInput
+              {...p}
+              size="lg"
+              autoFocus={autoFocus}
+              value={phone}
+              onChange={(d) => {
+                setPhone(d);
+                setError(null);
+              }}
+            />
           )}
         </Field>
-        <Button type="submit" block size="lg" pending={pending}>
+        <Button type="submit" block size="lg" pending={pending} disabled={!isCompleteNational(phone)}>
           {t("auth.sendCode")}
         </Button>
         <p className="text-center text-xs text-muted">{t("auth.phoneNewAccount")}</p>
@@ -149,7 +150,12 @@ export function PhoneOtpForm({ onSuccess }: { onSuccess: () => void }) {
             autoComplete="one-time-code"
             maxLength={6}
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onChange={(e) => {
+              const next = e.target.value.replace(/\D/g, "").slice(0, 6);
+              setCode(next);
+              // All six digits typed or pasted: check straight away, no extra tap.
+              if (next.length === 6 && !pending) void verify(normalized, next);
+            }}
             placeholder="••••••"
             className="h-14 text-center font-mono text-2xl tracking-[0.6em]"
           />

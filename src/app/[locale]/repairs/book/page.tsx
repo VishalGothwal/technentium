@@ -5,6 +5,8 @@ import { pageMetadata } from "@/lib/seo";
 import { getSession } from "@/server/auth/session";
 import { isDeliverableEmail } from "@/server/providers/email";
 import { getDeviceModel, listIssues } from "@/server/modules/catalog/catalog.service";
+import { lastBookingContact } from "@/server/modules/repairs/booking.service";
+import { nationalDigits } from "@/lib/phone";
 import { PageSkeleton } from "@/components/ui/surface";
 import { BookingWizard, type BookingPrefill } from "./wizard";
 
@@ -36,14 +38,20 @@ async function readPrefill(searchParams: SearchParams): Promise<BookingPrefill |
 
 async function WizardWithSession({ searchParams }: { searchParams: SearchParams }) {
   const [session, prefill] = await Promise.all([getSession(), readPrefill(searchParams)]);
-  const user = session?.user as { name?: string; phoneNumber?: string | null; email?: string } | undefined;
+  const user = session?.user as { id: string; name?: string; phoneNumber?: string | null; email?: string } | undefined;
+  // Returning customers: reuse what they entered last time so nothing is typed twice.
+  const last = user ? await lastBookingContact(user.id) : null;
+  const accountName = user?.name && user.name !== "Customer" ? user.name : "";
   return (
     <BookingWizard
+      // Remount after sign-in so the account's details fill the form.
+      key={user?.id ?? "guest"}
       initialSignedIn={!!session}
       prefill={prefill}
       defaults={{
-        contactName: user?.name && user.name !== "Customer" ? user.name : "",
-        contactPhone: user?.phoneNumber?.replace(/^\+91/, "") ?? "",
+        contactName: last?.contactName || accountName,
+        contactPhone: nationalDigits(user?.phoneNumber ?? last?.contactPhone ?? ""),
+        address: last?.address ?? null,
         hasEmail: isDeliverableEmail(user?.email),
       }}
     />

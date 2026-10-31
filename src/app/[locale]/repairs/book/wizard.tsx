@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch, ApiRequestError } from "@/lib/api-client";
 import { formatDate, formatPaise } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { normalizeIndianMobile, isValidPincode } from "@/lib/phone";
+import { formatNational, isCompleteNational, isValidPincode, nationalDigits, normalizeIndianMobile } from "@/lib/phone";
 import { HANDOVER_METHODS, METHODS_NEEDING_ADDRESS, type HandoverMethodKey } from "@/lib/schemas/repair";
 import { useI18n } from "@/i18n/client";
 import { localized } from "@/i18n/translate";
@@ -14,6 +14,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Checkbox, Field, Input, Textarea } from "@/components/ui/field";
 import { Alert, Card, DescriptionList, Skeleton } from "@/components/ui/surface";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 type Category = { id: string; nameEn: string; nameHi: string | null };
 type Named = { id: string; name: string };
@@ -44,13 +45,16 @@ const STEPS = ["device", "issues", "details", "handover", "location", "slot", "r
 const STORAGE_KEY = "tn_booking_draft_v1";
 const MAX_PHOTOS = 6;
 
-const newDraft = (defaults: { contactName: string; contactPhone: string }): Draft => ({
+type Address = Draft["address"];
+const EMPTY_ADDRESS: Address = { addressLine1: "", addressLine2: "", landmark: "", pincode: "" };
+
+const newDraft = (defaults: { contactName: string; contactPhone: string; address?: Address | null }): Draft => ({
   step: 0,
   issueTypeIds: [],
   description: "",
   contactName: defaults.contactName,
   contactPhone: defaults.contactPhone,
-  address: { addressLine1: "", addressLine2: "", landmark: "", pincode: "" },
+  address: defaults.address ?? EMPTY_ADDRESS,
   handoverNotes: "",
   acceptPolicy: false,
   idempotencyKey: crypto.randomUUID(),
@@ -81,7 +85,8 @@ export function BookingWizard({
   prefill,
 }: {
   initialSignedIn: boolean;
-  defaults: { contactName: string; contactPhone: string; hasEmail: boolean };
+  /** Account and last-booking details, so returning customers don't retype them. */
+  defaults: { contactName: string; contactPhone: string; address: Address | null; hasEmail: boolean };
   /** Device and services chosen on a repair model page — starts a fresh draft at the details step. */
   prefill?: BookingPrefill | null;
 }) {
@@ -90,6 +95,7 @@ export function BookingWizard({
   const [draft, setDraft] = useState<Draft>(() => newDraft(defaults));
   const [hydrated, setHydrated] = useState(false);
   const [signedIn, setSignedIn] = useState(initialSignedIn);
+  const [editingContact, setEditingContact] = useState(false);
   const [photos, setPhotos] = useState<{ file: File; url: string; uploadedId?: string }[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -113,7 +119,12 @@ export function BookingWizard({
       const saved = sessionStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved) as Draft;
-        setDraft({ ...parsed, contactName: parsed.contactName || defaults.contactName, contactPhone: parsed.contactPhone || defaults.contactPhone });
+        setDraft({
+          ...parsed,
+          contactName: parsed.contactName || defaults.contactName,
+          contactPhone: parsed.contactPhone || defaults.contactPhone,
+          address: parsed.address?.addressLine1 ? parsed.address : (defaults.address ?? parsed.address ?? EMPTY_ADDRESS),
+        });
       }
     } catch {
       /* storage unavailable — start fresh */
@@ -261,6 +272,23 @@ export function BookingWizard({
   }
 
   if (!hydrated) return <Skeleton className="mt-6 h-64" />;
+
+  if (!signedIn) {
+    return (
+      <Card className="mt-6 p-5 sm:p-6">
+        <h2 className="text-lg font-semibold">{t("booking.signInFirstTitle")}</h2>
+        <p className="mt-1 mb-5 text-sm text-muted">{t("booking.signInFirstBody")}</p>
+        <SignInPanel
+          autoFocus
+          onSuccess={() => {
+            setSignedIn(true);
+            // Re-render with the account's saved name, phone and address (the page remounts the wizard).
+            router.refresh();
+          }}
+        />
+      </Card>
+    );
+  }
 
   const selectedCategory = categories.data?.find((c) => c.id === draft.categoryId);
   const selectedIssues = issues.data?.filter((i) => draft.issueTypeIds.includes(i.id)) ?? [];
@@ -426,14 +454,28 @@ export function BookingWizard({
 
         {step === "location" && (
           <div className="space-y-5">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label={t("booking.contactName")} error={errors.contactName} required>
-                {(p) => <Input {...p} autoComplete="name" value={draft.contactName} onChange={(e) => update({ contactName: e.target.value })} />}
-              </Field>
-              <Field label={t("booking.contactPhone")} error={errors.contactPhone} required>
-                {(p) => <Input {...p} type="tel" inputMode="numeric" autoComplete="tel-national" value={draft.contactPhone} onChange={(e) => update({ contactPhone: e.target.value })} />}
-              </Field>
-            </div>
+            {!editingContact && !errors.contactName && !errors.contactPhone && draft.contactName.trim().length >= 2 && isCompleteNational(nationalDigits(draft.contactPhone)) ? (
+              // Known from the account or the last booking: confirm instead of retyping.
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-muted p-4">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold tracking-wide text-muted uppercase">{t("booking.contact")}</p>
+                  <p className="truncate font-semibold">{draft.contactName}</p>
+                  <p className="text-sm text-muted">+91 {formatNational(nationalDigits(draft.contactPhone))}</p>
+                </div>
+                <Button type="button" variant="secondary" size="sm" onClick={() => setEditingContact(true)}>
+                  {t("common.edit")}
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={t("booking.contactName")} error={errors.contactName} required>
+                  {(p) => <Input {...p} autoComplete="name" value={draft.contactName} onChange={(e) => update({ contactName: e.target.value })} />}
+                </Field>
+                <Field label={t("booking.contactPhone")} error={errors.contactPhone} required>
+                  {(p) => <PhoneInput {...p} value={draft.contactPhone} onChange={(d) => update({ contactPhone: d })} />}
+                </Field>
+              </div>
+            )}
             {needsAddress && (
               <div className="space-y-4">
                 <p className="text-sm font-medium">{t("booking.addressTitle")}</p>
@@ -517,7 +559,7 @@ export function BookingWizard({
                 [t("booking.handover"), draft.handoverMethod ? t(`handover.${draft.handoverMethod}.title`) : ""],
                 [t("booking.appointment"), selectedSlot ? `${formatDate(selectedSlot.date, locale)}, ${selectedSlot.startTime}–${selectedSlot.endTime}` : ""],
                 ...(needsAddress ? [[t("booking.address"), [draft.address.addressLine1, draft.address.addressLine2, draft.address.landmark, `Jaipur ${draft.address.pincode}`].filter(Boolean).join(", ")] as [string, string]] : []),
-                [t("booking.contact"), `${draft.contactName} · ${draft.contactPhone}`],
+                [t("booking.contact"), `${draft.contactName} · +91 ${formatNational(nationalDigits(draft.contactPhone))}`],
                 [t("booking.photos"), t("booking.photosCount", { count: photos.length })],
               ]}
             />

@@ -14,6 +14,12 @@ import { isValidIndianMobile, normalizeIndianMobile } from "@/lib/phone";
 export const OTP_EXPIRY_SECONDS = 300;
 export const OTP_RESEND_COOLDOWN_SECONDS = 30;
 
+/** "Continue with Google" is offered only when OAuth credentials are configured (free in Google Cloud Console). */
+const google =
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? { google: { clientId: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET, prompt: "select_account" as const } }
+    : undefined;
+
 export const auth = betterAuth({
   appName: "Technentium",
   baseURL: process.env.BETTER_AUTH_URL,
@@ -24,6 +30,10 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // refresh daily while active
   },
+
+  socialProviders: google,
+  // A Google sign-in with the same verified email as an existing account joins that account instead of failing.
+  account: { accountLinking: { enabled: true, trustedProviders: ["google"] } },
 
   user: {
     additionalFields: {
@@ -93,7 +103,7 @@ export const auth = betterAuth({
           throw new APIError("TOO_MANY_REQUESTS", { message: "Too many codes requested for this number. Try again later." });
         }
         testOtpHooks.record(phone, code);
-        await smsAdapter().send(phone, `${code} is your Technentium verification code. It expires in 5 minutes. Do not share it.`);
+        await smsAdapter().sendOtp(phone, code);
       },
     }),
     twoFactor({ issuer: "Technentium" }),
