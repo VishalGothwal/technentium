@@ -1,0 +1,160 @@
+{
+  "articles": {
+    "title": "Guides & articles",
+    "subtitle": "Practical, honest advice on repairs, protection and getting more from your devices — from the technicians at Technentium.",
+    "metaDescription": "Repair guides, buying advice and device-care tips from Technentium's technicians in Jaipur.",
+    "searchLabel": "Search articles",
+    "searchPlaceholder": "Search guides, e.g. battery",
+    "search": "Search",
+    "allTopics": "All topics",
+    "topics": {
+      "repair-guides": "Repair guides",
+      "buying-guides": "Buying guides",
+      "protection": "Protection",
+      "tips": "Tips & care",
+      "news": "News"
+    },
+    "topicDescriptions": {
+      "repair-guides": "What to expect from common repairs, and how to get your device ready.",
+      "buying-guides": "Make confident choices on phones, parts and accessories.",
+      "protection": "Screen protectors, cases and everyday protection that actually works.",
+      "tips": "Small habits that keep your devices healthy for longer.",
+      "news": "Updates from Technentium and the device world."
+    },
+    "featured": "Featured",
+    "latest": "Latest",
+    "readMinutes": "{n} min read",
+    "by": "By {name}",
+    "published": "Published {date}",
+    "updated": "Updated {date}",
+    "onThisPage": "On this page",
+    "share": "Share",
+    "copyLink": "Copy link",
+    "copied": "Link copied",
+    "shareWhatsApp": "WhatsApp",
+    "related": "Keep reading",
+    "relatedLinks": "Related products & services",
+    "newer": "Newer",
+    "older": "Older",
+    "englishOnly": "This article isn't available in Hindi yet, so we're showing the English version.",
+    "englishBadge": "English",
+    "noResults": "No articles found",
+    "noResultsBody": "Try another search or topic.",
+    "clearFilters": "Clear filters",
+    "pageOf": "Page {page} of {pages}",
+    "previous": "Previous",
+    "next": "Next",
+    "home": "Home",
+    "resultsFor": "Results for “{q}”",
+    "fromGuides": "From our guides",
+    "viewAll": "View all guides",
+    "readArticle": "Read article",
+    "readingProgress": "Reading progress",
+    "count": "{n} articles",
+    "cta": {
+      "repair": {
+        "title": "Need it fixed?",
+        "text": "Book a repair in Jaipur — pickup, walk-in or on-site. You approve the price before any work starts.",
+        "button": "Book a repair"
+      },
+      "protection": {
+        "title": "Protect it properly",
+        "text": "Screen protectors, cases and lens guards matched to your exact model.",
+        "button": "Shop protection"
+      },
+      "customize": {
+        "title": "Make it yours",
+        "text": "Design a custom skin or finish for your device in our studio.",
+        "button": "Open the studio"
+      },
+      "specs": {
+        "title": "Compare before you buy",
+        "text": "Side-by-side specifications, with unknown data clearly marked.",
+        "button": "Compare phones"
+      }
+    },
+    "callout": {
+      "tip": "Tip",
+      "warning": "Important",
+      "info": "Good to know"
+    },
+    "kinds": {
+      "CONTENT": "Article",
+      "PRODUCT": "Product",
+      "PRODUCT_CATEGORY": "Protection",
+      "REPAIR_CATEGORY": "Repair service",
+      "DEVICE_SPEC": "Specifications",
+      "COMPARISON": "Comparison"
+    },
+    "validation": {
+      "slug": "Use 3–120 lowercase letters, numbers and hyphens.",
+      "slugReserved": "This address is reserved. Choose another slug.",
+      "tooLong": "This is too long.",
+      "noHtml": "HTML isn't allowed. Use **bold**, *italic* and [link](https://…) instead.",
+      "videoUrl": "Enter a YouTube or Vimeo link.",
+      "videoRequired": "Videos need a YouTube or Vimeo link.",
+      "unsafeLink": "One of the links uses an address type that isn't allowed.",
+      "scheduleFuture": "Choose a time in the future.",
+      "tag": "Tags use lowercase letters, numbers and hyphens.",
+      "key": "Keys use lowercase letters, numbers and underscores.",
+      "selfRelation": "An article can't link to itself."
+    },
+    "errors": {
+      "slugTaken": "That slug is already used. Choose another.",
+      "incomplete": "Add a title, summary and at least one block before publishing."
+    }
+  },
+  "videos": {
+    "title": "Videos",
+    "subtitle": "Short walkthroughs and explainers from our repair bench.",
+    "metaDescription": "Device repair and care videos from Technentium, Jaipur.",
+    "play": "Play video: {title}",
+    "consent": "Playing loads the video from {provider}, which may set cookies.",
+    "openOn": "Watch on {provider}",
+    "noResults": "No videos yet",
+    "watch": "Watch"
+  },
+  "specs": {
+    "title": "Phone specifications",
+    "subtitle": "Clear, consistent spec sheets. Where we don't have verified data, we say so.",
+    "metaDescription": "Phone specifications and side-by-side comparisons for popular models in India.",
+    "searchLabel": "Search phones",
+    "searchPlaceholder": "Search a phone, e.g. Pixel 9",
+    "allBrands": "All brands",
+    "notAvailable": "Not available",
+    "unknownHint": "“Not available” means we don't have verified data yet — it doesn't mean the feature is missing.",
+    "released": "Released {date}",
+    "launchPrice": "Launch price",
+    "compare": "Compare",
+    "compareWith": "Compare with another phone",
+    "relatedArticles": "Guides for this phone",
+    "protectThis": "Protection for this phone",
+    "repairThis": "Book a repair",
+    "noResults": "No phones match your search",
+    "count": "{n} phones",
+    "highlights": "Highlights",
+    "fullSpecs": "Full specifications",
+    "comparisons": "Comparisons with this phone"
+  },
+  "compare": {
+    "title": "Compare phones",
+    "subtitle": "Pick two or three phones to see their specifications side by side.",
+    "metaDescription": "Compare phone specifications side by side — display, cameras, battery and more.",
+    "add": "Add a phone",
+    "remove": "Remove {name}",
+    "highlight": "Highlight differences",
+    "onlyWithSpecs": "Only phones with published specifications can be compared.",
+    "empty": "Choose at least two phones to compare.",
+    "curated": "Popular comparisons",
+    "verdict": "Our take",
+    "vs": "vs",
+    "maxDevices": "You can compare up to 3 phones.",
+    "select": "Choose a phone",
+    "viewSpecs": "Full specs",
+    "openFullComparison": "Open full comparison",
+    "validation": {
+      "devices": "Choose 2 or 3 different phones."
+    },
+    "onlyDifferences": "Show only differences"
+  }
+}

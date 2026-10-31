@@ -1,0 +1,1468 @@
+// Technentium — platform schema (PRD v0.1 §12)
+// Conventions: cuid ids, human references separate from ids, money in integer paise,
+// timestamps in UTC, archive (active=false / archivedAt) rather than delete.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────── Identity & access ─────────────────────────────
+// User / Session / Account / Verification / TwoFactor / RateLimit are owned by Better Auth.
+
+model User {
+  id                  String   @id @default(cuid())
+  name                String
+  email               String   @unique
+  emailVerified       Boolean  @default(false)
+  image               String?
+  phoneNumber         String?  @unique
+  phoneNumberVerified Boolean? @default(false)
+  twoFactorEnabled    Boolean? @default(false)
+  preferredLocale     String   @default("en")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  sessions        Session[]
+  accounts        Account[]
+  twoFactors      TwoFactor[]
+  customerProfile CustomerProfile?
+  staffProfile    StaffProfile?
+  roles           UserRole[]
+  consents        ConsentRecord[]
+
+  bookings              RepairBooking[]          @relation("BookingCustomer")
+  assignments           RepairAssignment[]       @relation("AssignmentTechnician")
+  quoteDecisions        QuoteDecision[]
+  inAppNotifications    InAppNotification[]
+  notificationPrefs     NotificationPreference[]
+  productRequests       ProductRequest[]         @relation("ProductRequestCustomer")
+  customizationRequests CustomizationRequest[]   @relation("CustomizationCustomer")
+  contentItems          ContentItem[]            @relation("ContentAuthor")
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+model TwoFactor {
+  id                      String    @id @default(cuid())
+  secret                  String
+  backupCodes             String
+  userId                  String
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0)
+  lockedUntil             DateTime?
+
+  @@index([secret])
+  @@index([userId])
+  @@map("two_factors")
+}
+
+model RateLimit {
+  id          String @id @default(cuid())
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@map("rate_limits")
+}
+
+model CustomerProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("customer_profiles")
+}
+
+model StaffProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName   String
+  active        Boolean   @default(true)
+  deactivatedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("staff_profiles")
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  key         String           @unique // owner | staff | technician | editor | inventory
+  name        String
+  description String?
+  permissions RolePermission[]
+  users       UserRole[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("roles")
+}
+
+model Permission {
+  id    String           @id @default(cuid())
+  key   String           @unique
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  userId    String
+  roleId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model ConsentRecord {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String // terms | privacy | notifications_whatsapp | ...
+  policyVersion String
+  granted       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@index([userId, type])
+  @@map("consent_records")
+}
+
+// ───────────────────────────── Devices & pricing ─────────────────────────────
+
+model DeviceCategory {
+  id        String             @id @default(cuid())
+  slug      String             @unique
+  nameEn    String
+  nameHi    String?
+  sortOrder Int                @default(0)
+  active    Boolean            @default(true)
+  brands    DeviceBrand[]
+  models    DeviceModel[]
+  issues    RepairIssueType[]
+  feeRules  DiagnosisFeeRule[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@map("device_categories")
+}
+
+model DeviceBrand {
+  id         String         @id @default(cuid())
+  slug       String
+  name       String
+  categoryId String
+  category   DeviceCategory @relation(fields: [categoryId], references: [id])
+  sortOrder  Int            @default(0)
+  active     Boolean        @default(true)
+  models     DeviceModel[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([categoryId, slug])
+  @@map("device_brands")
+}
+
+model DeviceModel {
+  id                    String                       @id @default(cuid())
+  slug                  String
+  name                  String
+  brandId               String
+  brand                 DeviceBrand                  @relation(fields: [brandId], references: [id])
+  categoryId            String
+  category              DeviceCategory               @relation(fields: [categoryId], references: [id])
+  active                Boolean                      @default(true)
+  bookings              RepairBooking[]
+  priceItems            PriceItem[]
+  estimates             RepairEstimate[]
+  feeRules              DiagnosisFeeRule[]
+  releaseYear           Int?
+  popular               Boolean                      @default(false)
+  /// 2D frame family (camera layout) key from src/lib/device-frames.ts; null falls back to the category default.
+  frame                 String?
+  /// Search shorthands, e.g. "s24u", "15pm" (matched exactly, lower-case).
+  aliases               String[]                     @default([])
+  compatibleProducts    ProductDeviceCompatibility[]
+  cartItems             CartItem[]
+  requestItems          ProductRequestItem[]
+  customizationRequests CustomizationRequest[]
+  specification         DeviceSpecification?
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+
+  @@unique([brandId, slug])
+  @@index([categoryId])
+  @@map("device_models")
+}
+
+model RepairIssueType {
+  id            String               @id @default(cuid())
+  slug          String
+  nameEn        String
+  nameHi        String?
+  descriptionEn String?
+  descriptionHi String?
+  categoryId    String
+  category      DeviceCategory       @relation(fields: [categoryId], references: [id])
+  sortOrder     Int                  @default(0)
+  active        Boolean              @default(true)
+  bookingIssues RepairBookingIssue[]
+  priceItems    PriceItem[]
+  estimates     RepairEstimate[]
+  feeRules      DiagnosisFeeRule[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@unique([categoryId, slug])
+  @@map("repair_issue_types")
+}
+
+enum LineItemKind {
+  LABOUR
+  PART
+  DIAGNOSIS_FEE
+  DISCOUNT
+  OTHER
+}
+
+/// Predefined price items used by the quote builder (FR-QUOTE-01).
+model PriceItem {
+  id          String           @id @default(cuid())
+  kind        LineItemKind
+  name        String
+  unitPaise   Int
+  partGrade   String? // e.g. original | oem | compatible
+  modelId     String?
+  model       DeviceModel?     @relation(fields: [modelId], references: [id])
+  issueTypeId String?
+  issueType   RepairIssueType? @relation(fields: [issueTypeId], references: [id])
+  active      Boolean          @default(true)
+  lineItems   QuoteLineItem[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([modelId, issueTypeId])
+  @@map("price_items")
+}
+
+/// Public "estimated price" shown per repair service before booking. A model-specific row overrides the
+/// issue-wide default (modelId null). Estimates only — the final price is agreed after diagnosis.
+model RepairEstimate {
+  id          String          @id @default(cuid())
+  issueTypeId String
+  issueType   RepairIssueType @relation(fields: [issueTypeId], references: [id])
+  modelId     String?
+  model       DeviceModel?    @relation(fields: [modelId], references: [id])
+  minPaise    Int
+  maxPaise    Int?
+  active      Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([issueTypeId, modelId])
+  @@index([modelId])
+  @@map("repair_estimates")
+}
+
+/// Diagnosis fee by scope; most specific match wins: model+issue > model > issue > category (FR-QUOTE-10).
+model DiagnosisFeeRule {
+  id               String           @id @default(cuid())
+  categoryId       String?
+  category         DeviceCategory?  @relation(fields: [categoryId], references: [id])
+  modelId          String?
+  model            DeviceModel?     @relation(fields: [modelId], references: [id])
+  issueTypeId      String?
+  issueType        RepairIssueType? @relation(fields: [issueTypeId], references: [id])
+  feePaise         Int
+  waivedIfApproved Boolean          @default(true)
+  active           Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@map("diagnosis_fee_rules")
+}
+
+// ───────────────────────────── Scheduling & serviceability ─────────────────────────────
+
+model ServiceableArea {
+  id        String   @id @default(cuid())
+  pincode   String   @unique
+  locality  String
+  city      String   @default("Jaipur")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("serviceable_areas")
+}
+
+enum HandoverMethod {
+  PICKUP_DROP // we collect and return the device
+  WALK_IN // customer brings it to the shop
+  ONSITE // technician repairs at customer location
+  DROP_OFF_DELIVERY // customer drops off, we deliver back
+}
+
+model AppointmentSlot {
+  id        String          @id @default(cuid())
+  date      DateTime        @db.Date
+  startTime String // "10:00" (Asia/Kolkata)
+  endTime   String
+  capacity  Int
+  active    Boolean         @default(true)
+  bookings  RepairBooking[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@unique([date, startTime])
+  @@index([date])
+  @@map("appointment_slots")
+}
+
+// ───────────────────────────── Repairs ─────────────────────────────
+
+enum BookingStatus {
+  SUBMITTED
+  NEEDS_INFO
+  CONFIRMED
+  DECLINED
+  CANCELLED
+}
+
+model RepairBooking {
+  id                  String               @id @default(cuid())
+  reference           String               @unique
+  customerId          String
+  customer            User                 @relation("BookingCustomer", fields: [customerId], references: [id])
+  modelId             String
+  model               DeviceModel          @relation(fields: [modelId], references: [id])
+  description         String?
+  status              BookingStatus        @default(SUBMITTED)
+  handoverMethod      HandoverMethod
+  slotId              String?
+  slot                AppointmentSlot?     @relation(fields: [slotId], references: [id])
+  contactName         String
+  contactPhone        String
+  diagnosisFeePaise   Int // snapshot of the fee disclosed at submission
+  feeWaivedIfApproved Boolean
+  policyVersion       String
+  statusReason        String?
+  idempotencyKey      String               @unique
+  issues              RepairBookingIssue[]
+  handover            HandoverDetail?
+  job                 RepairJob?
+  attachments         RepairAttachment[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([status, createdAt])
+  @@index([customerId])
+  @@index([handoverMethod])
+  @@map("repair_bookings")
+}
+
+model RepairBookingIssue {
+  bookingId   String
+  issueTypeId String
+  booking     RepairBooking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  issueType   RepairIssueType @relation(fields: [issueTypeId], references: [id])
+
+  @@id([bookingId, issueTypeId])
+  @@map("repair_booking_issues")
+}
+
+model HandoverDetail {
+  id           String        @id @default(cuid())
+  bookingId    String        @unique
+  booking      RepairBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  addressLine1 String?
+  addressLine2 String?
+  landmark     String?
+  pincode      String?
+  city         String?
+  notes        String?
+
+  @@map("repair_handover_details")
+}
+
+enum JobStatus {
+  AWAITING_HANDOVER
+  DEVICE_RECEIVED
+  INSPECTION
+  QUOTE_PREPARED
+  AWAITING_DECISION // quote sent; PRD "Quote Sent" and "Awaiting Customer Decision" are the same moment
+  APPROVED
+  IN_PROGRESS
+  QUALITY_CHECK
+  READY_FOR_RETURN
+  COMPLETED
+  ON_HOLD
+  AWAITING_CUSTOMER_RESPONSE
+  QUOTE_DECLINED
+  RETURN_COORDINATION
+  CANCELLED
+}
+
+enum JobPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model RepairJob {
+  id             String             @id @default(cuid())
+  reference      String             @unique
+  bookingId      String             @unique
+  booking        RepairBooking      @relation(fields: [bookingId], references: [id])
+  status         JobStatus          @default(AWAITING_HANDOVER)
+  previousStatus JobStatus?
+  priority       JobPriority        @default(NORMAL)
+  receivedAt     DateTime?
+  completedAt    DateTime?
+  repairNotes    String?
+  partsUsed      String?
+  assignments    RepairAssignment[]
+  inspection     RepairInspection?
+  diagnosis      RepairDiagnosis?
+  qualityChecks  QualityCheck[]
+  notes          JobNote[]
+  quote          Quote?
+  returns        RepairReturn[]
+  warranty       RepairWarranty?
+  attachments    RepairAttachment[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([status, updatedAt])
+  @@map("repair_jobs")
+}
+
+model RepairAssignment {
+  id           String    @id @default(cuid())
+  jobId        String
+  job          RepairJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  technicianId String
+  technician   User      @relation("AssignmentTechnician", fields: [technicianId], references: [id])
+  assignedById String
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  endedAt      DateTime?
+
+  @@index([technicianId, active])
+  @@index([jobId, active])
+  @@map("repair_assignments")
+}
+
+model RepairInspection {
+  id               String    @id @default(cuid())
+  jobId            String    @unique
+  job              RepairJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  receiptCondition String
+  accessories      String?
+  checklist        Json?
+  recordedById     String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("repair_inspections")
+}
+
+model RepairDiagnosis {
+  id                String    @id @default(cuid())
+  jobId             String    @unique
+  job               RepairJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  findings          String
+  suspectedCause    String?
+  recommendedRepair String?
+  partsRequired     String?
+  recordedById      String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("repair_diagnoses")
+}
+
+model QualityCheck {
+  id          String    @id @default(cuid())
+  jobId       String
+  job         RepairJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  checklist   Json?
+  passed      Boolean
+  notes       String?
+  checkedById String
+  createdAt   DateTime  @default(now())
+
+  @@index([jobId])
+  @@map("repair_quality_checks")
+}
+
+/// Status history for both bookings (entityType=BOOKING) and jobs (entityType=JOB).
+model RepairStatusHistory {
+  id              String   @id @default(cuid())
+  entityType      String // BOOKING | JOB
+  entityId        String
+  bookingId       String // always set, so the customer timeline is one query
+  fromStatus      String?
+  toStatus        String
+  actorId         String?
+  reason          String?
+  customerVisible Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  @@index([bookingId, createdAt])
+  @@index([entityType, entityId])
+  @@map("repair_status_history")
+}
+
+enum NoteVisibility {
+  INTERNAL
+  CUSTOMER
+}
+
+model JobNote {
+  id         String         @id @default(cuid())
+  jobId      String
+  job        RepairJob      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  authorId   String
+  body       String
+  visibility NoteVisibility @default(INTERNAL)
+  createdAt  DateTime       @default(now())
+
+  @@index([jobId, createdAt])
+  @@map("repair_job_notes")
+}
+
+enum AttachmentPurpose {
+  BOOKING_PHOTO
+  RECEIPT_PHOTO
+  INSPECTION_PHOTO
+}
+
+model RepairAttachment {
+  id           String            @id @default(cuid())
+  storageKey   String            @unique
+  mime         String
+  sizeBytes    Int
+  width        Int?
+  height       Int?
+  purpose      AttachmentPurpose
+  uploadedById String
+  draftKey     String? // set while attached to an unsubmitted booking draft
+  bookingId    String?
+  booking      RepairBooking?    @relation(fields: [bookingId], references: [id])
+  jobId        String?
+  job          RepairJob?        @relation(fields: [jobId], references: [id])
+  createdAt    DateTime          @default(now())
+
+  @@index([bookingId])
+  @@index([jobId])
+  @@index([uploadedById, draftKey])
+  @@map("repair_attachments")
+}
+
+// ───────────────────────────── Quotes ─────────────────────────────
+
+model Quote {
+  id              String         @id @default(cuid())
+  jobId           String         @unique
+  job             RepairJob      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  activeVersionId String?        @unique
+  activeVersion   QuoteVersion?  @relation("ActiveVersion", fields: [activeVersionId], references: [id])
+  versions        QuoteVersion[] @relation("QuoteVersions")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("quotes")
+}
+
+enum QuoteVersionStatus {
+  DRAFT
+  SENT
+  APPROVED
+  DECLINED
+  SUPERSEDED
+  EXPIRED
+}
+
+model QuoteVersion {
+  id              String             @id @default(cuid())
+  quoteId         String
+  quote           Quote              @relation("QuoteVersions", fields: [quoteId], references: [id], onDelete: Cascade)
+  activeFor       Quote?             @relation("ActiveVersion")
+  number          Int
+  status          QuoteVersionStatus @default(DRAFT)
+  customerMessage String?
+  subtotalPaise   Int                @default(0)
+  discountPaise   Int                @default(0)
+  taxPaise        Int                @default(0)
+  totalPaise      Int                @default(0)
+  taxRateBps      Int                @default(0) // basis points, e.g. 1800 = 18%
+  createdById     String
+  sentAt          DateTime?
+  sentById        String?
+  expiresAt       DateTime?
+  reminderSentAt  DateTime?
+  lineItems       QuoteLineItem[]
+  decision        QuoteDecision?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@unique([quoteId, number])
+  @@index([status, expiresAt])
+  @@map("quote_versions")
+}
+
+model QuoteLineItem {
+  id                String       @id @default(cuid())
+  versionId         String
+  version           QuoteVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  kind              LineItemKind
+  description       String
+  quantity          Int          @default(1)
+  unitPaise         Int // discounts are stored as positive amounts with kind=DISCOUNT
+  taxable           Boolean      @default(true)
+  priceItemId       String?
+  priceItem         PriceItem?   @relation(fields: [priceItemId], references: [id])
+  partGrade         String?
+  compatibilityNote String?
+  sortOrder         Int          @default(0)
+
+  @@index([versionId])
+  @@map("quote_line_items")
+}
+
+enum QuoteDecisionType {
+  APPROVED
+  DECLINED
+}
+
+model QuoteDecision {
+  id         String            @id @default(cuid())
+  versionId  String            @unique
+  version    QuoteVersion      @relation(fields: [versionId], references: [id])
+  decision   QuoteDecisionType
+  customerId String
+  customer   User              @relation(fields: [customerId], references: [id])
+  reason     String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime          @default(now())
+
+  @@map("quote_decisions")
+}
+
+// ───────────────────────────── Returns & warranty ─────────────────────────────
+
+enum ReturnReason {
+  COMPLETED
+  QUOTE_DECLINED
+}
+
+enum ReturnMethod {
+  COLLECTION // customer collects from shop
+  DELIVERY // we deliver to customer address
+}
+
+enum ReturnStatus {
+  PENDING
+  SCHEDULED
+  HANDED_OVER
+  CANCELLED
+}
+
+model RepairReturn {
+  id             String       @id @default(cuid())
+  jobId          String
+  job            RepairJob    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  reason         ReturnReason
+  method         ReturnMethod
+  chargePaise    Int          @default(0) // disclosed before customer confirmed
+  acceptedAt     DateTime?
+  addressLine1   String?
+  addressLine2   String?
+  pincode        String?
+  status         ReturnStatus @default(PENDING)
+  scheduledAt    DateTime?
+  handedOverAt   DateTime?
+  handedOverById String?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([jobId])
+  @@index([status])
+  @@map("repair_returns")
+}
+
+model WarrantyPolicy {
+  id         String           @id @default(cuid())
+  name       String
+  termsEn    String
+  termsHi    String?
+  days       Int
+  partGrade  String?
+  active     Boolean          @default(true)
+  warranties RepairWarranty[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@map("warranty_policies")
+}
+
+model RepairWarranty {
+  id        String         @id @default(cuid())
+  jobId     String         @unique
+  job       RepairJob      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  policyId  String
+  policy    WarrantyPolicy @relation(fields: [policyId], references: [id])
+  startsAt  DateTime
+  endsAt    DateTime
+  createdAt DateTime       @default(now())
+
+  @@map("repair_warranties")
+}
+
+// ───────────────────────────── Platform operations ─────────────────────────────
+
+model BusinessSetting {
+  key       String   @id
+  value     Json
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+
+  @@map("business_settings")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String // e.g. booking.confirm, quote.send, settings.update
+  entityType String
+  entityId   String
+  before     Json?
+  after      Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model IdempotencyKey {
+  key       String   @id
+  userId    String
+  scope     String
+  resultId  String?
+  createdAt DateTime @default(now())
+
+  @@map("idempotency_keys")
+}
+
+/// Transactional outbox: written in the same transaction as the business change.
+model NotificationEvent {
+  id          String                 @id @default(cuid())
+  type        String // booking.submitted, quote.sent, ...
+  dedupeKey   String                 @unique
+  recipientId String
+  payload     Json
+  createdAt   DateTime               @default(now())
+  deliveries  NotificationDelivery[]
+
+  @@index([recipientId, createdAt])
+  @@map("notification_events")
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model NotificationDelivery {
+  id                String            @id @default(cuid())
+  eventId           String
+  event             NotificationEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  channel           String // in_app | email | sms | whatsapp
+  provider          String?
+  providerMessageId String?
+  status            DeliveryStatus    @default(PENDING)
+  attempts          Int               @default(0)
+  lastError         String?
+  nextAttemptAt     DateTime          @default(now())
+  sentAt            DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@unique([eventId, channel])
+  @@index([status, nextAttemptAt])
+  @@map("notification_deliveries")
+}
+
+model InAppNotification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String    @unique
+  titleKey  String
+  bodyKey   String
+  params    Json
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@map("in_app_notifications")
+}
+
+model NotificationPreference {
+  userId  String
+  channel String
+  enabled Boolean @default(true)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, channel])
+  @@map("notification_preferences")
+}
+
+// ═════════════════════════ Media (public & private uploads) ═════════════════════════
+
+enum MediaPurpose {
+  PRODUCT_IMAGE
+  DESIGN_IMAGE
+  CONTENT_IMAGE
+  DEVICE_IMAGE
+  CUSTOM_ARTWORK // customer upload, private
+}
+
+/// Images outside the repair flow. Public assets are served cacheable by /api/v1/media/{id};
+/// private ones (custom artwork) only to their uploader and authorised staff.
+model MediaAsset {
+  id                     String                @id @default(cuid())
+  storageKey             String                @unique
+  mime                   String
+  sizeBytes              Int
+  width                  Int?
+  height                 Int?
+  purpose                MediaPurpose
+  isPublic               Boolean               @default(false)
+  altEn                  String?
+  altHi                  String?
+  uploadedById           String
+  draftKey               String? // set while attached to an unsubmitted customization draft
+  customizationRequestId String?
+  customizationRequest   CustomizationRequest? @relation(fields: [customizationRequestId], references: [id])
+  productImages          ProductImage[]
+  createdAt              DateTime              @default(now())
+
+  @@index([uploadedById, draftKey])
+  @@index([customizationRequestId])
+  @@index([purpose, createdAt])
+  @@map("media_assets")
+}
+
+// ═════════════════════════ Protection products & order requests (PRD §6.6) ═════════════════════════
+
+model ProductCategory {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  nameEn        String
+  nameHi        String?
+  descriptionEn String?
+  descriptionHi String?
+  sortOrder     Int           @default(0)
+  active        Boolean       @default(true)
+  products      Product[]
+  types         ProductType[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("product_categories")
+}
+
+/// A kind of product within a category that shoppers compare and filter by,
+/// e.g. screen protectors: Normal clear, HD+, Privacy, Matte; cases: Normal silicone, Anti-yellow clear.
+model ProductType {
+  id            String          @id @default(cuid())
+  categoryId    String
+  category      ProductCategory @relation(fields: [categoryId], references: [id])
+  slug          String
+  nameEn        String
+  nameHi        String?
+  descriptionEn String?
+  descriptionHi String?
+  /// Comparison scores 1–5 keyed by trait, e.g. { "clarity": 5, "privacy": 1, "toughness": 3 }.
+  highlights    Json            @default("{}")
+  /// Optional photo representing the type (MediaAsset id, purpose PRODUCT_IMAGE).
+  imageMediaId  String?
+  sortOrder     Int             @default(0)
+  active        Boolean         @default(true)
+  products      Product[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([categoryId, slug])
+  @@map("product_types")
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Product {
+  id                String                       @id @default(cuid())
+  slug              String                       @unique
+  sku               String                       @unique
+  nameEn            String
+  nameHi            String?
+  summaryEn         String?
+  summaryHi         String?
+  descriptionEn     String?
+  descriptionHi     String?
+  categoryId        String
+  category          ProductCategory              @relation(fields: [categoryId], references: [id])
+  typeId            String?
+  type              ProductType?                 @relation(fields: [typeId], references: [id], onDelete: SetNull)
+  pricePaise        Int
+  mrpPaise          Int?
+  status            ProductStatus                @default(DRAFT)
+  featured          Boolean                      @default(false)
+  /// Fits every device (e.g. cleaning kit); otherwise see `compatibility`.
+  universal         Boolean                      @default(false)
+  /// [{ labelEn, labelHi?, value }]
+  specs             Json                         @default("[]")
+  lowStockThreshold Int                          @default(5)
+  seoTitle          String?
+  metaDescription   String?
+  images            ProductImage[]
+  compatibility     ProductDeviceCompatibility[]
+  inventory         InventoryBalance?
+  movements         InventoryMovement[]
+  cartItems         CartItem[]
+  requestItems      ProductRequestItem[]
+  createdAt         DateTime                     @default(now())
+  updatedAt         DateTime                     @updatedAt
+
+  @@index([categoryId, status])
+  @@index([categoryId, typeId, status])
+  @@index([status, featured])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String     @id @default(cuid())
+  productId String
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     MediaAsset @relation(fields: [mediaId], references: [id])
+  sortOrder Int        @default(0)
+
+  @@index([productId, sortOrder])
+  @@map("product_images")
+}
+
+model ProductDeviceCompatibility {
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  deviceModelId String
+  deviceModel   DeviceModel @relation(fields: [deviceModelId], references: [id])
+  note          String?
+
+  @@id([productId, deviceModelId])
+  @@index([deviceModelId])
+  @@map("product_device_compatibility")
+}
+
+model InventoryBalance {
+  productId String   @id
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  onHand    Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@map("inventory_balances")
+}
+
+enum InventoryMovementReason {
+  RECEIVED
+  ADJUSTMENT
+  REQUEST_FULFILLED
+  RETURNED
+  DAMAGED
+}
+
+model InventoryMovement {
+  id        String                  @id @default(cuid())
+  productId String
+  product   Product                 @relation(fields: [productId], references: [id])
+  delta     Int
+  balance   Int // on-hand after this movement
+  reason    InventoryMovementReason
+  note      String?
+  requestId String?
+  actorId   String
+  createdAt DateTime                @default(now())
+
+  @@index([productId, createdAt])
+  @@map("inventory_movements")
+}
+
+model Cart {
+  id         String     @id @default(cuid())
+  userId     String?    @unique
+  guestToken String?    @unique
+  items      CartItem[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id            String       @id @default(cuid())
+  cartId        String
+  cart          Cart         @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product      @relation(fields: [productId], references: [id])
+  deviceModelId String?
+  deviceModel   DeviceModel? @relation(fields: [deviceModelId], references: [id])
+  quantity      Int
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+/// FR-PROD-07: cart → submitted request → staff-confirmed order → fulfilment → completion.
+enum ProductRequestStatus {
+  SUBMITTED
+  CONFIRMED
+  FULFILLING
+  SHIPPED
+  COMPLETED
+  DECLINED
+  CANCELLED
+}
+
+model ProductRequest {
+  id             String                        @id @default(cuid())
+  reference      String                        @unique
+  customerId     String
+  customer       User                          @relation("ProductRequestCustomer", fields: [customerId], references: [id])
+  status         ProductRequestStatus          @default(SUBMITTED)
+  contactName    String
+  contactPhone   String
+  addressLine1   String
+  addressLine2   String?
+  city           String
+  state          String
+  pincode        String
+  customerNotes  String?
+  subtotalPaise  Int
+  shippingPaise  Int? // set by staff on confirmation
+  totalPaise     Int?
+  trackingInfo   String?
+  idempotencyKey String?                       @unique
+  items          ProductRequestItem[]
+  history        ProductRequestStatusHistory[]
+  notes          ProductRequestNote[]
+  createdAt      DateTime                      @default(now())
+  updatedAt      DateTime                      @updatedAt
+
+  @@index([customerId, createdAt])
+  @@index([status, createdAt])
+  @@map("product_requests")
+}
+
+model ProductRequestItem {
+  id                String         @id @default(cuid())
+  requestId         String
+  request           ProductRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  productId         String
+  product           Product        @relation(fields: [productId], references: [id])
+  deviceModelId     String?
+  deviceModel       DeviceModel?   @relation(fields: [deviceModelId], references: [id])
+  nameSnapshot      String
+  skuSnapshot       String
+  unitPricePaise    Int
+  quantity          Int
+  confirmedQuantity Int?
+
+  @@index([requestId])
+  @@map("product_request_items")
+}
+
+model ProductRequestStatusHistory {
+  id              String                @id @default(cuid())
+  requestId       String
+  request         ProductRequest        @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fromStatus      ProductRequestStatus?
+  toStatus        ProductRequestStatus
+  actorId         String?
+  reason          String?
+  customerVisible Boolean               @default(true)
+  createdAt       DateTime              @default(now())
+
+  @@index([requestId, createdAt])
+  @@map("product_request_status_history")
+}
+
+/// FR-PROD-08: record customer communication.
+model ProductRequestNote {
+  id         String         @id @default(cuid())
+  requestId  String
+  request    ProductRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  authorId   String
+  body       String
+  visibility NoteVisibility @default(INTERNAL)
+  createdAt  DateTime       @default(now())
+
+  @@index([requestId, createdAt])
+  @@map("product_request_notes")
+}
+
+// ═════════════════════════ Customization studio (PRD §6.7) ═════════════════════════
+
+model Design {
+  id             String                 @id @default(cuid())
+  slug           String                 @unique
+  nameEn         String
+  nameHi         String?
+  descriptionEn  String?
+  descriptionHi  String?
+  collection     String // e.g. "minimal", "nature", "abstract", "typography"
+  /// Generative preview parameters: { palette: string[], pattern: string, ... } — rendered client-side as SVG.
+  style          Json                   @default("{}")
+  previewMediaId String?
+  basePricePaise Int?
+  featured       Boolean                @default(false)
+  active         Boolean                @default(true)
+  sortOrder      Int                    @default(0)
+  requests       CustomizationRequest[]
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  @@index([active, collection])
+  @@map("designs")
+}
+
+enum DesignOptionKind {
+  FINISH
+  COVERAGE
+}
+
+model DesignOption {
+  id               String                 @id @default(cuid())
+  kind             DesignOptionKind
+  slug             String
+  nameEn           String
+  nameHi           String?
+  descriptionEn    String?
+  descriptionHi    String?
+  priceDeltaPaise  Int                    @default(0)
+  active           Boolean                @default(true)
+  sortOrder        Int                    @default(0)
+  finishRequests   CustomizationRequest[] @relation("RequestFinish")
+  coverageRequests CustomizationRequest[] @relation("RequestCoverage")
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  @@unique([kind, slug])
+  @@map("design_options")
+}
+
+enum CustomizationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  NEEDS_INFO
+  FEASIBILITY_CONFIRMED
+  QUOTE_SHARED
+  ACCEPTED
+  DECLINED
+  COMPLETED
+  CANCELLED
+}
+
+model CustomizationRequest {
+  id               String                       @id @default(cuid())
+  reference        String                       @unique
+  customerId       String
+  customer         User                         @relation("CustomizationCustomer", fields: [customerId], references: [id])
+  deviceModelId    String
+  deviceModel      DeviceModel                  @relation(fields: [deviceModelId], references: [id])
+  designId         String?
+  design           Design?                      @relation(fields: [designId], references: [id])
+  finishOptionId   String
+  finishOption     DesignOption                 @relation("RequestFinish", fields: [finishOptionId], references: [id])
+  coverageOptionId String
+  coverageOption   DesignOption                 @relation("RequestCoverage", fields: [coverageOptionId], references: [id])
+  /// FR-CUSTOM-05 snapshot of the configuration as previewed (colours, text, placement, option names, prices).
+  configuration    Json
+  customerNotes    String?
+  status           CustomizationStatus          @default(SUBMITTED)
+  estimatePaise    Int? // indicative, from base + options at submission
+  quotedPaise      Int? // shared by staff
+  nextSteps        String?
+  idempotencyKey   String?                      @unique
+  artwork          MediaAsset[]
+  history          CustomizationStatusHistory[]
+  notes            CustomizationNote[]
+  createdAt        DateTime                     @default(now())
+  updatedAt        DateTime                     @updatedAt
+
+  @@index([customerId, createdAt])
+  @@index([status, createdAt])
+  @@map("customization_requests")
+}
+
+model CustomizationStatusHistory {
+  id              String               @id @default(cuid())
+  requestId       String
+  request         CustomizationRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fromStatus      CustomizationStatus?
+  toStatus        CustomizationStatus
+  actorId         String?
+  reason          String?
+  customerVisible Boolean              @default(true)
+  createdAt       DateTime             @default(now())
+
+  @@index([requestId, createdAt])
+  @@map("customization_status_history")
+}
+
+model CustomizationNote {
+  id         String               @id @default(cuid())
+  requestId  String
+  request    CustomizationRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  authorId   String
+  body       String
+  visibility NoteVisibility       @default(INTERNAL)
+  createdAt  DateTime             @default(now())
+
+  @@index([requestId, createdAt])
+  @@map("customization_notes")
+}
+
+// ═════════════════════════ Content (PRD §6.8–6.9) ═════════════════════════
+
+enum ContentType {
+  ARTICLE
+  VIDEO
+}
+
+enum ContentStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+model ContentItem {
+  id           String               @id @default(cuid())
+  type         ContentType
+  slug         String
+  /// Topic used for listing filters and interlinking, e.g. "repair-guides", "buying-guides", "protection", "news".
+  topic        String
+  tags         String[]             @default([])
+  authorId     String
+  author       User                 @relation("ContentAuthor", fields: [authorId], references: [id])
+  coverMediaId String?
+  videoUrl     String? // YouTube/Vimeo URL for VIDEO items
+  featured     Boolean              @default(false)
+  translations ContentTranslation[]
+  relations    ContentRelation[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@unique([type, slug])
+  @@index([topic])
+  @@map("content_items")
+}
+
+/// FR-CMS-03/04: each language is stored and published independently.
+model ContentTranslation {
+  id              String            @id @default(cuid())
+  contentItemId   String
+  contentItem     ContentItem       @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  locale          String // "en" | "hi"
+  title           String
+  summary         String
+  /// Block array: heading, paragraph, list, quote, image, video, callout, related.
+  body            Json              @default("[]")
+  seoTitle        String?
+  metaDescription String?
+  readingMinutes  Int               @default(1)
+  status          ContentStatus     @default(DRAFT)
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  revisions       ContentRevision[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([contentItemId, locale])
+  @@index([locale, status, publishedAt])
+  @@map("content_translations")
+}
+
+model ContentRevision {
+  id            String             @id @default(cuid())
+  translationId String
+  translation   ContentTranslation @relation(fields: [translationId], references: [id], onDelete: Cascade)
+  snapshot      Json
+  authorId      String
+  createdAt     DateTime           @default(now())
+
+  @@index([translationId, createdAt])
+  @@map("content_revisions")
+}
+
+enum ContentRelationTarget {
+  CONTENT
+  PRODUCT
+  PRODUCT_CATEGORY
+  REPAIR_CATEGORY
+  DEVICE_SPEC
+  COMPARISON
+}
+
+/// FR-CMS-08: related products, repair services and articles (interlinking).
+model ContentRelation {
+  id            String                @id @default(cuid())
+  contentItemId String
+  contentItem   ContentItem           @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  targetType    ContentRelationTarget
+  targetId      String
+  sortOrder     Int                   @default(0)
+
+  @@unique([contentItemId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@map("content_relations")
+}
+
+model DeviceSpecification {
+  id               String             @id @default(cuid())
+  deviceModelId    String             @unique
+  deviceModel      DeviceModel        @relation(fields: [deviceModelId], references: [id])
+  slug             String             @unique
+  status           ContentStatus      @default(DRAFT)
+  publishedAt      DateTime?
+  releaseDate      DateTime?
+  launchPricePaise Int?
+  summaryEn        String?
+  summaryHi        String?
+  /// [{ group, labelEn, labelHi?, items: [{ key, labelEn, labelHi?, value: string | null }] }] — null = data unavailable (FR-SPEC-04).
+  specs            Json               @default("[]")
+  imageMediaId     String?
+  seoTitle         String?
+  metaDescription  String?
+  comparisons      ComparisonDevice[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([status])
+  @@map("device_specifications")
+}
+
+model DeviceComparison {
+  id              String             @id @default(cuid())
+  slug            String             @unique
+  titleEn         String
+  titleHi         String?
+  introEn         String?
+  introHi         String?
+  verdictEn       String?
+  verdictHi       String?
+  status          ContentStatus      @default(DRAFT)
+  publishedAt     DateTime?
+  seoTitle        String?
+  metaDescription String?
+  devices         ComparisonDevice[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@map("device_comparisons")
+}
+
+model ComparisonDevice {
+  comparisonId String
+  comparison   DeviceComparison    @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  specId       String
+  spec         DeviceSpecification @relation(fields: [specId], references: [id])
+  sortOrder    Int                 @default(0)
+
+  @@id([comparisonId, specId])
+  @@map("comparison_devices")
+}

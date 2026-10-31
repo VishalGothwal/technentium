@@ -1,0 +1,196 @@
+{
+  "studio": {
+    "meta": {
+      "title": "Custom device skins — design your own",
+      "description": "Design a custom skin for your phone, tablet or laptop. Pick a pattern, tune the colours, add your name or artwork and see a live preview before you request it."
+    },
+    "hero": {
+      "eyebrow": "Technentium Studio",
+      "title": "Make your device unmistakably yours",
+      "subtitle": "Pick a design, remix the colours, add a monogram or your own artwork — and watch it come alive on your exact model.",
+      "cta": "Open the studio",
+      "browse": "Browse designs"
+    },
+    "how": {
+      "title": "How it works",
+      "s1Title": "Design",
+      "s1Body": "Choose your device and a design, then make it yours with colours, text and finish.",
+      "s2Title": "We review",
+      "s2Body": "Our team checks feasibility for your model and shares a final price. No payment now.",
+      "s3Title": "We craft it",
+      "s3Body": "Accept the price and we prepare your skin, then fit it or hand it over."
+    },
+    "gallery": {
+      "title": "Design catalogue",
+      "subtitle": "Every design is a starting point — remix the palette in the studio.",
+      "all": "All",
+      "customize": "Customize",
+      "from": "From {price}",
+      "empty": "No designs in this collection yet.",
+      "collections": {
+        "minimal": "Minimal",
+        "nature": "Nature",
+        "abstract": "Abstract",
+        "gradient": "Gradient",
+        "typography": "Typography",
+        "retro": "Retro"
+      }
+    },
+    "status": {
+      "SUBMITTED": "Submitted",
+      "UNDER_REVIEW": "Under review",
+      "NEEDS_INFO": "More information needed",
+      "FEASIBILITY_CONFIRMED": "Feasibility confirmed",
+      "QUOTE_SHARED": "Price shared",
+      "ACCEPTED": "Accepted",
+      "DECLINED": "Declined",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "title": "Design studio",
+    "stepOf": "Step {current} of {total}",
+    "steps": {
+      "device": "Device",
+      "design": "Design",
+      "colour": "Colour & text",
+      "finish": "Finish & coverage",
+      "artwork": "Artwork",
+      "review": "Review"
+    },
+    "device": {
+      "title": "Which device are we designing for?",
+      "hint": "Skins are cut for your exact model. Phones, tablets and laptops are supported."
+    },
+    "design": {
+      "title": "Start from a design",
+      "blank": "Blank canvas",
+      "blankBody": "Solid colours, your text or your own artwork."
+    },
+    "colour": {
+      "title": "Tune the palette",
+      "swatch": "Colour {n}",
+      "reset": "Reset colours",
+      "textTitle": "Monogram or text (optional)",
+      "addText": "Add text",
+      "removeText": "Remove text",
+      "textLabel": "Text",
+      "textPlaceholder": "e.g. AKHIL or ★",
+      "textHint": "Up to 24 characters.",
+      "font": "Font",
+      "position": "Position",
+      "textColor": "Text colour",
+      "fonts": { "sans": "Clean", "serif": "Classic", "mono": "Tech", "script": "Script", "display": "Poster" },
+      "positions": { "top": "Top", "center": "Centre", "bottom": "Bottom" }
+    },
+    "finish": {
+      "title": "Finish",
+      "coverage": "Coverage",
+      "included": "Included"
+    },
+    "artwork": {
+      "title": "Your artwork (optional)",
+      "body": "Upload a photo, logo or illustration (JPEG, PNG or WebP, up to 10 MB). It stays private — only you and our design team can see it.",
+      "choose": "Choose image",
+      "replace": "Replace",
+      "remove": "Remove",
+      "scale": "Size",
+      "x": "Horizontal position",
+      "y": "Vertical position",
+      "uploading": "Uploading…",
+      "pendingUpload": "Will upload when you submit.",
+      "rights": "Only upload images you own or have permission to use."
+    },
+    "review": {
+      "device": "Device",
+      "design": "Design",
+      "finish": "Finish",
+      "coverage": "Coverage",
+      "text": "Text",
+      "artwork": "Artwork",
+      "artworkYes": "Included",
+      "none": "None",
+      "notes": "Anything we should know? (optional)",
+      "notesPlaceholder": "e.g. leave the logo cut-out visible",
+      "acceptTerms": "I understand this is a design request, not an order. The team will confirm feasibility and the final price before anything is made.",
+      "signInNotice": "Sign in or create an account to send your design. Your design is saved while you sign in.",
+      "submit": "Send design request",
+      "submitting": "Sending…",
+      "signInToSubmit": "Sign in to send"
+    },
+    "price": {
+      "estimate": "Estimated price",
+      "estimateNote": "Indicative only — the final price is confirmed by our team after review. No payment is taken now.",
+      "base": "Design",
+      "finish": "Finish",
+      "coverage": "Coverage"
+    },
+    "done": {
+      "badge": "Request received",
+      "title": "Your design is on its way to our studio",
+      "body": "Reference {reference}. We'll review feasibility for your model and share a final price. You'll be notified at each step.",
+      "view": "Track this request",
+      "another": "Design another"
+    },
+    "preview": {
+      "side": "Device side",
+      "back": "Back",
+      "front": "Front",
+      "label": "Preview of the custom design on {device}",
+      "generic": "Design preview",
+      "illustrative": "Illustrative preview — final colours may vary slightly by material."
+    },
+    "validation": {
+      "textTooLong": "Use 24 characters or fewer.",
+      "acceptTerms": "Please confirm you understand how design requests work.",
+      "unavailable": "This option is no longer available. Please choose another.",
+      "artwork": "That artwork upload is not available. Please upload it again.",
+      "slug": "Use lowercase letters, numbers and hyphens.",
+      "slugTaken": "That slug is already in use.",
+      "device": "Choose your device to continue.",
+      "options": "Choose a finish and coverage."
+    },
+    "errors": {
+      "quoteNotActionable": "This price can no longer be accepted or declined."
+    },
+    "account": {
+      "title": "Custom designs",
+      "empty": "You haven't sent any design requests yet.",
+      "start": "Open the studio",
+      "submittedOn": "Sent {date}",
+      "estimate": "Estimate {price}",
+      "quoted": "Price {price}",
+      "timeline": "Progress",
+      "steps": { "submitted": "Sent", "review": "Review", "quote": "Price", "accepted": "Accepted", "completed": "Ready" },
+      "needsInfoTitle": "We need a bit more information",
+      "replyLabel": "Your reply",
+      "replySend": "Send reply",
+      "replySent": "Thanks — we've received your reply.",
+      "quoteTitle": "Price for your design",
+      "quoteBody": "Our team has reviewed your design and set the price below.",
+      "accept": "Accept price",
+      "decline": "Decline",
+      "acceptTitle": "Accept this price?",
+      "acceptBody": "We'll start preparing your design at {price}. Our team will contact you about payment and handover.",
+      "declineTitle": "Decline this price?",
+      "declineBody": "Nothing will be made. You can tell us why (optional).",
+      "declineReason": "Reason (optional)",
+      "accepted": "Accepted — we'll be in touch about next steps.",
+      "declined": "You declined this price.",
+      "cancel": "Cancel request",
+      "cancelTitle": "Cancel this design request?",
+      "cancelBody": "You can cancel until a price is shared. This cannot be undone.",
+      "cancelConfirm": "Yes, cancel",
+      "cancelled": "Request cancelled.",
+      "declinedTitle": "We couldn't take this design on",
+      "messages": "Messages",
+      "you": "You",
+      "team": "Technentium",
+      "history": "History",
+      "details": "Your design",
+      "yourNotes": "Your notes",
+      "nextSteps": "Next steps",
+      "estimateLabel": "Estimate",
+      "quotedLabel": "Final price"
+    }
+  }
+}

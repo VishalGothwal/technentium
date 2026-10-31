@@ -1,0 +1,120 @@
+{
+  "site": {
+    "header": {
+      "area": "Pickup & drop across Jaipur",
+      "hours": "Mon–Sat · 10:00–19:00",
+      "call": "Call {phone}",
+      "menu": "Menu",
+      "account": "Account",
+      "signedIn": "Signed in",
+      "repairsTitle": "Repair a device",
+      "repairsBody": "Choose your device to see prices and book in minutes.",
+      "allRepairs": "All repairs",
+      "brands": "{count} brands",
+      "bookBody": "Free quote before any work starts. Pay only when you approve.",
+      "protectionTitle": "Shop protection",
+      "allProducts": "All products",
+      "products": "{count} products",
+      "explore": "Explore",
+      "customizeBody": "Your photo or pattern on a skin",
+      "specsBody": "Specs & side-by-side comparisons",
+      "articlesBody": "Guides, care tips and how-tos",
+      "helpBody": "Contact, FAQs and policies",
+      "trackBody": "Status of a repair or order",
+      "needHelp": "Need help?"
+    },
+    "footer": {
+      "services": "Services",
+      "shop": "Shop",
+      "learn": "Learn",
+      "support": "Support",
+      "legal": "Legal",
+      "bookRepair": "Book a repair",
+      "track": "Track a request",
+      "guide": "Prepare your device",
+      "protection": "Protection products",
+      "customize": "Custom designs",
+      "articles": "Articles & guides",
+      "videos": "Videos",
+      "specs": "Phone specifications",
+      "compare": "Compare phones",
+      "help": "Help & contact",
+      "developers": "Developer API",
+      "repairsIn": "Repairs in Jaipur · Protection products shipped across India",
+      "cookies": "Cookie settings"
+    },
+    "consent": {
+      "title": "Your privacy",
+      "body": "We use essential cookies to keep you signed in and remember your cart. With your permission we also use analytics to understand which pages help people, so we can improve them. We never sell your data.",
+      "accept": "Allow analytics",
+      "reject": "Essential only",
+      "policy": "Read our privacy policy"
+    },
+    "track": {
+      "title": "Track your requests",
+      "subtitle": "Repairs, protection orders and custom designs — every update in one place.",
+      "label": "Reference number",
+      "placeholder": "e.g. TN-2610-00001, TN-P-2610-00001",
+      "submit": "Track",
+      "notFound": "We couldn't find a request with that reference on your account. Check the number in your confirmation message.",
+      "recent": "Your recent requests",
+      "none": "You have no requests yet.",
+      "open": "Open details",
+      "updated": "Updated {date}",
+      "history": "History",
+      "trackingInfo": "Shipping details",
+      "types": {
+        "repair": "Repair",
+        "order": "Protection order",
+        "customization": "Custom design"
+      }
+    },
+    "home": {
+      "eyebrow": "Repair · Protect · Personalise",
+      "title": "Everything your device needs, in one place.",
+      "subtitle": "Expert repairs in Jaipur with approved quotes and live tracking, protection that fits your exact model, and custom designs made just for you.",
+      "ctaRepair": "Book a repair",
+      "ctaShop": "Shop protection",
+      "sections": {
+        "repairs": {
+          "title": "Repairs",
+          "body": "Phones, tablets, laptops, watches and earbuds. Pickup, drop-off or onsite in Jaipur.",
+          "cta": "Book a repair"
+        },
+        "protection": {
+          "title": "Protection",
+          "body": "Tempered glass, cases, lens guards and chargers matched to your model. Delivered across India.",
+          "cta": "Shop now"
+        },
+        "customize": {
+          "title": "Custom designs",
+          "body": "Design a skin in our studio: patterns, colours, finishes and your own artwork.",
+          "cta": "Open the studio"
+        },
+        "specs": {
+          "title": "Specs & compare",
+          "body": "Clear spec sheets and side-by-side comparisons before you buy.",
+          "cta": "Compare phones"
+        }
+      },
+      "quick": {
+        "track": "Track a request",
+        "guide": "Prepare your device",
+        "help": "Talk to us"
+      },
+      "repairTitle": "Repairs without surprises",
+      "repairBody": "You see the diagnosis fee before you book and approve every quote before work starts. Every step shows up in your account.",
+      "handoverTitle": "Hand it over your way",
+      "shopTitle": "Protection that fits",
+      "shopBody": "Popular picks, checked for compatibility with your exact model.",
+      "studioTitle": "Make it unmistakably yours",
+      "studioBody": "Pick a design, tune the colours, add a monogram or upload your own artwork, and see it live on your device before you send the request.",
+      "studioCta": "Start designing",
+      "guidesTitle": "Guides worth reading",
+      "finalTitle": "Already have a request with us?",
+      "finalBody": "Track repairs, protection orders and custom designs with your reference number.",
+      "finalCta": "Track a request",
+      "viewAll": "View all"
+    }
+  }
+}

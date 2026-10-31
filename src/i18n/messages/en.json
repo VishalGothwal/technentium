@@ -1,0 +1,709 @@
+{
+  "meta": {
+    "title": "Technentium — Phone, tablet & laptop repair in Jaipur",
+    "description": "Book a device repair in Jaipur, approve the quote before any work starts, and track every step."
+  },
+  "common": {
+    "brand": "Technentium",
+    "skipToContent": "Skip to content",
+    "language": "Language",
+    "back": "Back",
+    "next": "Continue",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "saving": "Saving…",
+    "submit": "Submit",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "edit": "Edit",
+    "remove": "Remove",
+    "required": "Required",
+    "optional": "optional",
+    "yes": "Yes",
+    "no": "No",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "myAccount": "My account",
+    "myBookings": "My bookings",
+    "translationPending": "This page is not yet available in Hindi. Showing English.",
+    "draftNotice": "Draft content — pending business and legal review."
+  },
+  "nav": {
+    "home": "Home",
+    "repairs": "Repairs",
+    "bookRepair": "Book a repair",
+    "guide": "Prepare your device",
+    "help": "Help & contact",
+    "protection": "Protection",
+    "customization": "Customize",
+    "comingSoon": "Coming soon",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "articles": "Articles",
+    "specs": "Phone specs",
+    "shop": "Shop",
+    "cart": "Cart",
+    "tracking": "Track"
+  },
+  "footer": {
+    "tagline": "Device repairs in Jaipur with clear quotes and tracked progress.",
+    "privacy": "Privacy policy",
+    "terms": "Terms & conditions",
+    "repairPolicy": "Repair, return & warranty policy",
+    "rights": "© {year} Technentium. All rights reserved."
+  },
+  "home": {
+    "eyebrow": "Repairs in Jaipur",
+    "title": "Your device, repaired — with no surprises.",
+    "subtitle": "Book online, approve the quote before any work begins, and follow every step until your device is back in your hands.",
+    "cta": "Book a repair",
+    "ctaSecondary": "How it works",
+    "howTitle": "How it works",
+    "steps": {
+      "book": {
+        "title": "Book in two minutes",
+        "body": "Choose your device and issue, add photos, and pick how you'd like to hand it over."
+      },
+      "confirm": {
+        "title": "We confirm",
+        "body": "Our team confirms your booking and appointment, or contacts you if anything is unclear."
+      },
+      "quote": {
+        "title": "Approve the quote",
+        "body": "After inspection you get an itemised quote. Nothing is repaired until you approve it."
+      },
+      "return": {
+        "title": "Get it back",
+        "body": "Collect your device or have it delivered. Repairs carry a warranty."
+      }
+    },
+    "handoverTitle": "Hand it over your way",
+    "trustTitle": "Why customers choose us",
+    "trust": {
+      "pricing": {
+        "title": "Upfront pricing",
+        "body": "The diagnosis fee is shown before you book. Quotes are itemised."
+      },
+      "approval": {
+        "title": "You decide",
+        "body": "Approve or decline every quote. Decline and we return your device."
+      },
+      "tracking": {
+        "title": "Live tracking",
+        "body": "See each stage of your repair from your account."
+      },
+      "warranty": {
+        "title": "Warranty",
+        "body": "Replaced parts and workmanship are covered after repair."
+      }
+    },
+    "serviceArea": "Repairs are currently available in Jaipur only."
+  },
+  "handover": {
+    "PICKUP_DROP": {
+      "title": "Pickup & drop",
+      "body": "We collect your device and deliver it back after repair."
+    },
+    "WALK_IN": {
+      "title": "Walk in",
+      "body": "Bring your device to our Jaipur shop at your appointment."
+    },
+    "ONSITE": {
+      "title": "Onsite technician",
+      "body": "A technician visits your address for repairs that can be done on site."
+    },
+    "DROP_OFF_DELIVERY": {
+      "title": "Drop off, we deliver",
+      "body": "Drop your device at the shop; we deliver it back to you."
+    }
+  },
+  "repairs": {
+    "title": "Device repairs",
+    "subtitle": "Phones, tablets and laptops. Screens, batteries, charging ports, water damage and more.",
+    "feeTitle": "Transparent pricing",
+    "feeBody": "A diagnosis fee applies to most repairs and is shown before you book. For many repairs it is waived when you approve the quote.",
+    "faqTitle": "Common questions",
+    "faq": {
+      "q1": "Will you repair my device without asking?",
+      "a1": "No. After inspection we send you an itemised quote. Work only starts once you approve it.",
+      "q2": "What if I decline the quote?",
+      "a2": "We stop and arrange the return of your device. Any diagnosis fee and return charge are shown before you confirm.",
+      "q3": "Do you serve my area?",
+      "a3": "Repairs are available across serviceable Jaipur pincodes. You can check your pincode while booking."
+    }
+  },
+  "guide": {
+    "title": "Prepare your device for repair",
+    "intro": "A few steps protect your data and help us repair your device faster.",
+    "items": {
+      "backup": "Back up your photos, contacts and files.",
+      "lock": "Remove screen lock or share a temporary passcode only if the technician needs it to test the device.",
+      "accounts": "Sign out of Find My iPhone / Find My Device if asked, so the device can be tested.",
+      "sim": "Remove your SIM card, memory card and case.",
+      "charge": "Charge the device if it still powers on.",
+      "notes": "Note down any other problems you have noticed."
+    }
+  },
+  "help": {
+    "title": "Help & contact",
+    "intro": "Questions about a booking? Include your booking reference so we can help quickly.",
+    "phone": "Phone",
+    "address": "Shop",
+    "hours": "Hours",
+    "hoursValue": "Monday–Saturday, 10:00–19:00",
+    "trackTitle": "Track a repair",
+    "trackBody": "Sign in and open My bookings to see the latest status and any quote awaiting your decision."
+  },
+  "policies": {
+    "privacy": {
+      "title": "Privacy policy",
+      "body": "We collect only what we need to provide repairs: your name, phone number, email (optional), service address, and device photos you choose to upload. Photos and records are stored privately and are visible only to you and authorised staff. We use your contact details to send booking and repair updates. You can ask us to export or delete your data. Detailed retention periods will be published after legal review."
+    },
+    "terms": {
+      "title": "Terms & conditions",
+      "body": "Bookings are requests until confirmed by our team. Repairs begin only after you approve an itemised quote. Quotes are valid until the expiry date shown. Prices include applicable taxes as shown on the quote."
+    },
+    "repair": {
+      "title": "Repair, return & warranty policy",
+      "body": "A diagnosis fee may apply and is disclosed before booking. If you decline a quote, we return your device unrepaired; any diagnosis fee and return charge are shown before you confirm. Repaired devices carry a warranty on replaced parts and workmanship as stated on your repair record. Physical and liquid damage after return are not covered."
+    }
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signInSubtitle": "Sign in to book repairs, request protection products and custom designs, and track them all in one place.",
+    "tabPhone": "Mobile number",
+    "tabEmail": "Email",
+    "phone": "Mobile number",
+    "phoneHint": "Indian mobile number. We'll text you a 6-digit code.",
+    "sendCode": "Send code",
+    "codeSent": "We sent a code to {phone}.",
+    "code": "Verification code",
+    "verify": "Verify and continue",
+    "resendIn": "Resend code in {seconds}s",
+    "resend": "Resend code",
+    "changeNumber": "Change number",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full name",
+    "forgot": "Forgot password?",
+    "noAccount": "New here?",
+    "createAccount": "Create an account",
+    "haveAccount": "Already have an account?",
+    "registerTitle": "Create your account",
+    "register": "Create account",
+    "consent": "I agree to the {terms} and {privacy}.",
+    "consentTerms": "terms",
+    "consentPrivacy": "privacy policy",
+    "forgotTitle": "Reset your password",
+    "forgotBody": "Enter your email and we'll send you a reset link.",
+    "sendLink": "Send reset link",
+    "linkSent": "If an account exists for that email, a reset link is on its way.",
+    "resetTitle": "Choose a new password",
+    "newPassword": "New password",
+    "passwordHint": "At least 8 characters.",
+    "resetDone": "Your password has been updated. You can sign in now.",
+    "resetInvalid": "This reset link is invalid or has expired.",
+    "failed": "We couldn't sign you in. Check your details and try again.",
+    "otpFailed": "That code is incorrect or has expired.",
+    "tooMany": "Too many attempts. Please wait a moment and try again.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "strength": {
+      "0": "",
+      "1": "Too short — use at least 8 characters",
+      "2": "Fair — add length or mix in numbers and symbols",
+      "3": "Good password",
+      "4": "Strong password"
+    },
+    "emailNotVerified": "Please verify your email first — check your inbox for the link we sent.",
+    "phoneNewAccount": "New to Technentium? Verifying your number creates your account.",
+    "panelTitle": "Repairs, protection and custom designs — all in one account.",
+    "benefits": {
+      "track": {
+        "title": "Live repair tracking",
+        "body": "Follow every step from pickup to return, and approve quotes in a tap."
+      },
+      "orders": {
+        "title": "Protection orders",
+        "body": "Request screen guards and cases for your exact model, and track delivery."
+      },
+      "designs": {
+        "title": "Custom designs",
+        "body": "Save your studio creations and follow them from review to ready."
+      },
+      "secure": {
+        "title": "Private and secure",
+        "body": "Your photos and details are only visible to you and our team."
+      }
+    },
+    "registerSubtitle": "It takes a minute. You can also sign up with just your mobile number.",
+    "emailHint": "We'll send a link to verify this address.",
+    "emailTaken": "An account with this email already exists. Sign in instead, or reset your password.",
+    "registerPhoneNote": "Prefer your mobile number? Use the Mobile number option on the sign-in page — it creates your account automatically.",
+    "backToSignIn": "Back to sign in"
+  },
+  "booking": {
+    "title": "Book a repair",
+    "stepOf": "Step {current} of {total}",
+    "steps": {
+      "device": "Device",
+      "issues": "Issue",
+      "details": "Photos & details",
+      "handover": "Handover",
+      "location": "Contact & address",
+      "slot": "Appointment",
+      "review": "Review"
+    },
+    "category": "What needs repairing?",
+    "brand": "Brand",
+    "model": "Model",
+    "searchModel": "Search models",
+    "noModels": "No models match. Try another search or contact us.",
+    "popularModels": "Popular",
+    "olderModels": "Older models",
+    "issuesTitle": "What's wrong with your {model}?",
+    "issuesHint": "Select all that apply.",
+    "descriptionLabel": "Describe the problem",
+    "descriptionHint": "When did it start? Anything else we should know?",
+    "photosLabel": "Photos of the problem",
+    "photosHint": "Up to 6 photos (JPG, PNG or WebP, max 10 MB each). Location data is removed.",
+    "addPhotos": "Add photos",
+    "photoAlt": "Photo {index} of the reported problem",
+    "handoverTitle": "How would you like to hand over your device?",
+    "contactTitle": "Contact details",
+    "contactName": "Name",
+    "contactPhone": "Mobile number",
+    "addressTitle": "Service address",
+    "addressLine1": "House / flat, street",
+    "addressLine2": "Area / colony",
+    "landmark": "Landmark",
+    "pincode": "Pincode",
+    "checkPincode": "Check",
+    "serviceable": "We serve {locality}, Jaipur.",
+    "unserviceableTitle": "We don't serve this pincode yet",
+    "unserviceableBody": "Repairs are currently available only in parts of Jaipur. You can choose Walk in instead, or contact us.",
+    "handoverNotes": "Notes for pickup or visit",
+    "slotTitle": "Preferred appointment",
+    "slotHint": "Our team confirms the final time.",
+    "slotsLeft": "{count} left",
+    "slotFull": "Full",
+    "noSlots": "No appointment slots are open right now. Please contact us.",
+    "reviewTitle": "Review your booking",
+    "device": "Device",
+    "issues": "Issues",
+    "handover": "Handover",
+    "appointment": "Appointment",
+    "address": "Address",
+    "contact": "Contact",
+    "photos": "Photos",
+    "photosCount": "{count} attached",
+    "diagnosisFee": "Diagnosis fee",
+    "feeWaived": "Waived if you approve the repair quote.",
+    "feeNotWaived": "Charged even if you decline the repair quote.",
+    "nextSteps": "What happens next: our team confirms your booking, then inspects your device and sends you a quote. No repair is done without your approval.",
+    "acceptPolicy": "I have read the {policy} and agree to the diagnosis fee shown above.",
+    "policyLink": "repair, return & warranty policy",
+    "signInToSubmit": "Sign in to submit",
+    "signInNotice": "Sign in with your mobile number to submit. Your selections are kept.",
+    "submit": "Submit booking",
+    "submitting": "Submitting…",
+    "uploading": "Uploading photos…",
+    "successTitle": "Booking received",
+    "successBody": "Your booking reference is {reference}. We'll confirm it shortly and keep you updated.",
+    "pending": "Pending confirmation",
+    "viewBooking": "View booking",
+    "bookAnother": "Book another repair"
+  },
+  "account": {
+    "title": "My account",
+    "bookingsTitle": "My bookings",
+    "noBookings": "You haven't booked any repairs yet.",
+    "bookedOn": "Booked {date}",
+    "profileTitle": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Mobile",
+    "verified": "Verified",
+    "notVerified": "Not verified",
+    "preferredLanguage": "Preferred language for messages",
+    "profileSaved": "Profile saved.",
+    "notificationsTitle": "Notifications",
+    "noNotifications": "No notifications yet.",
+    "markAllRead": "Mark all as read",
+    "preferencesTitle": "Notification preferences",
+    "preferencesHint": "Important updates always appear in your account.",
+    "channels": {
+      "email": "Email",
+      "sms": "SMS",
+      "whatsapp": "WhatsApp",
+      "in_app": "In-app"
+    },
+    "ordersTitle": "Product orders",
+    "designsTitle": "Custom designs"
+  },
+  "tracking": {
+    "reference": "Reference",
+    "status": "Status",
+    "timeline": "Progress",
+    "steps": {
+      "submitted": "Booking submitted",
+      "confirmed": "Booking confirmed",
+      "received": "Device received",
+      "diagnosis": "Inspection & diagnosis",
+      "decision": "Quote decision",
+      "repair": "Repair",
+      "ready": "Ready for return",
+      "completed": "Completed"
+    },
+    "historyTitle": "Updates",
+    "messagesTitle": "Messages from our team",
+    "details": "Booking details",
+    "cancel": "Cancel booking",
+    "cancelConfirm": "Cancel this booking? This cannot be undone.",
+    "cancelled": "Booking cancelled.",
+    "needsInfoTitle": "We need more information",
+    "reply": "Your reply",
+    "sendReply": "Send reply",
+    "replySent": "Thanks — we've received your reply.",
+    "declinedTitle": "This booking could not be accepted",
+    "warrantyTitle": "Warranty",
+    "warrantyUntil": "Covered until {date}",
+    "returnTitle": "Return",
+    "returnMethod": {
+      "COLLECTION": "Collect from shop",
+      "DELIVERY": "Delivery to your address"
+    },
+    "returnStatus": {
+      "PENDING": "Being arranged",
+      "SCHEDULED": "Scheduled for {date}",
+      "HANDED_OVER": "Handed over",
+      "CANCELLED": "Cancelled"
+    },
+    "returnCharge": "Return charge"
+  },
+  "status": {
+    "booking": {
+      "SUBMITTED": "Awaiting confirmation",
+      "NEEDS_INFO": "Information needed",
+      "CONFIRMED": "Confirmed",
+      "DECLINED": "Declined",
+      "CANCELLED": "Cancelled",
+      "RESCHEDULED": "Appointment rescheduled"
+    },
+    "job": {
+      "AWAITING_HANDOVER": "Awaiting your device",
+      "DEVICE_RECEIVED": "Device received",
+      "INSPECTION": "Being inspected",
+      "QUOTE_PREPARED": "Preparing your quote",
+      "AWAITING_DECISION": "Quote awaiting your decision",
+      "APPROVED": "Quote approved",
+      "IN_PROGRESS": "Repair in progress",
+      "QUALITY_CHECK": "Quality check",
+      "READY_FOR_RETURN": "Ready for return",
+      "COMPLETED": "Completed",
+      "ON_HOLD": "On hold",
+      "AWAITING_CUSTOMER_RESPONSE": "Waiting to hear from you",
+      "QUOTE_DECLINED": "Quote declined",
+      "RETURN_COORDINATION": "Arranging return",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "quote": {
+    "title": "Your quote",
+    "version": "Version {number}",
+    "expires": "Respond by {date}",
+    "expired": "This quote has expired. Our team will contact you.",
+    "superseded": "Replaced by a newer quote",
+    "item": "Item",
+    "qty": "Qty",
+    "amount": "Amount",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "tax": "GST",
+    "total": "Total",
+    "kind": {
+      "LABOUR": "Labour",
+      "PART": "Part",
+      "DIAGNOSIS_FEE": "Diagnosis fee",
+      "DISCOUNT": "Discount",
+      "OTHER": "Other"
+    },
+    "grade": "Grade: {grade}",
+    "approve": "Approve quote",
+    "decline": "Decline",
+    "approveTitle": "Approve this quote?",
+    "approveBody": "We'll start the repair for {total}. If we find anything else, we'll send a new quote for your approval first.",
+    "approveConfirm": "Yes, approve",
+    "declineTitle": "Decline and get your device back",
+    "declineBody": "No repair will be done. Choose how you'd like your device returned.",
+    "returnMethod": "Return method",
+    "collect": "I'll collect it from the shop",
+    "deliver": "Deliver it to me",
+    "charges": "Charges if you decline",
+    "diagnosisCharge": "Diagnosis fee",
+    "returnCharge": "Return charge",
+    "free": "Free",
+    "reasonLabel": "Reason (optional)",
+    "acceptCharges": "I understand and accept these charges.",
+    "declineConfirm": "Confirm decline",
+    "approved": "Thanks! Your quote is approved.",
+    "declined": "Quote declined. We'll arrange your device's return.",
+    "decidedApproved": "You approved this quote on {date}.",
+    "decidedDeclined": "You declined this quote on {date}.",
+    "history": "Previous quotes"
+  },
+  "notifications": {
+    "title": "Notifications"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "unauthenticated": "Please sign in to continue.",
+    "forbidden": "You don't have permission to do that.",
+    "validation": "Please check the highlighted fields.",
+    "rateLimited": "Too many requests. Please wait a moment and try again.",
+    "unserviceable": "We don't serve this pincode yet.",
+    "notFound": {
+      "booking": "We couldn't find that booking.",
+      "quote": "We couldn't find that quote.",
+      "job": "We couldn't find that job.",
+      "attachment": "File not found.",
+      "record": "Not found.",
+      "return": "Return not found.",
+      "customer": "Customer not found.",
+      "user": "User not found.",
+      "slot": "Slot not found.",
+      "media": "File not found.",
+      "device": "Device not found.",
+      "product": "Product not found.",
+      "request": "Request not found.",
+      "design": "Design not found.",
+      "content": "Page not found."
+    },
+    "conflict": {
+      "stale": "This was changed by someone else. Refresh and try again.",
+      "idempotency": "This request was already used."
+    },
+    "slot": {
+      "full": "That appointment slot is full. Please choose another.",
+      "unavailable": "That appointment slot is no longer available."
+    },
+    "booking": {
+      "cannotCancel": "This booking can no longer be cancelled online. Please contact us.",
+      "notAwaitingInfo": "This booking is not waiting for information.",
+      "cannotReschedule": "This booking can no longer be rescheduled."
+    },
+    "quote": {
+      "superseded": "This quote has been replaced by a newer one.",
+      "expired": "This quote has expired.",
+      "alreadyDecided": "A decision has already been recorded for this quote.",
+      "notDraft": "Only draft quotes can be edited.",
+      "notDraftable": "A quote can't be prepared at this stage.",
+      "empty": "Add at least one line item.",
+      "needsDiagnosis": "Record the diagnosis before sending the quote.",
+      "discountTooLarge": "The discount can't exceed the subtotal."
+    },
+    "transition": {
+      "notAllowed": "That status change isn't allowed from the current stage.",
+      "forbidden": "You can't make that status change.",
+      "needsApproval": "The customer must approve the quote first.",
+      "needsQualityCheck": "Record a passed quality check first.",
+      "needsHandover": "Record the handover first.",
+      "needsInspection": "Record the inspection first."
+    },
+    "job": {
+      "closed": "This job is closed.",
+      "inspectionStage": "Inspection can only be recorded after the device is received.",
+      "diagnosisStage": "Diagnosis can't be recorded at this stage.",
+      "qcStage": "Quality check is only recorded during the quality-check stage."
+    },
+    "return": {
+      "closed": "This return is already closed.",
+      "notReady": "The job is not ready for return yet."
+    },
+    "team": {
+      "lastOwner": "There must be at least one active owner.",
+      "selfDeactivate": "You can't deactivate your own account."
+    },
+    "upload": {
+      "empty": "The file is empty.",
+      "tooLarge": "Files must be 10 MB or smaller.",
+      "type": "Only JPG, PNG or WebP images are allowed.",
+      "corrupt": "We couldn't read that image."
+    }
+  },
+  "validation": {
+    "required": "This field is required.",
+    "phone": "Enter a valid 10-digit Indian mobile number.",
+    "pincode": "Enter a valid 6-digit pincode.",
+    "address": "Enter your address.",
+    "name": "Enter your name.",
+    "email": "Enter a valid email address.",
+    "issues": "Select at least one issue.",
+    "slot": "Choose an appointment slot.",
+    "slotSame": "Choose a different slot.",
+    "photos": "One or more photos could not be attached.",
+    "maxPhotos": "You can add up to 6 photos.",
+    "acceptPolicy": "Please accept the policy to continue.",
+    "acceptCharges": "Please confirm you accept the charges.",
+    "reason": "Please give a reason (at least 3 characters).",
+    "technician": "Choose an active technician.",
+    "roles": "Choose at least one role.",
+    "date": "Enter a valid date.",
+    "invalid": "Invalid value.",
+    "unknownSetting": "Unknown setting."
+  },
+  "devicePicker": {
+    "brands": "Brands",
+    "title": "Choose your device",
+    "search": "Search brand or model, e.g. Galaxy S24",
+    "all": "All devices",
+    "popular": "Popular devices",
+    "results": "Matching devices",
+    "noResults": "No matching devices. Try a different spelling, or contact us if your device is not listed.",
+    "change": "Change device",
+    "selected": "Selected device",
+    "loading": "Loading devices…"
+  },
+  "activity": {
+    "orderTitle": "Protection order ({count} items)",
+    "orderStatus": {
+      "SUBMITTED": "Request received",
+      "CONFIRMED": "Order confirmed",
+      "FULFILLING": "Being packed",
+      "SHIPPED": "Shipped",
+      "COMPLETED": "Completed",
+      "DECLINED": "Declined",
+      "CANCELLED": "Cancelled"
+    },
+    "customizationStatus": {
+      "SUBMITTED": "Request received",
+      "UNDER_REVIEW": "Under review",
+      "NEEDS_INFO": "Information needed",
+      "FEASIBILITY_CONFIRMED": "Design feasible",
+      "QUOTE_SHARED": "Price shared",
+      "ACCEPTED": "Accepted",
+      "DECLINED": "Declined",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "developers": {
+    "title": "Technentium API",
+    "eyebrow": "Developers",
+    "intro": "One REST API powers the website and the Android and iOS apps: devices, repair bookings and tracking, protection products, customization and content.",
+    "downloadSpec": "Download OpenAPI 3.1 spec",
+    "contents": "On this page",
+    "gettingStarted": "Getting started",
+    "authTitle": "Authentication",
+    "authStep1": "Sign in with email and password, or with a mobile number and a 6-digit SMS code.",
+    "authStep2": "Read the set-auth-token response header and store it in the device's secure storage.",
+    "authStep3": "Send it on every request as Authorization: Bearer <token>. Sessions last 7 days and refresh while in use.",
+    "authStep4": "Call POST /api/auth/sign-out to revoke the token. A 401 response means the token expired: sign in again.",
+    "emailSignIn": "Email sign-in",
+    "phoneSignIn": "Phone OTP sign-in",
+    "authenticatedCall": "Authenticated request",
+    "conventions": "Conventions",
+    "errorsTitle": "Errors",
+    "meaning": "Meaning",
+    "parameter": "Parameter",
+    "in": "In",
+    "description": "Description",
+    "example": "Example request",
+    "response": "Example response",
+    "auth": {
+      "public": "Public",
+      "bearer": "Signed in",
+      "staff": "Staff"
+    },
+    "conv": {
+      "envelope": {
+        "title": "Response envelope",
+        "body": "Successful responses are { \"data\": … }. Errors are { \"error\": { code, messageKey, message, fields } } with a matching HTTP status."
+      },
+      "money": {
+        "title": "Money",
+        "body": "Amounts are integers in paise (₹1 = 100) and include GST where stated. Never compute totals on the client."
+      },
+      "language": {
+        "title": "Language",
+        "body": "Send Accept-Language: en or hi. Messages, labels and content come back in that language, falling back to English."
+      },
+      "idempotency": {
+        "title": "Safe retries",
+        "body": "Submitting a booking or request needs an Idempotency-Key header. Retrying with the same key returns the original record."
+      },
+      "pagination": {
+        "title": "Pagination",
+        "body": "Lists that can grow return { items, nextCursor }. Pass nextCursor as ?cursor= to fetch the next page."
+      },
+      "uploads": {
+        "title": "Images",
+        "body": "Upload JPEG, PNG or WebP up to 10 MB as multipart/form-data. Images are re-encoded and location data is removed."
+      }
+    }
+  },
+  "repairFlow": {
+    "heroEyebrow": "Doorstep & walk-in repairs in Jaipur",
+    "heroTitle": "Repair, the way you want it",
+    "heroBody": "Screens, batteries, charging ports, water damage and more — for phones, tablets, laptops, watches and earbuds.",
+    "point1": "Pickup & drop",
+    "point2": "Warranty on repairs",
+    "point3": "Approve the price first",
+    "searchLabel": "Find your device",
+    "searchPlaceholder": "Type your brand or model, e.g. iPhone 15",
+    "bookRepair": "Book repair",
+    "devicesTitle": "What needs fixing?",
+    "servicesTitle": "Services available",
+    "brandsTitle": "Top brands",
+    "selectBrand": "Select brand",
+    "selectModel": "Select model",
+    "categoryTitle": "{device} repair",
+    "brandTitle": "{brand} repair & replacement",
+    "topBrands": "Top repaired brands",
+    "topModels": "Popular models",
+    "modelsCount": "{count} models",
+    "howTitle": "How it works",
+    "how1Title": "Book a repair",
+    "how1Body": "Choose your device and the services you need. See an estimated price straight away.",
+    "how2Title": "Hand it over",
+    "how2Body": "We pick it up, you walk in, or a technician visits — whichever suits you.",
+    "how3Title": "Diagnose & approve",
+    "how3Body": "Our technicians inspect it and send the final price. Nothing is repaired until you approve.",
+    "how4Title": "Fast return",
+    "how4Body": "Get your device back with a warranty on replaced parts and workmanship.",
+    "whyTitle": "Why Technentium",
+    "stepDevice": "Select device",
+    "stepServices": "Select repair",
+    "stepCheckout": "Checkout",
+    "pickServices": "Pick your repair service",
+    "estimateFrom": "from {price}",
+    "noEstimate": "Price after diagnosis",
+    "add": "Add",
+    "added": "Added",
+    "addService": "Add {service}",
+    "removeService": "Remove {service}",
+    "readMore": "Read more",
+    "readLess": "Show less",
+    "repairList": "Repair list",
+    "noneSelected": "No service selected",
+    "estimatedTotal": "Estimated total",
+    "diagnosisFee": "Diagnosis fee",
+    "feeWaived": "Waived if you approve the quote",
+    "estimateNote": "Estimated price only. The final price is confirmed after diagnosis — nothing is repaired until you approve it.",
+    "unpriced": "+ {count} priced after diagnosis",
+    "notesLabel": "Device description (optional)",
+    "notesPlaceholder": "Anything we should know — colour, what happened, etc.",
+    "checkout": "Book now",
+    "pincodeTitle": "Check if we serve your pincode",
+    "pincodePlaceholder": "Enter pincode",
+    "check": "Check",
+    "serviceable": "Yes — we serve {locality}",
+    "notServiceable": "We don't pick up from this pincode yet. You can still walk in to our Jaipur shop.",
+    "otherIssueTitle": "Looking for another repair?",
+    "otherIssueBody": "Book now and describe the problem — our team will get back to you.",
+    "changeDevice": "Change",
+    "otherDevices": "Other devices",
+    "estimated": "Estimated"
+  }
+}

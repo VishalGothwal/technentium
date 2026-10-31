@@ -1,0 +1,58 @@
+# PR checks (PRD §16.2): lint → typecheck → unit → integration (real Postgres) → build → dependency audit.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: technentium_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/technentium_test
+      BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-ci-secret-00
+      BETTER_AUTH_URL: http://localhost:3000
+      APP_URL: http://localhost:3000
+      CRON_SECRET: ci-cron-secret-000000
+      STORAGE_DRIVER: local
+      NOTIFY_EMAIL_DRIVER: console
+      SMS_DRIVER: console
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - name: Migrate and seed test database
+        run: npx prisma migrate deploy && npx prisma db seed
+      - name: Integration tests
+        # .env.test points at a local dev server; override with the CI service database.
+        run: |
+          cat > .env.test <<EOF
+          DATABASE_URL=$DATABASE_URL
+          BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET
+          BETTER_AUTH_URL=$BETTER_AUTH_URL
+          APP_URL=$APP_URL
+          CRON_SECRET=$CRON_SECRET
+          STORAGE_DRIVER=local
+          NOTIFY_EMAIL_DRIVER=console
+          SMS_DRIVER=console
+          EOF
+          npm run test:integration
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high

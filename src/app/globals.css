@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens: the Technentium brand is strictly black and white, so the primary is black.
+ * Status colours (danger/warning/success) stay coloured because they carry meaning.
+ * Components only use the semantic names.
+ */
+:root {
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-muted: #f4f4f4;
+  --foreground: #000000;
+  --muted: #525252;
+  --border: #e5e5e5;
+  --primary: #000000;
+  --primary-hover: #262626;
+  --primary-foreground: #ffffff;
+  --primary-soft: #f4f4f4;
+  --accent: #000000;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --warning: #9a5b00;
+  --warning-soft: #fff4e0;
+  --success: #12733f;
+  --success-soft: #e7f6ec;
+  --info: #262626;
+  --info-soft: #f4f4f4;
+  --focus: #000000;
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --font-sans: var(--font-sans-latin), var(--font-devanagari), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-latin), var(--font-devanagari), ui-sans-serif, system-ui, sans-serif;
+  --radius-card: var(--radius);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
+
+/* The brand type is heavy: headings default to bold (utilities still override). */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Visible focus for keyboard users (WCAG 2.2 focus appearance). */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  /* White halo keeps the black ring visible on black sections. */
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+dialog::backdrop {
+  background: rgb(10 10 11 / 0.45);
+}
+
+/* Staff console tables: quiet uppercase column headers and a little more row height (utilities still win). */
+@layer components {
+  .admin-console thead th {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+  }
+  .admin-console tbody td {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+}
