@@ -27,8 +27,9 @@ const consoleSms: SmsAdapter = {
 };
 
 /**
- * Fast2SMS (fast2sms.com). Route "otp" sends "Your OTP: 123456" without DLT registration; route "dlt"
- * uses your DLT sender ID and approved template (code passed as the template variable).
+ * Fast2SMS (fast2sms.com). Route "otp" sends "Your OTP: 123456" without DLT registration; "q" (Quick SMS)
+ * sends our own wording without DLT at a higher price; "dlt" uses your DLT sender ID and approved template
+ * (code passed as the template variable).
  */
 function fast2sms(): SmsAdapter {
   const e = env();
@@ -43,10 +44,13 @@ function fast2sms(): SmsAdapter {
       throw new Error("Fast2SMS is configured for OTP codes only");
     },
     async sendOtp(to, code) {
+      const numbers = to.replace(/^\+91/, "");
       const body =
         e.FAST2SMS_ROUTE === "dlt"
-          ? { route: "dlt", sender_id: e.FAST2SMS_SENDER_ID, message: e.FAST2SMS_TEMPLATE_ID, variables_values: code, numbers: to.replace(/^\+91/, "") }
-          : { route: "otp", variables_values: code, numbers: to.replace(/^\+91/, "") };
+          ? { route: "dlt", sender_id: e.FAST2SMS_SENDER_ID, message: e.FAST2SMS_TEMPLATE_ID, variables_values: code, numbers }
+          : e.FAST2SMS_ROUTE === "q"
+            ? { route: "q", message: `${code} is your Technentium verification code. Valid for 5 minutes. Do not share it.`, numbers, flash: "0" }
+            : { route: "otp", variables_values: code, numbers };
       const res = await fetch("https://www.fast2sms.com/dev/bulkV2", {
         method: "POST",
         headers: { authorization: e.FAST2SMS_API_KEY!, "content-type": "application/json", accept: "application/json" },
