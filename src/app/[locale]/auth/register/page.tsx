@@ -3,7 +3,8 @@ import { Suspense } from "react";
 import { getT } from "@/i18n/server";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Skeleton } from "@/components/ui/surface";
-import { RegisterForm, SignInLink } from "./register-form";
+import { SignInLink } from "./register-form";
+import { RegisterChooser } from "./register-chooser";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -23,7 +24,7 @@ export default async function RegisterPage() {
       }
     >
       <Suspense fallback={<Skeleton className="h-80" />}>
-        <RegisterForm />
+        <RegisterChooser />
       </Suspense>
     </AuthShell>
   );

@@ -9,7 +9,18 @@ import { PhoneOtpForm } from "./phone-otp-form";
  * The quickest way in first: one-tap Google (when configured), then mobile number + OTP (creates the account
  * on first verification). Email and password stay available behind a link for customers who prefer it.
  */
-export function SignInPanel({ onSuccess, forgotHref, autoFocus }: { onSuccess: () => void; forgotHref?: string; autoFocus?: boolean }) {
+export function SignInPanel({
+  onSuccess,
+  forgotHref,
+  autoFocus,
+  emailOption = true,
+}: {
+  onSuccess: () => void;
+  forgotHref?: string;
+  autoFocus?: boolean;
+  /** Offer email + password sign-in behind a link (the sign-up page offers email sign-up instead). */
+  emailOption?: boolean;
+}) {
   const { t } = useI18n();
   const [method, setMethod] = useState<"phone" | "email">("phone");
 
@@ -37,9 +48,11 @@ export function SignInPanel({ onSuccess, forgotHref, autoFocus }: { onSuccess: (
         </>
       )}
       <PhoneOtpForm onSuccess={onSuccess} autoFocus={autoFocus && !googleSignInEnabled} />
-      <button type="button" onClick={() => setMethod("email")} className="block w-full text-center text-sm font-medium text-muted hover:text-foreground hover:underline">
-        {t("auth.useEmail")}
-      </button>
+      {emailOption && (
+        <button type="button" onClick={() => setMethod("email")} className="block w-full text-center text-sm font-medium text-muted hover:text-foreground hover:underline">
+          {t("auth.useEmail")}
+        </button>
+      )}
     </div>
   );
 }

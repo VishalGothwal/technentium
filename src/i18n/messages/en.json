@@ -176,6 +176,7 @@
     "tabEmail": "Email",
     "phone": "Mobile number",
     "phoneHint": "Indian mobile number. We'll text you a 6-digit code.",
+    "signUpWithEmail": "Sign up with email & password instead",
     "continueGoogle": "Continue with Google",
     "googleFailed": "Couldn't start Google sign-in. Try again or use your mobile number.",
     "orPhone": "or use your mobile number",
@@ -244,7 +245,7 @@
         "body": "Your photos and details are only visible to you and our team."
       }
     },
-    "registerSubtitle": "It takes a minute. You can also sign up with just your mobile number.",
+    "registerSubtitle": "Enter your mobile number or continue with Google — your account is created as soon as you verify.",
     "emailHint": "We'll send a link to verify this address.",
     "emailTaken": "An account with this email already exists. Sign in instead, or reset your password.",
     "registerPhoneNote": "Prefer your mobile number? Use the Mobile number option on the sign-in page — it creates your account automatically.",

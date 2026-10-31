@@ -5,12 +5,13 @@ import { useI18n } from "@/i18n/client";
 import { safeNext } from "@/lib/safe-redirect";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
 
-export function SignInClient() {
+export function SignInClient({ emailOption = true }: { emailOption?: boolean }) {
   const { locale } = useI18n();
   const router = useRouter();
   const next = safeNext(useSearchParams().get("next"), `/${locale}/account/bookings`);
   return (
     <SignInPanel
+      emailOption={emailOption}
       forgotHref={`/${locale}/auth/forgot-password`}
       onSuccess={() => {
         router.replace(next);
