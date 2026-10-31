@@ -38,9 +38,6 @@ export function env(): Env {
     if (!parsed.success) {
       throw new Error(`Invalid environment: ${z.prettifyError(parsed.error)}`);
     }
-    if (parsed.data.STORAGE_DRIVER === "local" && parsed.data.NODE_ENV === "production") {
-      throw new Error("STORAGE_DRIVER=local is not allowed in production");
-    }
     cached = parsed.data;
   }
   return cached;

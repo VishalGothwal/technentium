@@ -74,5 +74,10 @@ function s3Adapter(): StorageAdapter {
 }
 
 export function storage(): StorageAdapter {
-  return env().STORAGE_DRIVER === "s3" ? s3Adapter() : localAdapter;
+  const e = env();
+  if (e.STORAGE_DRIVER === "s3") return s3Adapter();
+  // Serverless disks are ephemeral: refuse uploads rather than lose them. Checked here (not in env()) so an
+  // unconfigured bucket only affects uploads, not sign-in codes or emails.
+  if (e.NODE_ENV === "production") throw new Error("STORAGE_DRIVER=local is not allowed in production; configure S3/R2 storage");
+  return localAdapter;
 }
