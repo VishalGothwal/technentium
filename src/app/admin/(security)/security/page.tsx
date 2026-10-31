@@ -7,7 +7,8 @@ export const metadata = { title: "Security" };
 export const instant = false;
 
 export default async function SecurityPage() {
-  const actor = await requireStaffPage();
+  // The one page an Owner can open before enabling two-factor sign-in.
+  const actor = await requireStaffPage({ allowWithoutTwoFactor: true });
   const user = await db.user.findUniqueOrThrow({ where: { id: actor.userId }, select: { twoFactorEnabled: true, email: true } });
   const isOwner = actor.roles.includes("owner");
 
