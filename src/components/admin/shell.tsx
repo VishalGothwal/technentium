@@ -68,7 +68,11 @@ const initials = (name: string) =>
     .join("") || "?";
 
 /** Staff console frame: dark grouped sidebar on desktop, dark top bar with a drawer on small screens. */
-export async function AdminShell({ children }: { children: ReactNode }) {
+/**
+ * `twoFactorSetup` marks the Security page: it must stay reachable while an owner's console is locked,
+ * otherwise the owner could never enable two-factor sign-in.
+ */
+export async function AdminShell({ children, twoFactorSetup = false }: { children: ReactNode; twoFactorSetup?: boolean }) {
   const actor = await getActor();
   if (!actor || !actor.isStaff) redirect("/admin/sign-in");
 
@@ -158,7 +162,7 @@ export async function AdminShell({ children }: { children: ReactNode }) {
               {!enforce2fa && " (not enforced in development)."}
             </Alert>
           )}
-          {enforce2fa ? <EnforcedSecurity /> : children}
+          {enforce2fa && !twoFactorSetup ? <EnforcedSecurity /> : children}
         </main>
       </div>
     </div>
