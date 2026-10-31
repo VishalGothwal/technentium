@@ -1,0 +1,10 @@
+# Never upload local env files: production values live in Vercel's environment settings.
+.env
+.env.*
+!.env.example
+neon.ts
+.neon
+.uploads
+test-results
+playwright-report
+coverage
