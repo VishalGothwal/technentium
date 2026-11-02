@@ -2,14 +2,13 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import { useI18n } from "@/i18n/client";
 import { safeNext } from "@/lib/safe-redirect";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Field, Input } from "@/components/ui/field";
 import { Alert } from "@/components/ui/surface";
 import { PasswordInput, PasswordStrength } from "@/components/auth/password-input";
-import { recordConsent } from "../actions";
+import { recordConsent, signUpWithPasswordAction } from "../actions";
 
 export function RegisterForm() {
   const { t, locale } = useI18n();
@@ -19,9 +18,13 @@ export function RegisterForm() {
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; password?: string }>({});
   const [pending, setPending] = useState(false);
   const [password, setPassword] = useState("");
+  const [checkEmail, setCheckEmail] = useState(false);
 
   const [before, after] = t("auth.consent").split("{terms}");
   const [mid, end] = (after ?? "").split("{privacy}");
+
+  // Supabase sends a confirmation link; the account opens when it is followed.
+  if (checkEmail) return <Alert tone="success">{t("auth.checkEmail")}</Alert>;
 
   return (
     <form
@@ -37,14 +40,12 @@ export function RegisterForm() {
         if (Object.keys(errs).length) return;
         setPending(true);
         setError(null);
-        const res = await authClient.signUp.email({ name, email: String(form.get("email")).trim(), password, preferredLocale: locale });
-        if (res.error) {
+        const res = await signUpWithPasswordAction({ name, email: String(form.get("email")).trim(), password, locale, next });
+        if (!res.ok) {
           setPending(false);
-          const { status, code } = res.error as { status: number; code?: string };
-          return setError(
-            status === 429 ? t("auth.tooMany") : code === "USER_ALREADY_EXISTS" || code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL" ? t("auth.emailTaken") : t("errors.generic"),
-          );
+          return setError(t(res.error));
         }
+        if (res.needsConfirmation) return setCheckEmail(true);
         await recordConsent();
         router.replace(next);
         router.refresh();

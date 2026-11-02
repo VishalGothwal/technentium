@@ -2,23 +2,9 @@ import { markReadSchema, preferencesSchema, profilePatchSchema } from "@/server/
 import type { PathsObject } from "./types";
 import { arr, bool, dateTime, fromZod, int, nullable, obj, pathId, query, str } from "./zod";
 
-const tagAuth = ["Authentication"];
 const tagAccount = ["Account"];
 const tagApp = ["App"];
 
-const TOKEN_NOTE =
-  "On success the response carries a `set-auth-token` header. Store it securely (Keychain / EncryptedSharedPreferences) and send it on every request as `Authorization: Bearer <token>`. Use the header value, not `token` in the body — only signed tokens are accepted.";
-
-const authUser = obj({
-  id: str(),
-  name: str(),
-  email: str("Phone-only accounts have a placeholder address ending in @phone.technentium.invalid"),
-  emailVerified: bool(),
-  phoneNumber: nullable(str()),
-  phoneNumberVerified: nullable(bool()),
-  preferredLocale: str(),
-  twoFactorEnabled: nullable(bool()),
-});
 const profile = obj({
   id: str(),
   name: str(),
@@ -45,67 +31,11 @@ const activityItem = obj({
   href: str("Web page for this request"),
 });
 
-/** Authentication (Better Auth endpoints under /api/auth), account, tracking and app bootstrap. */
+/**
+ * Account, tracking and app bootstrap. Sign-in itself is Supabase Auth (see the document description):
+ * apps send the Supabase access token as `Authorization: Bearer <token>`.
+ */
 export const paths: PathsObject = {
-  "/api/auth/sign-in/email": {
-    post: {
-      tags: tagAuth,
-      summary: "Sign in with email and password",
-      description: `${TOKEN_NOTE} Rate-limited to 10 attempts per minute.`,
-      security: "public",
-      requestBody: { schema: obj({ email: str(undefined, { format: "email" }), password: str(), rememberMe: bool() }, ["email", "password"]) },
-      response: obj({ redirect: bool(), token: str("Unsigned session id — do not use as a bearer token"), user: authUser }),
-    },
-  },
-  "/api/auth/sign-up/email": {
-    post: {
-      tags: tagAuth,
-      summary: "Create an account with email and password",
-      description: `Sends a verification email. ${TOKEN_NOTE}`,
-      security: "public",
-      requestBody: {
-        schema: obj({ name: str(), email: str(undefined, { format: "email" }), password: str("8–128 characters", { minLength: 8, maxLength: 128 }), preferredLocale: { type: "string", enum: ["en", "hi"] } }, ["name", "email", "password"]),
-      },
-      response: obj({ token: nullable(str()), user: authUser }),
-    },
-  },
-  "/api/auth/phone-number/send-otp": {
-    post: {
-      tags: tagAuth,
-      summary: "Send a 6-digit sign-in code by SMS",
-      description: "Indian mobile numbers only (`+91XXXXXXXXXX` or 10 digits). One code per 30 seconds per client, at most 5 per number per hour. Codes expire after 5 minutes.",
-      security: "public",
-      requestBody: { schema: obj({ phoneNumber: str(undefined, { example: "+919812345678" }) }, ["phoneNumber"]) },
-      response: obj({ message: str() }),
-    },
-  },
-  "/api/auth/phone-number/verify": {
-    post: {
-      tags: tagAuth,
-      summary: "Verify the code and sign in (creates the account on first use)",
-      description: `5 attempts per code. ${TOKEN_NOTE}`,
-      security: "public",
-      requestBody: { schema: obj({ phoneNumber: str(), code: str(undefined, { pattern: "^\\d{6}$" }) }, ["phoneNumber", "code"]) },
-      response: obj({ status: bool(), token: nullable(str()), user: authUser }),
-    },
-  },
-  "/api/auth/get-session": {
-    get: { tags: tagAuth, summary: "Current session and user (null when signed out)", security: "bearer", response: nullable(obj({ session: obj({ expiresAt: dateTime() }), user: authUser })) },
-  },
-  "/api/auth/sign-out": {
-    post: { tags: tagAuth, summary: "Sign out (revokes this session/token)", security: "bearer", requestBody: { schema: obj({}) }, response: obj({ success: bool() }) },
-  },
-  "/api/auth/request-password-reset": {
-    post: {
-      tags: tagAuth,
-      summary: "Email a password reset link",
-      description: "Always succeeds so addresses cannot be enumerated. The link opens the web reset page.",
-      security: "public",
-      requestBody: { schema: obj({ email: str(undefined, { format: "email" }), redirectTo: str("e.g. /en/auth/reset-password") }, ["email"]) },
-      response: obj({ status: bool() }),
-    },
-  },
-
   "/api/v1/account/profile": {
     get: { tags: tagAccount, summary: "My profile", security: "bearer", response: profile },
     patch: {

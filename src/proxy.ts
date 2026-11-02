@@ -1,21 +1,32 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE } from "@/i18n/config";
+import { refreshSupabaseSession } from "@/server/supabase/proxy";
 
 /**
- * Locale routing for the customer site: `/repairs` → `/{locale}/repairs`.
- * Preference order: saved cookie → Accept-Language (Hindi if preferred) → English.
- * Admin, API and static assets are not localised.
+ * 1. Locale routing for the customer site: `/repairs` → `/{locale}/repairs`.
+ *    Preference order: saved cookie → Accept-Language (Hindi if preferred) → English.
+ * 2. Supabase session refresh for site and admin pages (Server Components can't write cookies).
+ * API and static assets are not localised; API routes refresh sessions themselves.
  */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const first = pathname.split("/")[1];
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    return refreshSupabaseSession(request, () => NextResponse.next({ request }));
+  }
 
+  const first = pathname.split("/")[1];
   if (isLocale(first)) {
-    const res = NextResponse.next();
-    if (request.cookies.get(LOCALE_COOKIE)?.value !== first) {
-      res.cookies.set(LOCALE_COOKIE, first, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
-    }
-    return res;
+    return refreshSupabaseSession(request, () => {
+      const res = NextResponse.next({ request });
+      if (request.cookies.get(LOCALE_COOKIE)?.value !== first) {
+        res.cookies.set(LOCALE_COOKIE, first, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: "lax",
+        });
+      }
+      return res;
+    });
   }
 
   const cookie = request.cookies.get(LOCALE_COOKIE)?.value;
@@ -29,5 +40,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|admin|_next|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)"],
+  matcher: ["/((?!api|_next|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)"],
 };

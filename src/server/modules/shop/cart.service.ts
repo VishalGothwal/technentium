@@ -1,4 +1,5 @@
 import "server-only";
+import { assertSection } from "@/server/features";
 import { randomBytes } from "node:crypto";
 import type { Prisma } from "@/generated/prisma/client";
 import { db, type Tx } from "@/server/db";
@@ -133,6 +134,7 @@ export async function cartCount(identity: CartIdentity) {
  * the newly issued token the caller must persist.
  */
 export async function addToCart(identity: CartIdentity, rawInput: unknown) {
+  await assertSection("shop");
   const input = parse(cartItemSchema, rawInput);
   const product = await db.product.findFirst({
     where: { id: input.productId, status: "ACTIVE", category: { active: true } },

@@ -44,6 +44,10 @@ export const PERMISSIONS = [
   "content.edit", // articles, videos, specifications, comparisons
   "content.publish",
   "media.upload", // public images for products/designs/content
+  // Accounts & platform controls
+  "user.manage", // edit any account's profile, block, reset password / two-factor, sign out everywhere
+  "user.impersonate", // "switch user": view and act as another (non-owner) account, audited
+  "system.features", // feature controls: sign-in methods, site sections, test mode, maintenance
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];

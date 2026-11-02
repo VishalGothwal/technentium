@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { sendPhoneOtpAction, verifyPhoneOtpAction } from "@/app/[locale]/auth/actions";
 import { isCompleteNational, normalizeIndianMobile } from "@/lib/phone";
 import { useI18n } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
@@ -35,10 +35,10 @@ export function PhoneOtpForm({ onSuccess, autoFocus }: { onSuccess: () => void; 
     async (target: string, value: string) => {
       setPending(true);
       setError(null);
-      const res = await authClient.phoneNumber.verify({ phoneNumber: target, code: value.trim() });
-      if (res.error) {
+      const res = await verifyPhoneOtpAction(target, value.trim());
+      if (!res.ok) {
         setPending(false);
-        setError(res.error.status === 429 ? t("auth.tooMany") : t("auth.otpFailed"));
+        setError(t(res.error));
         codeRef.current?.select();
         return;
       }
@@ -67,13 +67,9 @@ export function PhoneOtpForm({ onSuccess, autoFocus }: { onSuccess: () => void; 
   async function sendCode(target: string) {
     setPending(true);
     setError(null);
-    const res = await authClient.phoneNumber.sendOtp({ phoneNumber: target });
+    const res = await sendPhoneOtpAction(target);
     setPending(false);
-    if (res.error) {
-      // 400 = the number was rejected; anything else is on our side (e.g. the SMS provider is down).
-      setError(res.error.status === 429 ? t("auth.tooMany") : res.error.status === 400 ? t("validation.phone") : t("auth.sendFailed"));
-      return;
-    }
+    if (!res.ok) return setError(t(res.error));
     setNormalized(target);
     setCode("");
     setCooldown(RESEND_SECONDS);

@@ -1,13 +1,10 @@
 "use client";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { startGoogleSignInAction } from "@/app/[locale]/auth/actions";
 import { useI18n } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
 
-/** True when the server has Google OAuth credentials (inlined at build time from next.config `env`). */
-export const googleSignInEnabled = process.env.NEXT_PUBLIC_GOOGLE_SIGN_IN === "1";
-
-/** One-tap "Continue with Google"; returns to the current page (or `callbackURL`) signed in. */
+/** One-tap "Continue with Google" (Supabase Auth); returns to the current page (or `callbackURL`, a site path) signed in. */
 export function GoogleButton({ callbackURL }: { callbackURL?: string }) {
   const { t } = useI18n();
   const [pending, setPending] = useState(false);
@@ -24,12 +21,12 @@ export function GoogleButton({ callbackURL }: { callbackURL?: string }) {
         onClick={async () => {
           setPending(true);
           setError(null);
-          const res = await authClient.signIn.social({ provider: "google", callbackURL: callbackURL ?? window.location.href });
-          // On success the browser is redirected to Google; we only get here on failure.
-          if (res.error) {
+          const res = await startGoogleSignInAction(callbackURL ?? `${window.location.pathname}${window.location.search}`);
+          if (!res.ok) {
             setPending(false);
-            setError(t("auth.googleFailed"));
+            return setError(t(res.error));
           }
+          window.location.assign(res.url);
         }}
       >
         {!pending && (

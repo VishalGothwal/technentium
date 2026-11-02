@@ -1,4 +1,5 @@
 import "server-only";
+import { assertSection } from "@/server/features";
 import type { CustomizationStatus } from "@/generated/prisma/enums";
 import { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/server/audit";
@@ -116,6 +117,7 @@ async function applyTransition(
  * snapshot is assembled from active catalogue rows so names and the estimate cannot be forged.
  */
 export async function submitCustomization(actor: Actor | null, rawInput: unknown, idempotencyKey: string) {
+  await assertSection("customization");
   requireUser(actor);
   if (!/^[\w-]{16,64}$/.test(idempotencyKey)) throw new AppError("VALIDATION", "errors.validation", { fields: { idempotencyKey: "validation.required" } });
 

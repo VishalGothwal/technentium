@@ -1,26 +1,31 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { changePasswordAction, confirmTotpAction, disableTotpAction, startTotpAction } from "@/app/admin/(security)/security/actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Alert, Badge } from "@/components/ui/surface";
 
-const secretFromUri = (uri: string) => {
-  try {
-    return new URL(uri).searchParams.get("secret") ?? "";
-  } catch {
-    return "";
-  }
-};
-
 /** Groups a base32 secret into blocks of four for easier manual entry. */
 const grouped = (s: string) => s.replace(/(.{4})/g, "$1 ").trim();
+
+const ERRORS: Partial<Record<string, string>> = {
+  "auth.wrongPassword": "Password is incorrect.",
+  "auth.codeInvalid": "That code didn't match. Check the time on your phone and try the current code.",
+  "auth.tooMany": "Too many attempts. Wait a few minutes and try again.",
+  "auth.weakPassword": "Choose a stronger password (at least 8 characters).",
+};
+const message = (key: string) => ERRORS[key] ?? "Something went wrong. Please try again.";
 
 export function TwoFactorPanel({ enabled, required }: { enabled: boolean; required: boolean }) {
   const router = useRouter();
   const [stage, setStage] = useState<"idle" | "setup" | "done">("idle");
-  const [setup, setSetup] = useState<{ uri: string; backupCodes: string[] } | null>(null);
+  const [setup, setSetup] = useState<{
+    factorId: string;
+    uri: string;
+    secret: string;
+    qr: string;
+  } | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -48,9 +53,9 @@ export function TwoFactorPanel({ enabled, required }: { enabled: boolean; requir
               e.preventDefault();
               setPending(true);
               setError(null);
-              const res = await authClient.twoFactor.disable({ password: String(new FormData(e.currentTarget).get("password")) });
+              const res = await disableTotpAction(String(new FormData(e.currentTarget).get("password")));
               setPending(false);
-              if (res.error) return setError("Password is incorrect.");
+              if (!res.ok) return setError(message(res.error));
               router.refresh();
             }}
           >
@@ -68,13 +73,14 @@ export function TwoFactorPanel({ enabled, required }: { enabled: boolean; requir
   }
 
   if (stage === "setup" && setup) {
-    const secret = secretFromUri(setup.uri);
     return (
       <div className="space-y-4">
         <ol className="list-decimal space-y-3 pl-5 text-sm">
           <li>
-            In your authenticator app, add an account using this setup key:
-            <p className="mt-1 select-all rounded-md bg-surface-muted px-3 py-2 font-mono text-sm tracking-wide">{grouped(secret)}</p>
+            Scan this QR code with your authenticator app, or add an account using the setup key:
+            {/* eslint-disable-next-line @next/next/no-img-element -- inline SVG data URI from Supabase */}
+            <img src={setup.qr} alt="Authenticator QR code" className="mt-2 size-40 rounded-md bg-white p-2" />
+            <p className="mt-2 select-all rounded-md bg-surface-muted px-3 py-2 font-mono text-sm tracking-wide">{grouped(setup.secret)}</p>
             <p className="mt-1 text-xs text-muted">
               Or{" "}
               <a href={setup.uri} className="text-primary underline">
@@ -94,25 +100,18 @@ export function TwoFactorPanel({ enabled, required }: { enabled: boolean; requir
               .
             </p>
           </li>
-          <li>
-            Save these backup codes somewhere safe. Each works once if you lose your phone. They won&apos;t be shown again.
-            <ul className="mt-2 grid grid-cols-2 gap-1 rounded-md bg-surface-muted p-3 font-mono text-xs">
-              {setup.backupCodes.map((c) => (
-                <li key={c}>{c}</li>
-              ))}
-            </ul>
-          </li>
           <li>Enter the 6-digit code from the app to finish.</li>
         </ol>
+        <p className="text-xs text-muted">Lost your phone later? An Owner can reset your two-factor from Users &amp; access.</p>
         <form
           className="space-y-3"
           onSubmit={async (e) => {
             e.preventDefault();
             setPending(true);
             setError(null);
-            const res = await authClient.twoFactor.verifyTotp({ code: String(new FormData(e.currentTarget).get("code")).trim() });
+            const res = await confirmTotpAction(setup.factorId, String(new FormData(e.currentTarget).get("code")).trim());
             setPending(false);
-            if (res.error) return setError("That code didn't match. Check the time on your phone and try the current code.");
+            if (!res.ok) return setError(message(res.error));
             setStage("done");
             router.refresh();
           }}
@@ -136,11 +135,16 @@ export function TwoFactorPanel({ enabled, required }: { enabled: boolean; requir
         e.preventDefault();
         setPending(true);
         setError(null);
-        const res = await authClient.twoFactor.enable({ password: String(new FormData(e.currentTarget).get("password")) });
+        const res = await startTotpAction(String(new FormData(e.currentTarget).get("password")));
         setPending(false);
-        if (res.error || !res.data) return setError("Password is incorrect.");
-        if (!("totpURI" in res.data)) return setError("Authenticator setup is unavailable. Contact the system administrator.");
-        setSetup({ uri: res.data.totpURI, backupCodes: res.data.backupCodes });
+        if (!res.ok) return setError(message(res.error));
+        if (!("factorId" in res)) return setError(message("errors.generic"));
+        setSetup({
+          factorId: res.factorId,
+          uri: res.uri,
+          secret: res.secret,
+          qr: res.qr,
+        });
         setStage("setup");
       }}
     >
@@ -169,14 +173,25 @@ export function ChangePasswordForm() {
         const form = e.currentTarget;
         const f = new FormData(form);
         const newPassword = String(f.get("newPassword"));
-        if (newPassword.length < 8) return setMsg({ ok: false, text: "New password must be at least 8 characters." });
+        if (newPassword.length < 8)
+          return setMsg({
+            ok: false,
+            text: "New password must be at least 8 characters.",
+          });
         if (newPassword !== String(f.get("confirm"))) return setMsg({ ok: false, text: "The new passwords don't match." });
         setPending(true);
-        const res = await authClient.changePassword({ currentPassword: String(f.get("currentPassword")), newPassword, revokeOtherSessions: true });
+        const res = await changePasswordAction(String(f.get("currentPassword")), newPassword);
         setPending(false);
-        if (res.error) return setMsg({ ok: false, text: "Current password is incorrect." });
+        if (!res.ok)
+          return setMsg({
+            ok: false,
+            text: res.error === "auth.wrongPassword" ? "Current password is incorrect." : message(res.error),
+          });
         form.reset();
-        setMsg({ ok: true, text: "Password changed." });
+        setMsg({
+          ok: true,
+          text: "Password changed. Other devices have been signed out.",
+        });
       }}
     >
       {msg && <Alert tone={msg.ok ? "success" : "danger"}>{msg.text}</Alert>}

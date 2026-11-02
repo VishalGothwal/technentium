@@ -21,9 +21,10 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/technentium_test
-      BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-ci-secret-00
-      BETTER_AUTH_URL: http://localhost:3000
       APP_URL: http://localhost:3000
+      # Placeholder project: CI never calls Supabase (integration tests exercise the app side of sign-in).
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder_000000
       CRON_SECRET: ci-cron-secret-000000
       STORAGE_DRIVER: local
       NOTIFY_EMAIL_DRIVER: console
@@ -45,9 +46,9 @@ jobs:
         run: |
           cat > .env.test <<EOF
           DATABASE_URL=$DATABASE_URL
-          BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET
-          BETTER_AUTH_URL=$BETTER_AUTH_URL
           APP_URL=$APP_URL
+          NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
           CRON_SECRET=$CRON_SECRET
           STORAGE_DRIVER=local
           NOTIFY_EMAIL_DRIVER=console

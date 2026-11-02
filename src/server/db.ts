@@ -1,13 +1,14 @@
 import "server-only";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
+import { runtimeDatabaseUrl } from "./db-url";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createClient() {
   // `npx prisma dev` (PGlite) handles one connection at a time; set DATABASE_POOL_MAX=1 there.
   const max = Number(process.env.DATABASE_POOL_MAX) || undefined;
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL, max });
+  const adapter = new PrismaPg({ connectionString: runtimeDatabaseUrl(), max });
   return new PrismaClient({
     adapter,
     // Serverless cold starts and a small pool can delay acquiring a connection.

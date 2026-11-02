@@ -249,7 +249,18 @@
     "emailHint": "We'll send a link to verify this address.",
     "emailTaken": "An account with this email already exists. Sign in instead, or reset your password.",
     "registerPhoneNote": "Prefer your mobile number? Use the Mobile number option on the sign-in page — it creates your account automatically.",
-    "backToSignIn": "Back to sign in"
+    "backToSignIn": "Back to sign in",
+    "allOff": "Sign-in is temporarily unavailable. Please try again later.",
+    "methodOff": "This sign-in method is switched off right now. Please use another one.",
+    "signUpOff": "New accounts can't be created right now. If you already have an account, sign in with it.",
+    "blocked": "This account is blocked. Please contact support.",
+    "notConfigured": "Sign-in isn't set up yet. Please try again later.",
+    "weakPassword": "Choose a stronger password (at least 8 characters).",
+    "notStaff": "This account doesn't have staff access.",
+    "codeInvalid": "That code is not valid. Try the current code from your authenticator app.",
+    "wrongPassword": "Password is incorrect.",
+    "checkEmail": "Almost done — we sent a confirmation link to your email. Open it to finish creating your account.",
+    "linkInvalid": "That sign-in link is invalid or has expired. Please try again."
   },
   "booking": {
     "title": "Book a repair",
@@ -540,6 +551,15 @@
       "tooLarge": "Files must be 10 MB or smaller.",
       "type": "Only JPG, PNG or WebP images are allowed.",
       "corrupt": "We couldn't read that image."
+    },
+    "featureOff": "This part of the site is temporarily unavailable.",
+    "supabaseAdminMissing": "This needs the Supabase secret key on the server (SUPABASE_SECRET_KEY).",
+    "emailChangeInApp": "Change your email from the app's account settings.",
+    "users": {
+      "self": "You can't do that to your own account.",
+      "noEmail": "This account has no email address.",
+      "blocked": "This account is blocked.",
+      "ownerViewAs": "Owner accounts can't be switched into."
     }
   },
   "validation": {
@@ -561,7 +581,8 @@
     "roles": "Choose at least one role.",
     "date": "Enter a valid date.",
     "invalid": "Invalid value.",
-    "unknownSetting": "Unknown setting."
+    "unknownSetting": "Unknown setting.",
+    "taken": "Already used by another account."
   },
   "devicePicker": {
     "brands": "Brands",
@@ -715,5 +736,15 @@
     "changeDevice": "Change",
     "otherDevices": "Other devices",
     "estimated": "Estimated"
+  },
+  "platform": {
+    "testMode": "Test mode — sign-in codes are not sent by SMS.",
+    "viewingAs": "Viewing as {name} (switched by {admin}).",
+    "maintenanceTitle": "We'll be back soon",
+    "maintenanceBody": "We're making some improvements. Please check back in a little while.",
+    "staffMaintenance": "Maintenance mode is on — customers see the maintenance page.",
+    "sectionOffTitle": "Temporarily unavailable",
+    "sectionOffBody": "This part of the site is paused for a short while. Please check back soon.",
+    "backHome": "Back to home"
   }
 }

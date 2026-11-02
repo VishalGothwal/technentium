@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/server/db";
+import { getFeatures } from "@/server/features";
 import { getSetting } from "@/server/settings";
 import { LOCALES, type Locale } from "@/i18n/config";
 import { localized } from "@/i18n/translate";
@@ -7,23 +8,38 @@ import { mediaUrl } from "@/lib/media";
 
 /** Static configuration a mobile app fetches on launch. */
 export async function appConfig() {
-  const [supportPhone, shopAddress, policyVersion] = await Promise.all([getSetting("business.supportPhone"), getSetting("business.shopAddress"), getSetting("policy.version")]);
+  const [supportPhone, shopAddress, policyVersion, features] = await Promise.all([
+    getSetting("business.supportPhone"),
+    getSetting("business.shopAddress"),
+    getSetting("policy.version"),
+    getFeatures(),
+  ]);
   return {
     locales: LOCALES,
     defaultLocale: "en",
     currency: "INR",
-    sections: { repairs: true, protection: true, customization: true, articles: true, specs: true },
+    sections: {
+      repairs: features.sections.repairs,
+      protection: features.sections.shop,
+      customization: features.sections.customization,
+      articles: features.sections.content,
+      specs: features.sections.content,
+    },
+    maintenance: features.maintenance ? { message: features.maintenanceMessage || null } : null,
     support: { phone: supportPhone, shopAddress },
     policyVersion,
     minSupportedAppVersion: process.env.MOBILE_MIN_APP_VERSION ?? "1.0.0",
     features: {
-      phoneOtpLogin: true,
-      emailPasswordLogin: true,
+      phoneOtpLogin: features.signIn.phoneOtp,
+      emailPasswordLogin: features.signIn.emailPassword,
+      googleLogin: features.signIn.google,
+      signUp: features.signUp,
       onlinePayments: false, // payments are deferred (PRD §2.2): orders and repairs are requests confirmed by staff
       repairServiceArea: "Jaipur",
       productShipping: "pan-India",
     },
-    auth: { bearerHeader: "Authorization", tokenResponseHeader: "set-auth-token" },
+    // Sign in with the Supabase SDK, then send `Authorization: Bearer <access_token>` to /api/v1.
+    auth: { provider: "supabase", supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? null, publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? null, bearerHeader: "Authorization" },
   };
 }
 

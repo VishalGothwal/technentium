@@ -1,8 +1,9 @@
 import "server-only";
-import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { audit } from "@/server/audit";
-import { auth } from "@/server/auth/auth";
+import { authCallbackUrl } from "@/server/auth/flows";
+import { revokeSessions } from "@/server/modules/users/user-admin.service";
+import { supabaseAdmin } from "@/server/supabase/admin";
 import { db } from "@/server/db";
 import { AppError, notFound } from "@/server/errors";
 import { assertCan, type Actor } from "@/server/rbac/actor";
@@ -33,31 +34,40 @@ const inviteSchema = z.object({
 });
 
 /**
- * Create a staff account and email a set-password link. The random initial password is never
- * shown to anyone; the invitee sets their own through the reset flow.
+ * Create a staff account and email an invitation (sent by Supabase). The link opens the set-password page;
+ * existing accounts are given staff roles and a password-reset link instead.
  */
 export async function inviteStaff(actor: Actor | null, raw: unknown) {
   assertCan(actor, "team.manage");
   const input = parse(inviteSchema, raw);
 
+  const admin = supabaseAdmin();
+  const setPassword = authCallbackUrl("/en/auth/reset-password");
   let user = await db.user.findUnique({ where: { email: input.email } });
-  if (!user) {
-    await auth.api.signUpEmail({ body: { name: input.name, email: input.email, password: randomBytes(24).toString("base64url") } });
-    user = await db.user.findUniqueOrThrow({ where: { email: input.email } });
+  let invited = false;
+  if (!user?.authUserId) {
+    const { data, error } = await admin.auth.admin.inviteUserByEmail(input.email, { data: { full_name: input.name }, redirectTo: setPassword });
+    if (error || !data.user) throw new AppError("VALIDATION", "errors.validation", { fields: { email: "validation.invalid" }, supabase: error?.message });
+    invited = true;
+    user = user
+      ? await db.user.update({ where: { id: user.id }, data: { authUserId: data.user.id } })
+      : await db.user.create({ data: { authUserId: data.user.id, email: input.email, name: input.name, customerProfile: { create: {} } } });
   }
+  const staffUser = user;
 
   await db.$transaction(async (tx) => {
     await tx.staffProfile.upsert({
-      where: { userId: user.id },
-      create: { userId: user.id, displayName: input.name },
+      where: { userId: staffUser.id },
+      create: { userId: staffUser.id, displayName: input.name },
       update: { active: true, deactivatedAt: null, displayName: input.name },
     });
-    await replaceRoles(tx, user.id, input.roles);
-    await audit(tx, actor, { action: "team.invite", entityType: "User", entityId: user.id, after: { roles: input.roles } });
+    await replaceRoles(tx, staffUser.id, input.roles);
+    await audit(tx, actor, { action: "team.invite", entityType: "User", entityId: staffUser.id, after: { roles: input.roles } });
   });
 
-  await auth.api.requestPasswordReset({ body: { email: input.email, redirectTo: "/en/auth/reset-password" } });
-  return { userId: user.id };
+  // Already had a Supabase login: send a reset link so they can set a password for the console.
+  if (!invited) await admin.auth.resetPasswordForEmail(input.email, { redirectTo: setPassword });
+  return { userId: staffUser.id };
 }
 
 async function replaceRoles(tx: Parameters<Parameters<typeof db.$transaction>[0]>[0], userId: string, roles: RoleKey[]) {
@@ -98,11 +108,11 @@ export async function setStaffActive(actor: Actor | null, userId: string, active
   await db.$transaction(async (tx) => {
     await tx.staffProfile.update({ where: { userId }, data: { active, deactivatedAt: active ? null : new Date() } });
     if (!active) {
-      await tx.session.deleteMany({ where: { userId } });
       await tx.repairAssignment.updateMany({ where: { technicianId: userId, active: true }, data: { active: false, endedAt: new Date() } });
     }
     await audit(tx, actor, { action: active ? "team.reactivate" : "team.deactivate", entityType: "User", entityId: userId });
   });
+  if (!active) await revokeSessions(await db.user.findUniqueOrThrow({ where: { id: userId }, select: { id: true, authUserId: true } }));
 }
 
 export async function listAudit(actor: Actor | null, filter: { entityType?: string; actorId?: string; page?: number } = {}) {
@@ -123,4 +133,21 @@ export async function listAudit(actor: Actor | null, filter: { entityType?: stri
   const actorIds = [...new Set(items.map((i) => i.actorId).filter((x): x is string => !!x))];
   const people = await db.user.findMany({ where: { id: { in: actorIds } }, select: { id: true, name: true } });
   return { items, total, page, pageSize, names: Object.fromEntries(people.map((p) => [p.id, p.name])) };
+}
+
+const ownProfileSchema = z.object({
+  name: z.string().trim().min(2, "validation.name").max(80),
+  displayName: z.string().trim().min(2, "validation.name").max(80),
+  preferredLocale: z.enum(["en", "hi"]),
+});
+
+/** "My profile" in the console: any staff member edits their own name, display name and language. */
+export async function updateOwnStaffProfile(actor: Actor | null, raw: unknown) {
+  if (!actor?.isStaff) throw new AppError("FORBIDDEN", "errors.forbidden");
+  const input = parse(ownProfileSchema, raw);
+  await db.$transaction(async (tx) => {
+    await tx.user.update({ where: { id: actor.userId }, data: { name: input.name, preferredLocale: input.preferredLocale } });
+    await tx.staffProfile.update({ where: { userId: actor.userId }, data: { displayName: input.displayName } });
+    await audit(tx, actor, { action: "team.own_profile", entityType: "User", entityId: actor.userId, after: input });
+  });
 }

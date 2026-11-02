@@ -1,4 +1,5 @@
 import "server-only";
+import { assertSection } from "@/server/features";
 import type { BookingStatus } from "@/generated/prisma/enums";
 import { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/server/audit";
@@ -35,6 +36,7 @@ const slotLabel = (slot: { date: Date; startTime: string; endTime: string } | nu
  * returns the original booking instead of creating a duplicate (FR-BOOK acceptance criteria).
  */
 export async function submitBooking(actor: Actor | null, rawInput: unknown, idempotencyKey: string) {
+  await assertSection("repairs");
   requireUser(actor);
   if (!/^[\w-]{16,64}$/.test(idempotencyKey)) throw new AppError("VALIDATION", "errors.validation", { fields: { idempotencyKey: "validation.required" } });
 

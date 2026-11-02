@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { setNewPasswordAction } from "../actions";
 import { useI18n } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -12,13 +12,13 @@ import { PasswordInput, PasswordStrength } from "@/components/auth/password-inpu
 export function ResetForm() {
   const { t, locale } = useI18n();
   const params = useSearchParams();
-  const token = params.get("token");
   const [done, setDone] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
 
-  if (!token || params.get("error")) return <Alert tone="danger">{t("auth.resetInvalid")}</Alert>;
+  // The reset link opens a short-lived session through /api/auth/callback before landing here.
+  if (params.get("error")) return <Alert tone="danger">{t("auth.resetInvalid")}</Alert>;
   if (done)
     return (
       <Alert tone="success">
@@ -37,9 +37,9 @@ export function ResetForm() {
         const newPassword = password;
         if (newPassword.length < 8) return setError(t("auth.passwordHint"));
         setPending(true);
-        const res = await authClient.resetPassword({ newPassword, token });
+        const res = await setNewPasswordAction(newPassword);
         setPending(false);
-        if (res.error) return setError(t("auth.resetInvalid"));
+        if (!res.ok) return setError(t(res.error));
         setDone(true);
       }}
     >

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { signInWithPasswordAction } from "@/app/[locale]/auth/actions";
 import { useI18n } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
@@ -21,11 +21,10 @@ export function EmailSignInForm({ onSuccess, forgotHref }: { onSuccess: () => vo
         const form = new FormData(e.currentTarget);
         setPending(true);
         setError(null);
-        const res = await authClient.signIn.email({ email: String(form.get("email")).trim(), password: String(form.get("password")) });
-        if (res.error) {
+        const res = await signInWithPasswordAction(String(form.get("email")).trim(), String(form.get("password")));
+        if (!res.ok) {
           setPending(false);
-          const { status } = res.error;
-          return setError(status === 429 ? t("auth.tooMany") : status === 403 ? t("auth.emailNotVerified") : t("auth.failed"));
+          return setError(t(res.error));
         }
         onSuccess();
       }}

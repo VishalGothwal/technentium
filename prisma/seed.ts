@@ -3,11 +3,14 @@
  * Safe to re-run: everything is upserted.
  *
  *   npm run db:seed
+ *   SEED_MODE=deploy …   (Vercel build: roles, owner bootstrap and switch defaults every deploy;
+ *                          catalogue and sample content only into an empty database; never demo users)
  */
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { hashPassword } from "better-auth/crypto";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { directDatabaseUrl } from "../src/server/db-url";
 import { PERMISSIONS, ROLE_DEFINITIONS, ROLE_KEYS } from "../src/server/rbac/permissions";
 import { deviceSlug } from "../src/lib/device-name";
 import { seedContent } from "./seed/content";
@@ -16,8 +19,9 @@ import { PHONES, phoneAliases } from "./seed/devices";
 import { seedRepairEstimates } from "./seed/repair-estimates";
 import { seedShop } from "./seed/shop";
 
-const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
-const isProd = process.env.NODE_ENV === "production";
+const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: directDatabaseUrl() }) });
+const isDeploy = process.env.SEED_MODE === "deploy";
+const isProd = process.env.NODE_ENV === "production" || isDeploy;
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
@@ -237,16 +241,38 @@ async function seedAreasAndSlots() {
   }
 }
 
+/** Supabase Auth admin client for demo logins; null when SUPABASE_SECRET_KEY is not set (app data is still seeded). */
+const supabase: SupabaseClient | null =
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SECRET_KEY
+    ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { persistSession: false, autoRefreshToken: false } })
+    : null;
+
+/** Create (or reset the password of) the Supabase login for a demo account and return its id. */
+async function upsertAuthLogin(email: string, name: string, password: string): Promise<string | null> {
+  if (!supabase) return null;
+  const created = await supabase.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { full_name: name } });
+  if (created.data.user) return created.data.user.id;
+  // Already exists: find it and reset the password so the printed demo password works.
+  for (let page = 1; page < 50; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) throw error;
+    const found = data.users.find((u) => u.email?.toLowerCase() === email);
+    if (found) {
+      await supabase.auth.admin.updateUserById(found.id, { password, email_confirm: true });
+      return found.id;
+    }
+    if (data.users.length < 200) break;
+  }
+  throw new Error(`Could not create Supabase login for ${email}: ${created.error?.message}`);
+}
+
 async function upsertPasswordUser(email: string, name: string, password: string, roles: string[]) {
+  const authUserId = await upsertAuthLogin(email, name, password);
   const user = await db.user.upsert({
     where: { email },
-    create: { email, name, emailVerified: true },
-    update: { name },
+    create: { email, name, emailVerified: true, authUserId },
+    update: { name, ...(authUserId ? { authUserId } : {}) },
   });
-  const hash = await hashPassword(password);
-  const account = await db.account.findFirst({ where: { userId: user.id, providerId: "credential" } });
-  if (account) await db.account.update({ where: { id: account.id }, data: { password: hash } });
-  else await db.account.create({ data: { userId: user.id, accountId: user.id, providerId: "credential", password: hash } });
   await db.customerProfile.upsert({ where: { userId: user.id }, create: { userId: user.id }, update: {} });
 
   if (roles.length) {
@@ -267,10 +293,47 @@ async function seedDemoUsers() {
   await upsertPasswordUser("editor@technentium.test", "Meera (editor)", password, ["editor"]);
   await upsertPasswordUser("inventory@technentium.test", "Arjun (inventory)", password, ["inventory"]);
   console.log(`Demo users (password: ${password}): owner@, staff@, tech@, tech2@, editor@, inventory@, customer@technentium.test`);
+  if (!supabase) console.warn("SUPABASE_SECRET_KEY not set: demo accounts have no Supabase login yet (re-run the seed once it is set).");
+}
+
+/**
+ * Make OWNER_EMAIL the Owner. No password is created: the person signs up (or signs in with Google) with that
+ * email, and the first sign-in with it confirmed links to this account.
+ */
+async function bootstrapOwner() {
+  const email = process.env.OWNER_EMAIL?.trim().toLowerCase();
+  if (!email) return;
+  const owner = await db.role.findUniqueOrThrow({ where: { key: "owner" } });
+  const user = await db.user.upsert({ where: { email }, create: { email, name: "Owner", customerProfile: { create: {} } }, update: {} });
+  await db.staffProfile.upsert({ where: { userId: user.id }, create: { userId: user.id, displayName: user.name }, update: { active: true, deactivatedAt: null } });
+  await db.userRole.upsert({ where: { userId_roleId: { userId: user.id, roleId: owner.id } }, create: { userId: user.id, roleId: owner.id }, update: {} });
+  console.log(`Owner: ${email}`);
+}
+
+/** First deploy only: offer Google / mobile OTP only if those providers are enabled in Supabase. */
+async function defaultSignInSwitches() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return;
+  const res = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } }).catch(() => null);
+  const settings = (await res?.json().catch(() => null)) as { external?: { google?: boolean; phone?: boolean } } | null;
+  if (!settings?.external) return;
+  for (const [key, value] of [
+    ["features.signIn.google", !!settings.external.google],
+    ["features.signIn.phoneOtp", !!settings.external.phone],
+  ] as const) {
+    await db.businessSetting.upsert({ where: { key }, create: { key, value }, update: {} });
+  }
 }
 
 async function main() {
   await seedRbac();
+  if (isDeploy) {
+    const fresh = (await db.deviceCategory.count()) === 0;
+    await bootstrapOwner();
+    await defaultSignInSwitches();
+    if (!fresh) return console.log("Deploy seed: roles and owner updated.");
+  }
   await seedCatalog();
   await seedRepairEstimates(db);
   await seedAreasAndSlots();

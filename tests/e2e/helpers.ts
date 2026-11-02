@@ -6,7 +6,7 @@ export const BASE = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 /** Authenticated API context for a seeded account (staff/technician actions driven through /api/v1/admin). */
 export async function apiAs(email: string): Promise<APIRequestContext> {
   const ctx = await pwRequest.newContext({ baseURL: BASE, extraHTTPHeaders: { Origin: BASE } });
-  const res = await ctx.post("/api/auth/sign-in/email", { data: { email, password: PASSWORD } });
+  const res = await ctx.post("/api/test/sign-in", { data: { email, password: PASSWORD } });
   expect(res.ok(), `sign in ${email}`).toBeTruthy();
   return ctx;
 }

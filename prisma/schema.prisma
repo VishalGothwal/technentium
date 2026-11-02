@@ -12,24 +12,31 @@ datasource db {
 }
 
 // ───────────────────────────── Identity & access ─────────────────────────────
-// User / Session / Account / Verification / TwoFactor / RateLimit are owned by Better Auth.
+// Sign-in identities, sessions and two-factor factors live in Supabase Auth (auth.users). `users` is the app
+// profile every record points at; `authUserId` links it to its Supabase Auth user (set on first sign-in).
 
 model User {
-  id                  String   @id @default(cuid())
+  id                  String    @id @default(cuid())
+  /// Supabase Auth user id (auth.users.id). Null for accounts that have not signed in since the move to Supabase.
+  authUserId          String?   @unique
+  /// Blocked accounts cannot sign in or use the API (set by an admin in Users & access).
+  blockedAt           DateTime?
+  blockedReason       String?
+  lastSignInAt        DateTime?
+  /// Tokens issued before this moment are refused ("sign out everywhere", deactivation).
+  sessionsRevokedAt   DateTime?
   name                String
-  email               String   @unique
-  emailVerified       Boolean  @default(false)
+  email               String    @unique
+  emailVerified       Boolean   @default(false)
   image               String?
-  phoneNumber         String?  @unique
-  phoneNumberVerified Boolean? @default(false)
-  twoFactorEnabled    Boolean? @default(false)
-  preferredLocale     String   @default("en")
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  phoneNumber         String?   @unique
+  phoneNumberVerified Boolean?  @default(false)
+  /// Mirror of "has a verified Supabase TOTP factor", kept in sync by the security actions.
+  twoFactorEnabled    Boolean?  @default(false)
+  preferredLocale     String    @default("en")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  sessions        Session[]
-  accounts        Account[]
-  twoFactors      TwoFactor[]
   customerProfile CustomerProfile?
   staffProfile    StaffProfile?
   roles           UserRole[]
@@ -45,68 +52,6 @@ model User {
   contentItems          ContentItem[]            @relation("ContentAuthor")
 
   @@map("users")
-}
-
-model Session {
-  id        String   @id @default(cuid())
-  expiresAt DateTime
-  token     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("sessions")
-}
-
-model Account {
-  id                    String    @id @default(cuid())
-  accountId             String
-  providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  @@index([userId])
-  @@map("accounts")
-}
-
-model Verification {
-  id         String   @id @default(cuid())
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([identifier])
-  @@map("verifications")
-}
-
-model TwoFactor {
-  id                      String    @id @default(cuid())
-  secret                  String
-  backupCodes             String
-  userId                  String
-  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  verified                Boolean?  @default(true)
-  failedVerificationCount Int?      @default(0)
-  lockedUntil             DateTime?
-
-  @@index([secret])
-  @@index([userId])
-  @@map("two_factors")
 }
 
 model RateLimit {
@@ -802,16 +747,29 @@ model BusinessSetting {
   @@map("business_settings")
 }
 
+/// Test mode only: sign-in codes captured instead of being texted, shown in Admin → Feature controls.
+model TestOtp {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("test_otps")
+}
+
 model AuditLog {
-  id         String   @id @default(cuid())
-  actorId    String?
-  action     String // e.g. booking.confirm, quote.send, settings.update
-  entityType String
-  entityId   String
-  before     Json?
-  after      Json?
-  ipAddress  String?
-  createdAt  DateTime @default(now())
+  id             String   @id @default(cuid())
+  actorId        String?
+  /// Set when an admin made the change while switched into another user's account (actorId is that user).
+  impersonatorId String?
+  action         String // e.g. booking.confirm, quote.send, settings.update
+  entityType     String
+  entityId       String
+  before         Json?
+  after          Json?
+  ipAddress      String?
+  createdAt      DateTime @default(now())
 
   @@index([entityType, entityId])
   @@index([actorId, createdAt])
@@ -935,8 +893,8 @@ model MediaAsset {
 // ═════════════════════════ Protection products & order requests (PRD §6.6) ═════════════════════════
 
 model ProductCategory {
-  id            String    @id @default(cuid())
-  slug          String    @unique
+  id            String        @id @default(cuid())
+  slug          String        @unique
   nameEn        String
   nameHi        String?
   descriptionEn String?

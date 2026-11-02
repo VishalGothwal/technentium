@@ -1,12 +1,22 @@
 import "server-only";
 import { z } from "zod";
 
-const schema = z.object({
+const fields = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  DATABASE_URL: z.string().min(1),
-  BETTER_AUTH_SECRET: z.string().min(32),
-  BETTER_AUTH_URL: z.url(),
+  /** Or POSTGRES_PRISMA_URL from the Supabase–Vercel integration (see server/db-url.ts). */
+  DATABASE_URL: z.string().min(1).optional(),
+  POSTGRES_PRISMA_URL: z.string().min(1).optional(),
   APP_URL: z.url(),
+  /** Supabase project (Dashboard → Project Settings → API). The publishable key is safe in the browser. */
+  NEXT_PUBLIC_SUPABASE_URL: z.url(),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(20),
+  /**
+   * Server-only secret key (`sb_secret_…`, or the legacy service_role JWT). Needed for staff invitations,
+   * admin user controls, switching into a user, and seeding demo accounts. Never expose it to the browser.
+   */
+  SUPABASE_SECRET_KEY: z.union([z.literal(""), z.string().min(20)]).optional(),
+  /** Secret of the Auth "Send SMS" hook (`v1,whsec_…`), so Fast2SMS keeps delivering sign-in codes. */
+  SUPABASE_SMS_HOOK_SECRET: z.string().optional(),
   CRON_SECRET: z.string().min(16),
   STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
   S3_ENDPOINT: z.string().optional(),
@@ -26,9 +36,9 @@ const schema = z.object({
   FAST2SMS_ROUTE: z.enum(["otp", "q", "dlt"]).default("otp"),
   FAST2SMS_SENDER_ID: z.string().optional(),
   FAST2SMS_TEMPLATE_ID: z.string().optional(),
-  GOOGLE_CLIENT_ID: z.string().optional(),
-  GOOGLE_CLIENT_SECRET: z.string().optional(),
 });
+
+const schema = fields.refine((e) => !!(e.DATABASE_URL || e.POSTGRES_PRISMA_URL), { message: "Set DATABASE_URL (or POSTGRES_PRISMA_URL)", path: ["DATABASE_URL"] });
 
 export type Env = z.infer<typeof schema>;
 

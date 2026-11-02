@@ -20,7 +20,10 @@ export type NavIcon =
   | "bell"
   | "team"
   | "history"
-  | "shield";
+  | "shield"
+  | "key"
+  | "toggle"
+  | "profile";
 
 export type NavLinkItem = { href: string; label: string; icon: NavIcon };
 export type NavGroup = { label: string | null; items: NavLinkItem[] };
@@ -43,6 +46,9 @@ const PATHS: Record<NavIcon, string> = {
   team: "M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20v-1a6 6 0 0 1 12 0v1M16 4a3 3 0 0 1 0 6M21 20v-1a5 5 0 0 0-3-4.6",
   history: "M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3",
   shield: "M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6zM9 12l2 2 4-4",
+  key: "M15 7a4 4 0 1 1-3.9 4.9L4 19v-3h3v-3h3l1.1-1.1A4 4 0 0 1 15 7zM16 9.5h.01",
+  toggle: "M8 7h8a5 5 0 0 1 0 10H8A5 5 0 0 1 8 7zM16 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+  profile: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21v-1a7 7 0 0 1 14 0v1",
 };
 
 export function NavGlyph({ icon, className }: { icon: NavIcon; className?: string }) {

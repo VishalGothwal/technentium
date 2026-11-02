@@ -17,6 +17,7 @@ export async function audit(tx: Tx, actor: Actor | null, input: AuditInput) {
   await tx.auditLog.create({
     data: {
       actorId: actor?.userId ?? null,
+      impersonatorId: actor?.impersonator?.userId ?? null,
       action: input.action,
       entityType: input.entityType,
       entityId: input.entityId,

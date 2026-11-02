@@ -1,10 +1,18 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { staffSignInAction, verifyTotpAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Alert } from "@/components/ui/surface";
+
+const STAFF_ERRORS: Partial<Record<string, string>> = {
+  "auth.tooMany": "Too many attempts. Wait a minute and try again.",
+  "auth.notStaff": "This account doesn't have staff access. Ask the Owner to invite you.",
+  "auth.blocked": "This account is blocked. Ask the Owner to unblock it.",
+  "auth.emailNotVerified": "Confirm your email first — open the link in your invitation email.",
+  "auth.notConfigured": "Sign-in isn't configured yet: set the Supabase environment variables.",
+};
 
 /** Email + password, then a TOTP step when two-factor is enabled (Owner accounts). */
 export function StaffSignIn() {
@@ -28,9 +36,9 @@ export function StaffSignIn() {
           setPending(true);
           setError(null);
           const code = String(new FormData(e.currentTarget).get("code")).trim();
-          const res = await authClient.twoFactor.verifyTotp({ code });
+          const res = await verifyTotpAction(code);
           setPending(false);
-          if (res.error) return setError("That code is not valid. Try the current code from your authenticator app.");
+          if (!res.ok) return setError(res.error === "auth.tooMany" ? "Too many attempts. Wait a minute and try again." : "That code is not valid. Try the current code from your authenticator app.");
           done();
         }}
       >
@@ -53,10 +61,10 @@ export function StaffSignIn() {
         const form = new FormData(e.currentTarget);
         setPending(true);
         setError(null);
-        const res = await authClient.signIn.email({ email: String(form.get("email")), password: String(form.get("password")) });
+        const res = await staffSignInAction(String(form.get("email")), String(form.get("password")));
         setPending(false);
-        if (res.error) return setError(res.error.status === 429 ? "Too many attempts. Wait a minute and try again." : "Email or password is incorrect.");
-        if ((res.data as { twoFactorRedirect?: boolean } | null)?.twoFactorRedirect) return setStep("2fa");
+        if (!res.ok) return setError(STAFF_ERRORS[res.error] ?? "Email or password is incorrect.");
+        if (res.needsTotp) return setStep("2fa");
         done();
       }}
     >

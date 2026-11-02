@@ -8,7 +8,8 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Migrations need a direct (non-pooled) connection; the Supabase–Vercel integration provides POSTGRES_URL_NON_POOLING.
+    url: process.env["DIRECT_DATABASE_URL"] || process.env["POSTGRES_URL_NON_POOLING"] || process.env["DATABASE_URL"],
     shadowDatabaseUrl: process.env["SHADOW_DATABASE_URL"],
   },
 });

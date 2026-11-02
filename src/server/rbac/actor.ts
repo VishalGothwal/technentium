@@ -11,6 +11,12 @@ export type Actor = {
   isStaff: boolean;
   ipAddress?: string | null;
   userAgent?: string | null;
+  email?: string | null;
+  phoneNumber?: string | null;
+  /** The admin who switched into this account ("view as"); every audit entry records them too. */
+  impersonator?: { userId: string; name: string } | null;
+  /** Staff account with two-factor on, signed in without the second step yet: staff powers withheld. */
+  needsSecondFactor?: boolean;
 };
 
 export const can = (actor: Actor | null | undefined, permission: Permission): boolean =>

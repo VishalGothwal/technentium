@@ -1,7 +1,7 @@
 import "server-only";
 import { refresh } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
-import { getActor } from "@/server/auth/session";
+import { getActor, getRealActor } from "@/server/auth/session";
 import { isAppError, type ErrorCode } from "@/server/errors";
 import type { Actor } from "@/server/rbac/actor";
 
@@ -13,10 +13,11 @@ export type ActionResult<T = null> =
  * Wrap a Server Action body: resolve the actor, call the service, map domain errors to a
  * serialisable result, and refresh the router so server-rendered data updates.
  * Services enforce authorisation; this wrapper never trusts the client.
+ * `real: true` resolves the signed-in person even while they are switched into another account.
  */
-export async function runAction<T>(fn: (actor: Actor | null) => Promise<T>, opts: { refresh?: boolean } = {}): Promise<ActionResult<T>> {
+export async function runAction<T>(fn: (actor: Actor | null) => Promise<T>, opts: { refresh?: boolean; real?: boolean } = {}): Promise<ActionResult<T>> {
   try {
-    const actor = await getActor();
+    const actor = opts.real ? await getRealActor() : await getActor();
     const data = await fn(actor);
     if (opts.refresh !== false) refresh();
     return { ok: true, data: (data ?? null) as T };

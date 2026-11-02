@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { getActor } from "@/server/auth/session";
+import { getActor, getRealActor } from "@/server/auth/session";
 import { db } from "@/server/db";
 import { can, type Actor } from "@/server/rbac/actor";
 import type { Permission } from "@/server/rbac/permissions";
@@ -10,6 +10,7 @@ import { Logo } from "@/components/site/logo";
 import { SignOutButton } from "@/components/site/sign-out-button";
 import { Alert } from "@/components/ui/surface";
 import { AdminNavLinks, type NavGroup, type NavIcon } from "./nav-links";
+import { StopViewAsButton } from "./users/view-as";
 
 export type NavItem = { href: string; label: string; icon: NavIcon; anyOf: Permission[] };
 
@@ -39,14 +40,23 @@ const NAV: { label: string | null; items: NavItem[] }[] = [
       { href: "/admin/specs", label: "Specs & comparisons", icon: "chart", anyOf: ["content.edit"] },
     ],
   },
-  { label: "People", items: [{ href: "/admin/customers", label: "Customers", icon: "users", anyOf: ["customer.view"] }, { href: "/admin/team", label: "Team & roles", icon: "team", anyOf: ["team.manage"] }] },
+  {
+    label: "People",
+    items: [
+      { href: "/admin/customers", label: "Customers", icon: "users", anyOf: ["customer.view"] },
+      { href: "/admin/team", label: "Team & roles", icon: "team", anyOf: ["team.manage"] },
+      { href: "/admin/users", label: "Users & access", icon: "key", anyOf: ["user.manage"] },
+    ],
+  },
   {
     label: "Configuration",
     items: [
       { href: "/admin/catalog", label: "Devices & pricing", icon: "devices", anyOf: ["catalog.manage", "settings.fees"] },
       { href: "/admin/settings", label: "Settings", icon: "settings", anyOf: ["settings.manage", "settings.fees"] },
+      { href: "/admin/controls", label: "Feature controls", icon: "toggle", anyOf: ["system.features"] },
       { href: "/admin/notifications", label: "Notification log", icon: "bell", anyOf: ["notification.view_log"] },
       { href: "/admin/audit", label: "Audit history", icon: "history", anyOf: ["audit.view_all", "audit.view_limited"] },
+      { href: "/admin/profile", label: "My profile", icon: "profile", anyOf: ["dashboard.view"] },
       { href: "/admin/security", label: "Security", icon: "shield", anyOf: ["dashboard.view"] },
     ],
   },
@@ -73,7 +83,10 @@ const initials = (name: string) =>
  * otherwise the owner could never enable two-factor sign-in.
  */
 export async function AdminShell({ children, twoFactorSetup = false }: { children: ReactNode; twoFactorSetup?: boolean }) {
+  if ((await getRealActor())?.needsSecondFactor) redirect("/admin/sign-in?step=2fa");
   const actor = await getActor();
+  // Switched into a customer account: the console isn't theirs; show their storefront account instead.
+  if (actor?.impersonator && !actor.isStaff) redirect("/en/account");
   if (!actor || !actor.isStaff) redirect("/admin/sign-in");
 
   const needs2fa = await ownerNeedsTwoFactor(actor);
@@ -152,6 +165,14 @@ export async function AdminShell({ children, twoFactorSetup = false }: { childre
           </Link>
         </div>
 
+        {actor.impersonator && (
+          <div role="status" className="sticky top-14 z-10 flex flex-wrap items-center justify-between gap-2 bg-warning px-4 py-2 text-sm font-medium text-black lg:top-16 lg:px-6">
+            <span>
+              Switched into <strong>{actor.name}</strong> ({roleNames}) — you see and act as them. Signed in as {actor.impersonator.name}.
+            </span>
+            <StopViewAsButton returnTo={`/admin/users/${actor.userId}`} />
+          </div>
+        )}
         <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
           {needs2fa && (
             <Alert tone="warning" className="mb-4" title="Two-factor authentication required">

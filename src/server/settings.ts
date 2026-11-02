@@ -17,6 +17,20 @@ export const SETTINGS = {
   "warranty.defaultPolicyId": { schema: z.string().nullable(), default: null as string | null },
   "business.supportPhone": { schema: z.string(), default: "+91 00000 00000" },
   "business.shopAddress": { schema: z.string(), default: "Technentium, Jaipur, Rajasthan" },
+
+  // Feature controls (Admin → Feature controls). Read through `server/features.ts`.
+  "features.signUp": { schema: z.boolean(), default: true },
+  "features.signIn.google": { schema: z.boolean(), default: true },
+  "features.signIn.phoneOtp": { schema: z.boolean(), default: true },
+  "features.signIn.emailPassword": { schema: z.boolean(), default: true },
+  "features.section.repairs": { schema: z.boolean(), default: true },
+  "features.section.shop": { schema: z.boolean(), default: true },
+  "features.section.customization": { schema: z.boolean(), default: true },
+  "features.section.content": { schema: z.boolean(), default: true },
+  "features.testMode": { schema: z.boolean(), default: false },
+  "features.maintenance": { schema: z.boolean(), default: false },
+  "features.maintenanceMessage": { schema: z.string().max(300), default: "" },
+  "features.impersonation": { schema: z.boolean(), default: true },
 } as const;
 
 export type SettingKey = keyof typeof SETTINGS;

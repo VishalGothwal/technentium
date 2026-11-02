@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { signOutAction } from "@/app/[locale]/auth/actions";
 import { Button } from "@/components/ui/button";
 
 export function SignOutButton({ label, className, redirectTo = "/" }: { label: string; className?: string; redirectTo?: string }) {
@@ -15,7 +15,7 @@ export function SignOutButton({ label, className, redirectTo = "/" }: { label: s
       pending={pending}
       onClick={async () => {
         setPending(true);
-        await authClient.signOut();
+        await signOutAction();
         router.push(redirectTo);
         router.refresh();
       }}

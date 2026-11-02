@@ -4,20 +4,29 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/i18n/client";
 import { safeNext } from "@/lib/safe-redirect";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
+import { Alert } from "@/components/ui/surface";
+
+/** `?error=` set by /api/auth/callback when a Google or email-link sign-in could not finish. */
+const CALLBACK_ERRORS = { link: "auth.linkInvalid", blocked: "auth.blocked", signup: "auth.signUpOff" } as const;
 
 export function SignInClient({ emailOption = true }: { emailOption?: boolean }) {
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
-  const next = safeNext(useSearchParams().get("next"), `/${locale}/account/bookings`);
+  const params = useSearchParams();
+  const next = safeNext(params.get("next"), `/${locale}/account/bookings`);
+  const callbackError = CALLBACK_ERRORS[params.get("error") as keyof typeof CALLBACK_ERRORS];
   return (
-    <SignInPanel
-      emailOption={emailOption}
-      forgotHref={`/${locale}/auth/forgot-password`}
-      onSuccess={() => {
-        router.replace(next);
-        router.refresh();
-      }}
-    />
+    <>
+      {callbackError && <Alert tone="danger" className="mb-4">{t(callbackError)}</Alert>}
+      <SignInPanel
+        emailOption={emailOption}
+        forgotHref={`/${locale}/auth/forgot-password`}
+        onSuccess={() => {
+          router.replace(next);
+          router.refresh();
+        }}
+      />
+    </>
   );
 }
 

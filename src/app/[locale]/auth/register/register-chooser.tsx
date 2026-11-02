@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useI18n } from "@/i18n/client";
+import { useAuthMethods } from "@/components/auth/auth-methods";
+import { Alert } from "@/components/ui/surface";
 import { SignInClient } from "../sign-in/sign-in-client";
 import { RegisterForm } from "./register-form";
 
@@ -10,8 +12,10 @@ import { RegisterForm } from "./register-form";
  */
 export function RegisterChooser() {
   const { t } = useI18n();
-  const [withEmail, setWithEmail] = useState(false);
-  return withEmail ? (
+  const methods = useAuthMethods();
+  const [withEmail, setWithEmail] = useState(!methods.phoneOtp && !methods.google);
+  if (!methods.signUp) return <Alert tone="warning">{t("auth.signUpOff")}</Alert>;
+  return withEmail && methods.emailPassword ? (
     <div className="space-y-4">
       <RegisterForm />
       <button type="button" onClick={() => setWithEmail(false)} className="block w-full text-center text-sm font-medium text-muted hover:text-foreground hover:underline">
@@ -21,9 +25,11 @@ export function RegisterChooser() {
   ) : (
     <div className="space-y-4">
       <SignInClient emailOption={false} />
-      <button type="button" onClick={() => setWithEmail(true)} className="block w-full text-center text-sm font-medium text-muted hover:text-foreground hover:underline">
-        {t("auth.signUpWithEmail")}
-      </button>
+      {methods.emailPassword && (
+        <button type="button" onClick={() => setWithEmail(true)} className="block w-full text-center text-sm font-medium text-muted hover:text-foreground hover:underline">
+          {t("auth.signUpWithEmail")}
+        </button>
+      )}
     </div>
   );
 }

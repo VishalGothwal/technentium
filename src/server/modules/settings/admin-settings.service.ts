@@ -23,6 +23,8 @@ export async function updateSettings(actor: Actor | null, changes: Record<string
     if (!(key in SETTINGS)) throw new AppError("VALIDATION", "errors.validation", { fields: { [key]: "validation.unknownSetting" } });
     const k = key as SettingKey;
     if (!can(actor, "settings.manage") && !FEE_KEYS.includes(k)) throw new AppError("FORBIDDEN", "errors.forbidden");
+    // Feature switches have their own permission and page (features.service).
+    if (k.startsWith("features.")) throw new AppError("FORBIDDEN", "errors.forbidden");
     try {
       parsed[k] = parseSetting(k, value);
     } catch {

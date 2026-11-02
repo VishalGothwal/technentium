@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { requestPasswordResetAction } from "../actions";
 import { useI18n } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
@@ -21,12 +21,9 @@ export function ForgotForm() {
       onSubmit={async (e) => {
         e.preventDefault();
         setPending(true);
-        const res = await authClient.requestPasswordReset({
-          email: String(new FormData(e.currentTarget).get("email")),
-          redirectTo: `/${locale}/auth/reset-password`,
-        });
+        const res = await requestPasswordResetAction(String(new FormData(e.currentTarget).get("email")), locale);
         setPending(false);
-        if (res.error?.status === 429) return setError(t("auth.tooMany"));
+        if (!res.ok) return setError(t(res.error));
         setSent(true);
       }}
     >

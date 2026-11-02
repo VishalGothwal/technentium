@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import type { RoleKey } from "@/server/rbac/permissions";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Checkbox, Field, Input } from "@/components/ui/field";
 import { Alert, Badge } from "@/components/ui/surface";
 import { useAction } from "@/components/admin/use-action";
 import { inviteStaffAction, setStaffActiveAction, setStaffRolesAction } from "@/app/admin/actions";
+import { StartViewAsButton } from "@/components/admin/users/view-as";
 
 type Role = { key: RoleKey; name: string; description: string };
 
@@ -72,7 +74,7 @@ export function InviteStaffForm({ roles }: { roles: Role[] }) {
 
 type Member = { id: string; name: string; email: string; phone: string | null; active: boolean; twoFactor: boolean; roles: RoleKey[] };
 
-export function StaffRow({ member, roles, isSelf }: { member: Member; roles: Role[]; isSelf: boolean }) {
+export function StaffRow({ member, roles, isSelf, canSwitch, canManage }: { member: Member; roles: Role[]; isSelf: boolean; canSwitch: boolean; canManage: boolean }) {
   const [editing, setEditing] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [selected, setSelected] = useState<RoleKey[]>(member.roles);
@@ -98,7 +100,13 @@ export function StaffRow({ member, roles, isSelf }: { member: Member; roles: Rol
             <Badge tone={member.twoFactor ? "success" : "warning"}>{member.twoFactor ? "2FA on" : "2FA off"}</Badge>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {canSwitch && <StartViewAsButton userId={member.id} isStaff label="Switch to" />}
+          {canManage && (
+            <Link href={`/admin/users/${member.id}`} className="inline-flex h-8 items-center rounded-lg px-3 text-sm font-medium text-primary hover:underline">
+              Manage account
+            </Link>
+          )}
           <Button size="sm" variant="secondary" aria-expanded={editing} onClick={() => setEditing(!editing)}>
             {editing ? "Close" : "Edit roles"}
           </Button>

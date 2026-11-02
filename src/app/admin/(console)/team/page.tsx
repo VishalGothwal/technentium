@@ -1,5 +1,6 @@
 import { requireStaffPage } from "@/server/auth/guards";
 import { can } from "@/server/rbac/actor";
+import { getFeatures } from "@/server/features";
 import { listStaff } from "@/server/modules/team/team.service";
 import { PERMISSIONS, ROLE_DEFINITIONS, ROLE_KEYS, type RoleKey } from "@/server/rbac/permissions";
 import { Badge, Card, CardBody, CardHeader, PageHeader } from "@/components/ui/surface";
@@ -13,12 +14,14 @@ export const instant = false;
 export default async function TeamPage() {
   const actor = await requireStaffPage();
   if (!can(actor, "team.manage")) return <NoAccess />;
-  const staff = await listStaff(actor);
+  const [staff, features] = await Promise.all([listStaff(actor), getFeatures()]);
+  // "Switch to" an employee to test exactly what their role can see and do (owners excluded, audited).
+  const canSwitch = can(actor, "user.impersonate") && features.impersonation;
   const roles = ROLE_KEYS.map((k) => ({ key: k, name: ROLE_DEFINITIONS[k].name, description: ROLE_DEFINITIONS[k].description }));
 
   return (
     <>
-      <PageHeader title="Team & roles" description="Staff accounts, their roles and sign-in security." />
+      <PageHeader title="Team & roles" description="Staff accounts, their roles and sign-in security. Use “Switch to” to test what each employee sees." />
       <div className="space-y-6">
         <Card>
           <CardHeader title="Invite staff" description="The invitee receives an email link to set their own password." />
@@ -36,6 +39,8 @@ export default async function TeamPage() {
                   key={s.id}
                   roles={roles}
                   isSelf={s.id === actor.userId}
+                  canSwitch={canSwitch && s.id !== actor.userId && !!s.staffProfile?.active && !s.roles.some((r) => r.role.key === "owner")}
+                  canManage={can(actor, "user.manage")}
                   member={{
                     id: s.id,
                     name: s.staffProfile?.displayName || s.name,

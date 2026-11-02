@@ -1,7 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { db } from "@/server/db";
-import { auth } from "@/server/auth/auth";
+import type { User as AuthUser } from "@supabase/supabase-js";
+import { appUserIdFor } from "@/server/auth/provision";
+import { isDeliverableEmail } from "@/server/providers/email";
 import { loadActor } from "@/server/auth/session";
 import { isAppError } from "@/server/errors";
 import { submitBooking } from "@/server/modules/repairs/booking.service";
@@ -19,8 +21,6 @@ import {
 import { buildOpenApiDocument } from "@/server/openapi/document";
 import type { Actor } from "@/server/rbac/actor";
 import { bookingInput, key, newCustomer } from "../support/fixtures";
-
-const BASE = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
 
 async function errorCode(p: Promise<unknown>) {
   try {
@@ -83,44 +83,79 @@ async function designRequestFor(actor: Actor) {
   });
 }
 
-describe("bearer token auth (mobile)", () => {
-  it("sign-up returns set-auth-token, which authenticates as that user; unsigned or tampered tokens do not", async () => {
-    const email = `mobile-${randomUUID().slice(0, 8)}@example.test`;
-    const res = await auth.handler(
-      new Request(`${BASE}/api/auth/sign-up/email`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name: "Mobile User", email, password: "Correct-Horse-9" }),
-      }),
-    );
-    expect(res.status).toBe(200);
-    const token = res.headers.get("set-auth-token");
-    expect(token).toBeTruthy();
-    const body = (await res.json()) as { token: string; user: { id: string } };
+/** A Supabase Auth user as returned by `auth.getUser()`, for the linking rules (no Supabase needed). */
+function authUser(over: Partial<AuthUser> = {}): AuthUser {
+  return {
+    id: randomUUID(),
+    aud: "authenticated",
+    app_metadata: {},
+    user_metadata: { full_name: "Linked Person" },
+    created_at: new Date().toISOString(),
+    ...over,
+  } as AuthUser;
+}
 
-    const session = await auth.api.getSession({ headers: new Headers({ authorization: `Bearer ${token}` }) });
-    expect(session?.user.id).toBe(body.user.id);
+describe("Supabase account linking", () => {
+  it("links an existing account by verified email, and keeps the link on later sign-ins", async () => {
+    const customer = await newCustomer();
+    const { email } = await db.user.findUniqueOrThrow({ where: { id: customer.userId } });
+    const u = authUser({ email, email_confirmed_at: new Date().toISOString() });
 
-    // The raw session id from the body is not a valid bearer token (signature required).
-    expect(await auth.api.getSession({ headers: new Headers({ authorization: `Bearer ${body.token}` }) })).toBeNull();
-    // A tampered signature is rejected.
-    const tampered = `${token!.split(".")[0]}.AAAA${token!.split(".")[1].slice(4)}`;
-    expect(await auth.api.getSession({ headers: new Headers({ authorization: `Bearer ${tampered}` }) })).toBeNull();
+    expect(await appUserIdFor(u.id, async () => u)).toBe(customer.userId);
+    expect((await db.user.findUniqueOrThrow({ where: { id: customer.userId } })).authUserId).toBe(u.id);
+    // Linked: no lookup of the Supabase user needed any more.
+    expect(await appUserIdFor(u.id, async () => null)).toBe(customer.userId);
+  });
 
-    // Sign-in with the same credentials also issues a token.
-    const signIn = await auth.handler(
-      new Request(`${BASE}/api/auth/sign-in/email`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, password: "Correct-Horse-9" }),
-      }),
-    );
-    expect(signIn.status).toBe(200);
-    expect(signIn.headers.get("set-auth-token")).toBeTruthy();
+  it("does not link by an unconfirmed email; creates a separate account instead", async () => {
+    const customer = await newCustomer();
+    const { email } = await db.user.findUniqueOrThrow({ where: { id: customer.userId } });
+    const u = authUser({ email });
 
-    // The token resolves to a customer actor for /api/v1 services.
-    const actor = await loadActor(session!.user.id);
-    expect(actor?.isStaff).toBe(false);
+    const id = await appUserIdFor(u.id, async () => u);
+    expect(id).not.toBe(customer.userId);
+    const created = await db.user.findUniqueOrThrow({ where: { id: id! }, include: { customerProfile: true } });
+    // The address belongs to the other account, so the new one gets a placeholder and no verified email.
+    expect(created.email).not.toBe(email);
+    expect(created.emailVerified).toBe(false);
+    expect(created.customerProfile).not.toBeNull();
+  });
+
+  it("creates a phone account (E.164 +91) with a placeholder email, and links by verified phone next time", async () => {
+    const digits = `9${rand(9)}`;
+    const u = authUser({ phone: `91${digits}`, phone_confirmed_at: new Date().toISOString(), user_metadata: {} });
+    const id = await appUserIdFor(u.id, async () => u);
+    const created = await db.user.findUniqueOrThrow({ where: { id: id! } });
+    expect(created.phoneNumber).toBe(`+91${digits}`);
+    expect(created.phoneNumberVerified).toBe(true);
+    expect(created.name).toBe("Customer");
+    expect(isDeliverableEmail(created.email)).toBe(false);
+
+    // A second Supabase identity with the same verified phone joins the existing (unlinked) account only.
+    await db.user.update({ where: { id: id! }, data: { authUserId: null } });
+    const again = authUser({ phone: `91${digits}`, phone_confirmed_at: new Date().toISOString() });
+    expect(await appUserIdFor(again.id, async () => again)).toBe(id);
+  });
+
+  it("refuses new accounts while sign-ups are switched off, but still links existing ones", async () => {
+    await db.businessSetting.upsert({ where: { key: "features.signUp" }, create: { key: "features.signUp", value: false }, update: { value: false } });
+    try {
+      const stranger = authUser({ email: `new-${randomUUID().slice(0, 8)}@example.test`, email_confirmed_at: new Date().toISOString() });
+      expect(await appUserIdFor(stranger.id, async () => stranger)).toBeNull();
+
+      const customer = await newCustomer();
+      const { email } = await db.user.findUniqueOrThrow({ where: { id: customer.userId } });
+      const known = authUser({ email, email_confirmed_at: new Date().toISOString() });
+      expect(await appUserIdFor(known.id, async () => known)).toBe(customer.userId);
+    } finally {
+      await db.businessSetting.delete({ where: { key: "features.signUp" } });
+    }
+  });
+
+  it("blocked accounts have no actor", async () => {
+    const customer = await newCustomer();
+    await db.user.update({ where: { id: customer.userId }, data: { blockedAt: new Date() } });
+    expect(await loadActor(customer.userId)).toBeNull();
   });
 });
 

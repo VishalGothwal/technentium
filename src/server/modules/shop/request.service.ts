@@ -1,4 +1,5 @@
 import "server-only";
+import { assertSection } from "@/server/features";
 import type { ProductRequestStatus } from "@/generated/prisma/enums";
 import { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/server/audit";
@@ -34,6 +35,7 @@ const orderHref = (reference: string) => `/account/orders/${reference}`;
 
 /** Submit the signed-in customer's cart as an order request. Idempotent on `idempotencyKey`. */
 export async function submitProductRequest(actor: Actor | null, rawInput: unknown, idempotencyKey: string) {
+  await assertSection("shop");
   requireUser(actor);
   if (!/^[\w-]{16,64}$/.test(idempotencyKey)) throw new AppError("VALIDATION", "errors.validation", { fields: { idempotencyKey: "validation.required" } });
 

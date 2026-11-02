@@ -89,15 +89,20 @@ export function buildOpenApiDocument(serverUrl: string) {
       title: "Technentium API",
       version: "1.0.0",
       description:
-        "REST API for the Technentium web and mobile apps: device repairs, protection products, customization and content. Responses are JSON wrapped in `{ data }`; errors use `{ error: { code, messageKey, message, fields } }`. Money is integer paise (₹1 = 100). Send `Accept-Language: hi` for Hindi messages and labels.",
+        "REST API for the Technentium web and mobile apps: device repairs, protection products, customization and content. Responses are JSON wrapped in `{ data }`; errors use `{ error: { code, messageKey, message, fields } }`. Money is integer paise (₹1 = 100). Send `Accept-Language: hi` for Hindi messages and labels.\n\n**Sign-in** uses Supabase Auth directly from the app (URL and publishable key in `GET /api/v1/app/config` → `auth`): `signInWithOtp({ phone })` + `verifyOtp({ phone, token, type: 'sms' })` for mobile numbers (+91), `signInWithPassword`, or Google. Send the session's access token as `Authorization: Bearer <token>`; the first authenticated request links or creates the app account.",
     },
     servers: [{ url: serverUrl }],
     tags,
     paths,
     components: {
       securitySchemes: {
-        bearerAuth: { type: "http", scheme: "bearer", description: "Value of the `set-auth-token` header returned by any sign-in endpoint." },
-        cookieAuth: { type: "apiKey", in: "cookie", name: "better-auth.session_token", description: "Browser session cookie (web)." },
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Supabase Auth access token (`session.access_token` from supabase-js / supabase-flutter / supabase-kt). The SDK refreshes it; always send the current one.",
+        },
+        cookieAuth: { type: "apiKey", in: "cookie", name: "sb-<project-ref>-auth-token", description: "Supabase session cookie (web)." },
       },
       parameters: {
         AcceptLanguage: { name: "Accept-Language", in: "header", required: false, schema: { type: "string", enum: ["en", "hi"], default: "en" } },
