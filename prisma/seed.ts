@@ -4,7 +4,8 @@
  *
  *   npm run db:seed
  *   SEED_MODE=deploy …   (Vercel build: roles, owner bootstrap and switch defaults every deploy;
- *                          catalogue and sample content only into an empty database; never demo users)
+ *                          catalogue and sample content only into an empty database; demo users only
+ *                          with SEED_TEST_USERS=true, which also requires SEED_DEMO_PASSWORD)
  */
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -285,6 +286,7 @@ async function upsertPasswordUser(email: string, name: string, password: string,
 
 async function seedDemoUsers() {
   const password = process.env.SEED_DEMO_PASSWORD ?? "Technentium#2026";
+  if (isProd && !process.env.SEED_DEMO_PASSWORD) throw new Error("SEED_TEST_USERS needs SEED_DEMO_PASSWORD in production.");
   await upsertPasswordUser("owner@technentium.test", "Owner (demo)", password, ["owner"]);
   await upsertPasswordUser("staff@technentium.test", "Priya (staff)", password, ["staff"]);
   await upsertPasswordUser("tech@technentium.test", "Ravi (technician)", password, ["technician"]);
@@ -332,6 +334,8 @@ async function main() {
     const fresh = (await db.deviceCategory.count()) === 0;
     await bootstrapOwner();
     await defaultSignInSwitches();
+    // Pre-launch testing: SEED_TEST_USERS=true also creates the demo accounts (one per role) on this deploy.
+    if (process.env.SEED_TEST_USERS === "true") await seedDemoUsers();
     if (!fresh) return console.log("Deploy seed: roles and owner updated.");
   }
   await seedCatalog();
