@@ -1,6 +1,9 @@
 import type { Prisma, PrismaClient } from "../../src/generated/prisma/client";
 import { readingMinutes } from "../../src/lib/content/reading";
-import { ARTICLES, type SeedArticle } from "./content-articles";
+import { ARTICLES as BASE_ARTICLES, type SeedArticle } from "./content-articles";
+import { ARTICLE_ADDITIONS } from "./content-additions";
+
+const ARTICLES = [...BASE_ARTICLES, ...ARTICLE_ADDITIONS];
 import { COMPARISONS, SPEC_SHEETS, toSpecGroups } from "./content-specs";
 
 const DAY = 86_400_000;
@@ -9,7 +12,8 @@ const DAY = 86_400_000;
  * Sample articles, videos, specifications and comparisons. Idempotent: items are upserted by slug,
  * so re-running refreshes the sample copy without duplicating anything. Relations are rebuilt.
  */
-export async function seedContent(db: PrismaClient) {
+/** `onlyNew`: production deploys only add articles that don't exist yet and leave specs/comparisons alone. */
+export async function seedContent(db: PrismaClient, { onlyNew = false } = {}) {
   const author =
     (await db.user.findUnique({ where: { email: "editor@technentium.test" } })) ??
     (await db.user.findFirst({ where: { roles: { some: { role: { key: "owner" } } } } }));
@@ -20,7 +24,8 @@ export async function seedContent(db: PrismaClient) {
 
   // ── Specifications ──
   const specIds = new Map<string, string>();
-  for (const s of SPEC_SHEETS) {
+  if (onlyNew) for (const r of await db.deviceSpecification.findMany({ select: { id: true, slug: true } })) specIds.set(r.slug, r.id);
+  for (const s of onlyNew ? [] : SPEC_SHEETS) {
     const model = await db.deviceModel.findFirst({ where: { slug: s.model, brand: { slug: s.brand } } });
     if (!model) continue;
     const slug = `${s.brand}-${s.model}`;
@@ -39,7 +44,7 @@ export async function seedContent(db: PrismaClient) {
   }
 
   // ── Comparisons ──
-  for (const c of COMPARISONS) {
+  for (const c of onlyNew ? [] : COMPARISONS) {
     const ids = c.specs.map((s) => specIds.get(s)).filter((x): x is string => !!x);
     if (ids.length < 2) continue;
     const data = {
@@ -59,8 +64,17 @@ export async function seedContent(db: PrismaClient) {
 
   // ── Articles & videos ──
   const itemIds = new Map<string, string>();
+  const fresh = new Set<string>();
   for (const a of ARTICLES) {
     const type = a.type ?? "ARTICLE";
+    if (onlyNew) {
+      const found = await db.contentItem.findUnique({ where: { type_slug: { type, slug: a.slug } }, select: { id: true } });
+      if (found) {
+        itemIds.set(a.slug, found.id);
+        continue;
+      }
+    }
+    fresh.add(a.slug);
     const publishedAt = new Date(Date.now() - a.daysAgo * DAY);
     const item = await db.contentItem.upsert({
       where: { type_slug: { type, slug: a.slug } },
@@ -93,6 +107,7 @@ export async function seedContent(db: PrismaClient) {
   const repairCats = await db.deviceCategory.findMany({ select: { id: true, slug: true } });
   const productCats = await db.productCategory.findMany({ where: { active: true }, select: { id: true, slug: true } });
   for (const a of ARTICLES) {
+    if (!fresh.has(a.slug)) continue;
     const id = itemIds.get(a.slug)!;
     const targets: { targetType: "CONTENT" | "REPAIR_CATEGORY" | "DEVICE_SPEC" | "PRODUCT_CATEGORY" | "COMPARISON"; targetId: string }[] = [];
     for (const r of a.related ?? []) if (itemIds.has(r)) targets.push({ targetType: "CONTENT", targetId: itemIds.get(r)! });

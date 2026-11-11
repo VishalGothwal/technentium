@@ -339,7 +339,12 @@ async function main() {
     await defaultSignInSwitches();
     // Pre-launch testing: SEED_TEST_USERS=true also creates the demo accounts (one per role) on this deploy.
     if (process.env.SEED_TEST_USERS === "true") await seedDemoUsers();
-    if (!fresh) return console.log("Deploy seed: roles and owner updated.");
+    if (!fresh) {
+      // New catalogue items and articles added in code reach production; existing rows are never touched.
+      await seedShop(db, { onlyNew: true });
+      await seedContent(db, { onlyNew: true });
+      return console.log("Deploy seed: roles and owner updated, new products and articles added.");
+    }
   }
   await seedCatalog();
   await seedRepairEstimates(db);

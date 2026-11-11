@@ -1,13 +1,14 @@
 import type { PrismaClient } from "../../src/generated/prisma/client";
+import { PRODUCT_ADDITIONS } from "./shop-additions";
 
 /**
  * Sample protection-product catalogue (illustrative names, prices and stock — replace before launch).
  * Idempotent: categories and products are upserted by slug; stock is only set when a product is first created.
  */
 
-type Spec = [labelEn: string, value: string, labelHi?: string];
-type Fits = { brand: string; models?: string[]; category?: string };
-type Seed = {
+export type Spec = [labelEn: string, value: string, labelHi?: string];
+export type Fits = { brand: string; models?: string[]; category?: string };
+export type ProductSeed = {
   slug: string;
   sku: string;
   category: string;
@@ -67,7 +68,7 @@ const IPHONE_OLDER = ["iPhone 12", "iPhone 13", "iPhone 14", "iPhone 14 Plus"];
 const SAMSUNG_S = ["Galaxy S23", "Galaxy S24", "Galaxy S24 Ultra", "Galaxy S25", "Galaxy S25 Ultra"];
 const SAMSUNG_A = ["Galaxy A35", "Galaxy A55", "Galaxy M34", "Galaxy F55"];
 
-const PRODUCTS: Seed[] = [
+const PRODUCTS: ProductSeed[] = [
   // Screen protectors — one product per common type so every type has stock to browse.
   {
     slug: "hd-plus-crystal-glass-iphone",
@@ -710,14 +711,19 @@ async function modelIdsFor(db: PrismaClient, fits: Fits[] = []) {
   return [...ids];
 }
 
-export async function seedShop(db: PrismaClient) {
+/**
+ * `onlyNew`: production deploys add catalogue items that don't exist yet (by slug) and never touch
+ * existing ones, so the owner's edits to prices, stock and copy survive every deploy.
+ */
+export async function seedShop(db: PrismaClient, { onlyNew = false } = {}) {
+  const ALL = [...PRODUCTS, ...PRODUCT_ADDITIONS];
   const categoryIds = new Map<string, string>();
   let order = 0;
   for (const [slug, nameEn, nameHi, descriptionEn, descriptionHi] of CATEGORIES) {
     const c = await db.productCategory.upsert({
       where: { slug },
       create: { slug, nameEn, nameHi, descriptionEn, descriptionHi, sortOrder: order++ },
-      update: { nameEn, nameHi, descriptionEn, descriptionHi },
+      update: onlyNew ? {} : { nameEn, nameHi, descriptionEn, descriptionHi },
     });
     categoryIds.set(slug, c.id);
   }
@@ -732,12 +738,15 @@ export async function seedShop(db: PrismaClient) {
     const t = await db.productType.upsert({
       where: { categoryId_slug: { categoryId, slug } },
       create: { categoryId, slug, sortOrder, ...data },
-      update: data,
+      update: onlyNew ? {} : data,
     });
     typeIds.set(`${category}/${slug}`, t.id);
   }
 
-  for (const p of PRODUCTS) {
+  let added = 0;
+  for (const p of ALL) {
+    if (onlyNew && (await db.product.count({ where: { slug: p.slug } }))) continue;
+    added++;
     const data = {
       sku: p.sku,
       nameEn: p.nameEn,
@@ -768,5 +777,5 @@ export async function seedShop(db: PrismaClient) {
       }
     }
   }
-  console.log(`Shop: ${CATEGORIES.length} categories, ${TYPES.length} product types, ${PRODUCTS.length} products.`);
+  console.log(`Shop: ${CATEGORIES.length} categories, ${TYPES.length} product types, ${added} of ${ALL.length} products written.`);
 }
