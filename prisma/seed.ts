@@ -19,6 +19,7 @@ import { seedCustomization } from "./seed/customization";
 import { PHONES, phoneAliases } from "./seed/devices";
 import { seedRepairEstimates } from "./seed/repair-estimates";
 import { seedShop } from "./seed/shop";
+import { seedProductImages } from "./seed/product-images";
 
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: directDatabaseUrl() }) });
 const isDeploy = process.env.SEED_MODE === "deploy";
@@ -342,6 +343,7 @@ async function main() {
     if (!fresh) {
       // New catalogue items and articles added in code reach production; existing rows are never touched.
       await seedShop(db, { onlyNew: true });
+      await seedProductImages(db);
       await seedContent(db, { onlyNew: true });
       return console.log("Deploy seed: roles and owner updated, new products and articles added.");
     }
@@ -352,6 +354,7 @@ async function main() {
   if (!isProd) await seedDemoUsers();
   // Section catalogues (products, designs, articles/specs) — sample data, replaced by real content before launch.
   await seedShop(db);
+  await seedProductImages(db);
   await seedCustomization(db);
   await seedContent(db);
   console.log("Seed complete.");

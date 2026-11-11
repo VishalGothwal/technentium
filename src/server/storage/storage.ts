@@ -4,6 +4,7 @@ import path from "node:path";
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@/server/env";
+import { supabaseAdmin, supabaseAdminConfigured } from "@/server/supabase/admin";
 
 /**
  * Private object storage (PRD §13.2). Objects are never public: access goes through an
@@ -81,9 +82,57 @@ function s3Adapter(): StorageAdapter {
   return s3;
 }
 
+/** Private Supabase Storage bucket used by the "supabase" driver (created on first use). */
+export const SUPABASE_BUCKET = "media";
+let supa: StorageAdapter | undefined;
+
+function supabaseAdapter(): StorageAdapter {
+  if (supa) return supa;
+  let ready: Promise<void> | null = null;
+  const bucket = async () => {
+    ready ??= (async () => {
+      const client = supabaseAdmin();
+      const { error } = await client.storage.getBucket(SUPABASE_BUCKET);
+      if (error) {
+        const created = await client.storage.createBucket(SUPABASE_BUCKET, { public: false, fileSizeLimit: "30MB" });
+        if (created.error && !/exists/i.test(created.error.message)) throw new Error(`Supabase storage: ${created.error.message}`);
+      }
+    })().catch((e) => {
+      ready = null;
+      throw e;
+    });
+    await ready;
+    return supabaseAdmin().storage.from(SUPABASE_BUCKET);
+  };
+  const check = <T>(res: { data: T; error: null } | { data: null; error: { message: string } }): T => {
+    if (res.error) throw new Error(`Supabase storage: ${res.error.message}`);
+    return res.data as T;
+  };
+  supa = {
+    async put(key, body, contentType) {
+      check(await (await bucket()).upload(key, body, { contentType, upsert: true }));
+    },
+    async signedUrl(key, ttl) {
+      return check(await (await bucket()).createSignedUrl(key, ttl))!.signedUrl;
+    },
+    async signedPutUrl(key) {
+      return check(await (await bucket()).createSignedUploadUrl(key))!.signedUrl;
+    },
+    async read(key) {
+      return Buffer.from(await check(await (await bucket()).download(key))!.arrayBuffer());
+    },
+    async remove(key) {
+      check(await (await bucket()).remove([key]));
+    },
+  };
+  return supa;
+}
+
 export function storage(): StorageAdapter {
   const e = env();
   if (e.STORAGE_DRIVER === "s3") return s3Adapter();
+  // Supabase Storage: chosen explicitly, or automatically in production when no S3 bucket is configured.
+  if (e.STORAGE_DRIVER === "supabase" || (e.NODE_ENV === "production" && supabaseAdminConfigured())) return supabaseAdapter();
   // Serverless disks are ephemeral: refuse uploads rather than lose them. Checked here (not in env()) so an
   // unconfigured bucket only affects uploads, not sign-in codes or emails.
   if (e.NODE_ENV === "production") throw new Error("STORAGE_DRIVER=local is not allowed in production; configure S3/R2 storage");

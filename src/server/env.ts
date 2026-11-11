@@ -18,7 +18,7 @@ const fields = z.object({
   /** Secret of the Auth "Send SMS" hook (`v1,whsec_…`), so Fast2SMS keeps delivering sign-in codes. */
   SUPABASE_SMS_HOOK_SECRET: z.string().optional(),
   CRON_SECRET: z.string().min(16),
-  STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
+  STORAGE_DRIVER: z.enum(["local", "s3", "supabase"]).default("local"),
   S3_ENDPOINT: z.string().optional(),
   S3_REGION: z.string().default("auto"),
   S3_BUCKET: z.string().optional(),
