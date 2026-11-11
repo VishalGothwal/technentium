@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { getT } from "@/i18n/server";
 import { pageMetadata } from "@/lib/seo";
 import { ListingFilters, ListingResults, ListingSkeleton } from "@/components/content/listing";
+import { ArticleSections } from "@/components/content/article-sections";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t, locale } = await getT();
@@ -22,7 +23,12 @@ export default async function ArticlesPage({ searchParams }: PageProps<"/[locale
       <div className="mt-8">
         <ListingFilters basePath={base} type="ARTICLE" />
       </div>
-      <div className="mt-8">
+      <div className="mt-10">
+        <Suspense fallback={null}>
+          <ArticleSections searchParams={searchParams} />
+        </Suspense>
+      </div>
+      <div className="mt-6">
         <Suspense fallback={<ListingSkeleton />}>
           <ListingResults searchParams={searchParams} type="ARTICLE" basePath={base} />
         </Suspense>

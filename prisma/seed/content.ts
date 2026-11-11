@@ -2,9 +2,17 @@ import type { Prisma, PrismaClient } from "../../src/generated/prisma/client";
 import { readingMinutes } from "../../src/lib/content/reading";
 import { ARTICLES as BASE_ARTICLES, type SeedArticle } from "./content-articles";
 import { ARTICLE_ADDITIONS } from "./content-additions";
+import { ARTICLE_ADDITIONS_2 } from "./content-additions-2";
+import { COMPARISONS, EXTRA_GROUPS, SPEC_SHEETS as BASE_SHEETS, toSpecGroups, type Sheet } from "./content-specs";
+import { SPEC_EXTRAS, SPEC_SHEET_ADDITIONS_A } from "./content-specs-additions-a";
+import { SPEC_SHEET_ADDITIONS_B } from "./content-specs-additions-b";
+import { SPEC_SHEET_ADDITIONS_B2 } from "./content-specs-additions-b2";
+import { ARTICLE_ADDITIONS_3 } from "./content-additions-3";
+import type { SpecGroup } from "../../src/lib/schemas/content";
 
-const ARTICLES = [...BASE_ARTICLES, ...ARTICLE_ADDITIONS];
-import { COMPARISONS, SPEC_SHEETS, toSpecGroups } from "./content-specs";
+const ARTICLES = [...BASE_ARTICLES, ...ARTICLE_ADDITIONS, ...ARTICLE_ADDITIONS_2, ...ARTICLE_ADDITIONS_3];
+/** Original sheets gain their extra groups (video, software, features…) from SPEC_EXTRAS. */
+const SPEC_SHEETS: Sheet[] = [...BASE_SHEETS.map((s) => ({ ...s, ...SPEC_EXTRAS[`${s.brand}-${s.model}`] })), ...SPEC_SHEET_ADDITIONS_A, ...SPEC_SHEET_ADDITIONS_B, ...SPEC_SHEET_ADDITIONS_B2];
 
 const DAY = 86_400_000;
 
@@ -24,11 +32,21 @@ export async function seedContent(db: PrismaClient, { onlyNew = false } = {}) {
 
   // ── Specifications ──
   const specIds = new Map<string, string>();
-  if (onlyNew) for (const r of await db.deviceSpecification.findMany({ select: { id: true, slug: true } })) specIds.set(r.slug, r.id);
-  for (const s of onlyNew ? [] : SPEC_SHEETS) {
+  const existingSpecs = onlyNew ? await db.deviceSpecification.findMany({ select: { id: true, slug: true, deviceModelId: true, specs: true } }) : [];
+  for (const r of existingSpecs) specIds.set(r.slug, r.id);
+  for (const s of SPEC_SHEETS) {
     const model = await db.deviceModel.findFirst({ where: { slug: s.model, brand: { slug: s.brand } } });
     if (!model) continue;
     const slug = `${s.brand}-${s.model}`;
+    const existing = existingSpecs.find((r) => r.deviceModelId === model.id);
+    if (existing) {
+      // Deploys never change published values; they only append extra groups the sheet doesn't have yet.
+      const current = (Array.isArray(existing.specs) ? existing.specs : []) as SpecGroup[];
+      const have = new Set(current.map((g) => g.group));
+      const extra = toSpecGroups(s).filter((g) => (EXTRA_GROUPS as readonly string[]).includes(g.group) && !have.has(g.group));
+      if (extra.length) await db.deviceSpecification.update({ where: { id: existing.id }, data: { specs: [...current, ...extra] as unknown as Prisma.InputJsonValue } });
+      continue;
+    }
     const data = {
       slug,
       status: "PUBLISHED" as const,

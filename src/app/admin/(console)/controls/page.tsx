@@ -119,6 +119,12 @@ export default async function FeatureControlsPage() {
                   description: "Off: repair model pages show the 2D front and back outline.",
                   on: f.preview3d.repairs,
                 },
+                {
+                  key: "features.preview3d.specs",
+                  label: "3D on phone spec pages",
+                  description: "Off: spec pages hide the “See it in 3D” section.",
+                  on: f.preview3d.specs,
+                },
               ]}
             />
           </CardBody>

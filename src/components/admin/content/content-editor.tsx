@@ -46,7 +46,7 @@ export type EditorInitial = {
 
 type Draft = { title: string; summary: string; blocks: EditorBlock[]; seoTitle: string; metaDescription: string };
 
-const TOPIC_LABELS: Record<string, string> = { "repair-guides": "Repair guides", "buying-guides": "Buying guides", protection: "Protection", tips: "Tips & care", news: "News" };
+const TOPIC_LABELS: Record<string, string> = { "repair-guides": "Repair guides", "buying-guides": "Buying guides", protection: "Protection", tips: "Tips & care", news: "News", "software-apps": "Software & apps", photography: "Photography", gaming: "Gaming", "laptops-tablets": "Laptops & tablets", accessories: "Accessories" };
 const STATUS_TONE: Record<Status, "neutral" | "info" | "success" | "warning"> = { DRAFT: "neutral", SCHEDULED: "info", PUBLISHED: "success", ARCHIVED: "warning" };
 
 const toDraft = (t: EditorTranslation | undefined, labels: RelationOption[]): Draft => ({

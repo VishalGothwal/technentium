@@ -19,7 +19,7 @@ import { seedCustomization } from "./seed/customization";
 import { PHONES, phoneAliases } from "./seed/devices";
 import { seedRepairEstimates } from "./seed/repair-estimates";
 import { seedShop } from "./seed/shop";
-import { seedProductImages } from "./seed/product-images";
+import { seedContentImages, seedProductImages } from "./seed/product-images";
 
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: directDatabaseUrl() }) });
 const isDeploy = process.env.SEED_MODE === "deploy";
@@ -345,6 +345,7 @@ async function main() {
       await seedShop(db, { onlyNew: true });
       await seedProductImages(db);
       await seedContent(db, { onlyNew: true });
+      await seedContentImages(db);
       return console.log("Deploy seed: roles and owner updated, new products and articles added.");
     }
   }
@@ -357,6 +358,7 @@ async function main() {
   await seedProductImages(db);
   await seedCustomization(db);
   await seedContent(db);
+  await seedContentImages(db);
   console.log("Seed complete.");
 }
 

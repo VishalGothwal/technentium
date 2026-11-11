@@ -5,6 +5,7 @@ import { localized } from "@/i18n/translate";
 import { specValue } from "@/lib/content/specs";
 import type { SpecGroup } from "@/lib/schemas/content";
 import { cn } from "@/lib/cn";
+import { mediaUrl } from "@/lib/media";
 
 /** Stylised device illustration for spec pages (until editors upload product shots). */
 export function DeviceIllustration({ seed, className }: { seed: string; className?: string }) {
@@ -103,6 +104,7 @@ export function SpecTable({ specs, locale, t }: { specs: SpecGroup[]; locale: Lo
 
 export type SpecCardData = {
   slug: string;
+  imageMediaId?: string | null;
   specs: SpecGroup[];
   summaryEn: string | null;
   summaryHi: string | null;
@@ -112,7 +114,15 @@ export type SpecCardData = {
 export function SpecCard({ spec, locale, t }: { spec: SpecCardData; locale: Locale; t: TFunction }) {
   return (
     <article className="group relative flex h-full gap-4 rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <DeviceIllustration seed={spec.slug} className="h-28 w-16 shrink-0 transition group-hover:-rotate-3" />
+      {spec.imageMediaId ? (
+        // White product shots melt into the tile (multiply); transparent PNGs simply sit on it.
+        <span className="flex h-32 w-20 shrink-0 items-center justify-center rounded-xl bg-surface-muted p-1.5">
+          {/* eslint-disable-next-line @next/next/no-img-element -- media route serves re-encoded WebP */}
+          <img src={mediaUrl(spec.imageMediaId)} alt="" loading="lazy" className="max-h-full max-w-full object-contain mix-blend-multiply transition group-hover:scale-105" />
+        </span>
+      ) : (
+        <DeviceIllustration seed={spec.slug} className="h-28 w-16 shrink-0 transition group-hover:-rotate-3" />
+      )}
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold tracking-wider text-muted uppercase">{spec.deviceModel.brand.name}</p>
         <h3 className="text-lg font-bold leading-tight">

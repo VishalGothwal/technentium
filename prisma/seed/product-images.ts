@@ -62,3 +62,52 @@ export async function seedProductImages(db: PrismaClient) {
   }
   console.log(`Product photos: ${added} attached.`);
 }
+
+/** Store one repo image as a public media asset; null when storage is unavailable. */
+async function storeImage(db: PrismaClient, file: string, purpose: "DEVICE_IMAGE" | "CONTENT_IMAGE", alt: string) {
+  const body = await readFile(file);
+  const meta = await sharp(body).metadata();
+  const key = `media/${purpose.toLowerCase()}/${randomUUID()}.webp`;
+  try {
+    await put(key, body);
+  } catch (e) {
+    console.warn(`Seed images stopped: ${(e as Error).message}`);
+    return null;
+  }
+  return db.mediaAsset.create({
+    data: { storageKey: key, mime: "image/webp", sizeBytes: body.byteLength, width: meta.width ?? null, height: meta.height ?? null, purpose, isPublic: true, altEn: alt, uploadedById: "seed" },
+  });
+}
+
+const storageReady = () => !((process.env.NODE_ENV === "production" || process.env.SEED_MODE === "deploy") && process.env.STORAGE_DRIVER !== "s3" && !supabaseStorage());
+
+/**
+ * Phone photos (prisma/seed/spec-images/<spec slug>.webp) and article covers (prisma/seed/article-covers/<slug>.webp),
+ * attached only where none is set yet, so editors' own images are never replaced. Sources: docs/*-image-sources.csv.
+ */
+export async function seedContentImages(db: PrismaClient) {
+  if (!storageReady()) return console.log("Content images skipped: no storage configured.");
+  let specs = 0;
+  let covers = 0;
+  const specDir = path.join(process.cwd(), "prisma", "seed", "spec-images");
+  if (existsSync(specDir))
+    for (const f of (await readdir(specDir)).filter((x) => x.endsWith(".webp"))) {
+      const spec = await db.deviceSpecification.findUnique({ where: { slug: f.slice(0, -5) }, select: { id: true, imageMediaId: true, deviceModel: { select: { name: true } } } });
+      if (!spec || spec.imageMediaId) continue;
+      const media = await storeImage(db, path.join(specDir, f), "DEVICE_IMAGE", spec.deviceModel.name);
+      if (!media) break;
+      await db.deviceSpecification.update({ where: { id: spec.id }, data: { imageMediaId: media.id } });
+      specs++;
+    }
+  const coverDir = path.join(process.cwd(), "prisma", "seed", "article-covers");
+  if (existsSync(coverDir))
+    for (const f of (await readdir(coverDir)).filter((x) => x.endsWith(".webp"))) {
+      const item = await db.contentItem.findFirst({ where: { slug: f.slice(0, -5) }, select: { id: true, coverMediaId: true, slug: true } });
+      if (!item || item.coverMediaId) continue;
+      const media = await storeImage(db, path.join(coverDir, f), "CONTENT_IMAGE", item.slug.replace(/-/g, " "));
+      if (!media) break;
+      await db.contentItem.update({ where: { id: item.id }, data: { coverMediaId: media.id } });
+      covers++;
+    }
+  console.log(`Content images: ${specs} phone photos, ${covers} article covers attached.`);
+}

@@ -5,8 +5,8 @@
  */
 import type { SpecGroup } from "../../src/lib/schemas/content";
 
-type V = string | null;
-type Sheet = {
+export type V = string | null;
+export type Sheet = {
   brand: string;
   model: string;
   releaseDate: string;
@@ -19,6 +19,12 @@ type Sheet = {
   battery: [capacity: V, wired: V, wireless: V];
   build: [dimensions: V, weight: V, ip: V, materials: V];
   connectivity: [network: V, sim: V, port: V, jack: V];
+  /** Extra groups (optional; missing values show as "Not available"). */
+  video?: [rear: V, front: V, stabilisation: V];
+  software?: [launchOs: V, osUpgrades: V, securityUpdates: V];
+  features?: [biometrics: V, speakers: V, wifiBluetooth: V, extras: V];
+  inBox?: [contents: V];
+  colours?: [options: V];
 };
 
 export const SPEC_SHEETS: Sheet[] = [
@@ -220,6 +226,24 @@ const keys = {
     ["port", "Port", "पोर्ट"],
     ["headphone_jack", "3.5 mm headphone jack", "3.5 मिमी हेडफ़ोन जैक"],
   ],
+  video: [
+    ["rear_video", "Rear video", "रियर वीडियो"],
+    ["front_video", "Front video", "फ़्रंट वीडियो"],
+    ["stabilisation", "Stabilisation", "स्टेबिलाइज़ेशन"],
+  ],
+  software: [
+    ["launch_os", "Launched with", "लॉन्च के समय OS"],
+    ["os_upgrades", "OS upgrades", "OS अपग्रेड"],
+    ["security_updates", "Security updates", "सिक्योरिटी अपडेट"],
+  ],
+  features: [
+    ["biometrics", "Unlock", "अनलॉक"],
+    ["speakers", "Speakers", "स्पीकर"],
+    ["wifi_bluetooth", "Wi-Fi & Bluetooth", "Wi-Fi और Bluetooth"],
+    ["extras", "Other features", "अन्य फ़ीचर"],
+  ],
+  inBox: [["contents", "In the box", "बॉक्स में"]],
+  colours: [["options", "Colours", "रंग"]],
 } as const;
 
 const groups: [keyof typeof keys, string, string][] = [
@@ -229,11 +253,23 @@ const groups: [keyof typeof keys, string, string][] = [
   ["battery", "Battery & charging", "बैटरी और चार्जिंग"],
   ["build", "Build", "बनावट"],
   ["connectivity", "Connectivity", "कनेक्टिविटी"],
+  ["video", "Video", "वीडियो"],
+  ["software", "Software & updates", "सॉफ़्टवेयर और अपडेट"],
+  ["features", "Features", "फ़ीचर"],
+  ["inBox", "In the box", "बॉक्स में"],
+  ["colours", "Colours", "रंग"],
 ];
 
+/** Stored group ids are snake_case ("inBox" → "in_box"), as the spec schema requires. */
+const groupId = (g: string) => g.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+
+/** The optional groups (stored ids), which deploys may add to existing published sheets. */
+export const EXTRA_GROUPS = ["video", "software", "features", "in_box", "colours"] as const;
+
 export function toSpecGroups(s: Sheet): SpecGroup[] {
-  return groups.map(([g, labelEn, labelHi]) => ({
-    group: g,
+  // Optional groups are left out entirely when the sheet has no data for them.
+  return groups.filter(([g]) => s[g]).map(([g, labelEn, labelHi]) => ({
+    group: groupId(g),
     labelEn,
     labelHi,
     items: keys[g].map(([key, lEn, lHi], i) => ({ key, labelEn: lEn, labelHi: lHi, value: (s[g] as V[])[i] ?? null })),

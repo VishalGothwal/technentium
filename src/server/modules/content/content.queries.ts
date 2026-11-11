@@ -1,9 +1,10 @@
 import "server-only";
+import { MODEL3D_SELECT } from "@/lib/device-3d";
 import { deviceName } from "@/lib/content/specs";
 import type { ContentType, Prisma } from "@/generated/prisma/client";
 import type { Locale } from "@/i18n/config";
 import { db } from "@/server/db";
-import { blocksSchema, specGroupsSchema, type ContentBlock, type ListContentQuery, type RelationTarget, type SpecGroup } from "@/lib/schemas/content";
+import { blocksSchema, specGroupSchema, specGroupsSchema, type ContentBlock, type ListContentQuery, type RelationTarget, type SpecGroup } from "@/lib/schemas/content";
 
 /**
  * Uncached public content queries. `content.public.ts` wraps these with `'use cache'`;
@@ -33,7 +34,13 @@ export function safeBlocks(raw: unknown): ContentBlock[] {
 
 export function safeSpecs(raw: unknown): SpecGroup[] {
   const parsed = specGroupsSchema.safeParse(raw);
-  return parsed.success ? parsed.data : [];
+  if (parsed.success) return parsed.data;
+  // One malformed group must not hide the whole sheet: keep the groups that are valid.
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((g) => {
+    const one = specGroupSchema.safeParse(g);
+    return one.success ? [one.data] : [];
+  }).slice(0, 20);
 }
 
 const CARD_ITEM_SELECT = {
@@ -328,7 +335,7 @@ const SPEC_CARD_SELECT = {
   specs: true,
   publishedAt: true,
   updatedAt: true,
-  deviceModel: { select: { id: true, name: true, releaseYear: true, brand: { select: { name: true, slug: true } }, category: { select: { slug: true } } } },
+  deviceModel: { select: { id: true, name: true, releaseYear: true, frame: true, model3d: MODEL3D_SELECT, brand: { select: { name: true, slug: true } }, category: { select: { slug: true } } } },
 } as const;
 
 export async function querySpecList({ q, brand }: { q?: string | null; brand?: string | null }, now = new Date()) {

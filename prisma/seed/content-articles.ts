@@ -3,7 +3,7 @@
  * Written as genuinely useful guidance; prices and specifics are deliberately general.
  * Review with the business before launch.
  */
-import type { ContentBlock } from "../../src/lib/schemas/content";
+import type { CONTENT_TOPICS, ContentBlock } from "../../src/lib/schemas/content";
 
 export const h2 = (text: string): ContentBlock => ({ type: "heading", level: 2, text });
 export const h3 = (text: string): ContentBlock => ({ type: "heading", level: 3, text });
@@ -20,7 +20,7 @@ export type SeedTranslation = { title: string; summary: string; seoTitle?: strin
 export type SeedArticle = {
   slug: string;
   type?: "ARTICLE" | "VIDEO";
-  topic: "repair-guides" | "buying-guides" | "protection" | "tips" | "news";
+  topic: (typeof CONTENT_TOPICS)[number];
   tags: string[];
   featured?: boolean;
   videoUrl?: string;

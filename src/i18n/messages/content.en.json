@@ -1,5 +1,13 @@
 {
   "articles": {
+    "browseTopics": "Browse by topic",
+    "topicCount": "{n} guides",
+    "quickFixes": "Quick fixes",
+    "quickFixesHint": "Answers you can read in under five minutes.",
+    "videoGuides": "Video guides",
+    "allVideos": "All videos",
+    "latest": "Latest guides",
+    "editorsPicks": "Editor's picks",
     "title": "Guides & articles",
     "subtitle": "Practical, honest advice on repairs, protection and getting more from your devices — from the technicians at Technentium.",
     "metaDescription": "Repair guides, buying advice and device-care tips from Technentium's technicians in Jaipur.",
@@ -12,14 +20,24 @@
       "buying-guides": "Buying guides",
       "protection": "Protection",
       "tips": "Tips & care",
-      "news": "News"
+      "news": "News",
+      "software-apps": "Software & apps",
+      "photography": "Photography",
+      "gaming": "Gaming",
+      "laptops-tablets": "Laptops & tablets",
+      "accessories": "Accessories"
     },
     "topicDescriptions": {
       "repair-guides": "What to expect from common repairs, and how to get your device ready.",
       "buying-guides": "Make confident choices on phones, parts and accessories.",
       "protection": "Screen protectors, cases and everyday protection that actually works.",
       "tips": "Small habits that keep your devices healthy for longer.",
-      "news": "Updates from Technentium and the device world."
+      "news": "Updates from Technentium and the device world.",
+      "software-apps": "Updates, settings and apps that make your phone faster and safer.",
+      "photography": "Get better photos and videos from the phone you already have.",
+      "gaming": "Smooth, cool and battery-friendly mobile gaming.",
+      "laptops-tablets": "Care, upgrades and repairs for laptops and tablets.",
+      "accessories": "Chargers, cables, cases and gadgets that are worth it."
     },
     "featured": "Featured",
     "latest": "Latest",
@@ -115,6 +133,17 @@
     "watch": "Watch"
   },
   "specs": {
+    "latestLaunches": "Latest launches",
+    "byBudget": "Best phones by budget",
+    "budgetUnder15": "Under ₹15,000",
+    "budget15to30": "₹15,000–30,000",
+    "budget30to50": "₹30,000–50,000",
+    "budgetFlagship": "Flagships (₹50,000+)",
+    "allPhones": "All phones",
+    "foldables": "Foldables",
+    "view3d": "See it in 3D",
+    "view3dHint": "Drag to turn it around. Real proportions, buttons and camera layout.",
+    "phonesCount": "{n} phones",
     "title": "Phone specifications",
     "subtitle": "Clear, consistent spec sheets. Where we don't have verified data, we say so.",
     "metaDescription": "Phone specifications and side-by-side comparisons for popular models in India.",

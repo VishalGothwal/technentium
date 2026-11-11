@@ -37,6 +37,7 @@ export const SETTINGS = {
   /** 3D device previews per section; off shows the 2D drawings. */
   "features.preview3d.studio": { schema: z.boolean(), default: true },
   "features.preview3d.repairs": { schema: z.boolean(), default: true },
+  "features.preview3d.specs": { schema: z.boolean(), default: true },
 } as const;
 
 export type SettingKey = keyof typeof SETTINGS;

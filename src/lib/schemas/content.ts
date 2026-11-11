@@ -6,7 +6,7 @@ import { z } from "zod";
 import { containsHtml, safeHref } from "@/lib/content/inline";
 import { parseVideoUrl } from "@/lib/content/video";
 
-export const CONTENT_TOPICS = ["repair-guides", "buying-guides", "protection", "tips", "news"] as const;
+export const CONTENT_TOPICS = ["repair-guides", "buying-guides", "protection", "tips", "news", "software-apps", "photography", "gaming", "laptops-tablets", "accessories"] as const;
 export type ContentTopic = (typeof CONTENT_TOPICS)[number];
 export const isContentTopic = (s: string): s is ContentTopic => (CONTENT_TOPICS as readonly string[]).includes(s);
 
