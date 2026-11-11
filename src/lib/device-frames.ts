@@ -158,9 +158,45 @@ export const isFrameKey = (v: unknown): v is FrameKey => typeof v === "string" &
 /** Family used when a model has no (or an unknown) frame: the generic look for its kind. */
 export const DEFAULT_FRAME: Record<DeviceKind, FrameKey> = { phone: "square-corner", tablet: "tablet", laptop: "laptop" };
 
+/** A side key, as seen from the FRONT: `top` and `length` are fractions of the body height. */
+export type SideButton = { side: "left" | "right"; top: number; length: number };
+/** Bottom-edge openings, as fractions of the width from the centre. */
+export type Ports = { usb: boolean; speakers: boolean };
+
+/** Side keys and ports for a frame family (iPhones: action + volume left, power right; most Androids: all right). */
+export function hardwareFor(frame: string | null | undefined, kind: DeviceKind): { buttons: SideButton[]; ports: Ports } {
+  if (kind === "laptop") return { buttons: [], ports: { usb: false, speakers: false } };
+  if (kind === "tablet") return { buttons: [{ side: "right", top: 0.04, length: 0.07 }, { side: "right", top: 0.13, length: 0.09 }], ports: { usb: true, speakers: true } };
+  const key = isFrameKey(frame) ? frame : DEFAULT_FRAME.phone;
+  if (key.startsWith("iphone"))
+    return {
+      buttons: [
+        { side: "left", top: 0.16, length: 0.045 },
+        { side: "left", top: 0.25, length: 0.085 },
+        { side: "left", top: 0.36, length: 0.085 },
+        { side: "right", top: 0.28, length: 0.13 },
+      ],
+      ports: { usb: true, speakers: true },
+    };
+  if (key === "galaxy-flip") return { buttons: [{ side: "right", top: 0.36, length: 0.09 }, { side: "right", top: 0.47, length: 0.06 }], ports: { usb: true, speakers: true } };
+  return { buttons: [{ side: "right", top: 0.2, length: 0.13 }, { side: "right", top: 0.37, length: 0.07 }], ports: { usb: true, speakers: true } };
+}
+
 /** Geometry for a model's frame key, falling back to the kind's default (and to phone for anything else). */
 export function frameFor(frame: string | null | undefined, kind: DeviceKind = "phone"): FrameGeometry {
   return FRAME_FAMILIES[isFrameKey(frame) ? frame : DEFAULT_FRAME[kind] ?? "square-corner"];
+}
+
+/**
+ * The frame at a model's real proportions (height / width from its dimensions in mm). The camera layout stays
+ * anchored to the top-left so lenses keep their shape; only the body gets taller or shorter.
+ */
+export function sizedFrame(g: FrameGeometry, aspect: number | null | undefined): FrameGeometry {
+  if (!aspect || !Number.isFinite(aspect)) return g;
+  const h = Math.round(Math.min(Math.max(aspect, 0.4), 3) * g.w);
+  if (h === g.h) return g;
+  const k = h / g.h;
+  return { ...g, h, hinge: g.hinge ? g.hinge * k : g.hinge, cover: g.cover ? { ...g.cover, h: g.cover.h * k } : g.cover };
 }
 
 /** Front view: the display area and the cut-outs drawn on top of it (island, notch, punch-hole, home button, webcam). */

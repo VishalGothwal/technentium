@@ -183,12 +183,13 @@
     "useEmail": "Use email & password instead",
     "usePhone": "Use mobile number instead",
     "phoneStarts": "Indian mobile numbers start with 6, 7, 8 or 9.",
-    "sendFailed": "We couldn't send the code right now. Please try again in a minute, or continue with Google.",
+    "sendFailed": "We couldn't send the code right now. Please try again in a minute.",
     "sendCode": "Send code",
     "codeSent": "We sent a code to {phone}.",
     "code": "Verification code",
     "verify": "Verify and continue",
     "resendIn": "Resend code in {seconds}s",
+    "verified": "Verified",
     "resend": "Resend code",
     "changeNumber": "Change number",
     "email": "Email",
@@ -245,7 +246,7 @@
         "body": "Your photos and details are only visible to you and our team."
       }
     },
-    "registerSubtitle": "Enter your mobile number or continue with Google — your account is created as soon as you verify.",
+    "registerSubtitle": "Enter your mobile number — your account is created as soon as you verify.",
     "emailHint": "We'll send a link to verify this address.",
     "emailTaken": "An account with this email already exists. Sign in instead, or reset your password.",
     "registerPhoneNote": "Prefer your mobile number? Use the Mobile number option on the sign-in page — it creates your account automatically.",

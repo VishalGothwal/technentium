@@ -70,7 +70,7 @@ export function StaffSignIn() {
     >
       {error && <Alert tone="danger">{error}</Alert>}
       <Field label="Email" required>
-        {(p) => <Input {...p} name="email" type="email" autoComplete="username" />}
+        {(p) => <Input {...p} name="email" type="text" inputMode="email" autoCapitalize="none" spellCheck={false} autoComplete="username" />}
       </Field>
       <Field label="Password" required>
         {(p) => <Input {...p} name="password" type="password" autoComplete="current-password" />}

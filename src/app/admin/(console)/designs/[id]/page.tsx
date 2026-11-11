@@ -5,6 +5,7 @@ import { isAppError } from "@/server/errors";
 import { getDesignAdmin } from "@/server/modules/customization/design-admin.service";
 import { PageHeader } from "@/components/ui/surface";
 import { NoAccess } from "@/components/admin/no-access";
+import { readHiddenSteps, type DesignHideableStep } from "@/lib/customization/steps";
 import { DesignForm, type DesignFormValues } from "../design-form";
 
 export const instant = false;
@@ -19,6 +20,7 @@ const EMPTY: DesignFormValues = {
   collection: "minimal",
   style: { pattern: "waves", palette: ["#0b3c49", "#2ec4b6", "#cbf3f0"], density: 5, angle: 45 },
   basePricePaise: null,
+  hiddenSteps: [],
   featured: false,
   active: true,
   sortOrder: 100,
@@ -57,6 +59,7 @@ export default async function DesignEditPage({ params }: PageProps<"/admin/desig
           collection: d.collection as DesignFormValues["collection"],
           style: d.style,
           basePricePaise: d.basePricePaise,
+          hiddenSteps: readHiddenSteps(d.hiddenSteps).filter((s): s is DesignHideableStep => s !== "design"),
           featured: d.featured,
           active: d.active,
           sortOrder: d.sortOrder,

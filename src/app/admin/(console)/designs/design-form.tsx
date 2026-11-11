@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox, Field, Input, Select, Textarea } from "@/components/ui/field";
 import { Alert, Card, CardBody, CardHeader } from "@/components/ui/surface";
 import { useAction } from "@/components/admin/use-action";
-import { DevicePreview } from "@/components/customization/device-preview";
+import { Device3D } from "@/components/device/device-3d";
+import { DESIGN_HIDEABLE_STEPS, STEP_LABELS, type DesignHideableStep } from "@/lib/customization/steps";
 import { saveDesignAction, setDesignActiveAction } from "./actions";
 
 export type DesignFormValues = {
@@ -19,6 +20,7 @@ export type DesignFormValues = {
   collection: CollectionKey;
   style: DesignStyle;
   basePricePaise: number | null;
+  hiddenSteps: DesignHideableStep[];
   featured: boolean;
   active: boolean;
   sortOrder: number;
@@ -113,6 +115,21 @@ export function DesignForm({ id, initial }: { id: string | null; initial: Design
             <Checkbox checked={v.active} onChange={(e) => set({ active: e.target.checked })} label="Active (visible to customers)" />
           </div>
 
+          <fieldset className="space-y-3 border-t border-border pt-5">
+            <legend className="text-sm font-semibold">Studio sections for this design</legend>
+            <p className="text-sm text-muted">Untick a section to hide it when customers choose this design (on top of the studio-wide switches on the catalogue page).</p>
+            <div className="flex flex-wrap gap-6">
+              {DESIGN_HIDEABLE_STEPS.map((s) => (
+                <Checkbox
+                  key={s}
+                  checked={!v.hiddenSteps.includes(s)}
+                  onChange={(e) => set({ hiddenSteps: e.target.checked ? v.hiddenSteps.filter((x) => x !== s) : [...v.hiddenSteps, s] })}
+                  label={STEP_LABELS[s].label}
+                />
+              ))}
+            </div>
+          </fieldset>
+
           <fieldset className="space-y-4 border-t border-border pt-5">
             <legend className="text-sm font-semibold">Style</legend>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -187,7 +204,7 @@ export function DesignForm({ id, initial }: { id: string | null; initial: Design
           }
         />
         <div className="flex h-[28rem] items-center justify-center bg-[radial-gradient(circle_at_50%_35%,#2a2352_0%,#0b0c14_75%)] p-6">
-          <DevicePreview kind={previewKind} style={v.style} finish="gloss" coverage="camera" seed={v.slug || "preview"} label="Design preview" className="h-full w-full" />
+          <Device3D kind={previewKind} spec={{ frame: null, params: {}, glbUrl: null }} style={v.style} finish="gloss" coverage="camera" seed={v.slug || "preview"} label="Design preview" className="h-full w-full" />
         </div>
       </Card>
     </div>

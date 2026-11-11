@@ -21,6 +21,8 @@ export type Features = {
   maintenance: boolean;
   maintenanceMessage: string;
   impersonation: boolean;
+  /** 3D (true) or 2D device previews, per section. */
+  preview3d: { studio: boolean; repairs: boolean };
 };
 
 export type Section = keyof Features["sections"];
@@ -53,6 +55,10 @@ async function readFeatures(): Promise<Features> {
     maintenance: get("features.maintenance") as boolean,
     maintenanceMessage: get("features.maintenanceMessage") as string,
     impersonation: get("features.impersonation") as boolean,
+    preview3d: {
+      studio: get("features.preview3d.studio") as boolean,
+      repairs: get("features.preview3d.repairs") as boolean,
+    },
   };
 }
 

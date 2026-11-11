@@ -1,4 +1,5 @@
 import "server-only";
+import { MODEL3D_SELECT } from "@/lib/device-3d";
 import { db } from "@/server/db";
 import { getSetting } from "@/server/settings";
 import { resolveDiagnosisFee } from "@/server/modules/pricing/diagnosis-fee";
@@ -95,6 +96,8 @@ const DEVICE_SELECT = {
   releaseYear: true,
   popular: true,
   frame: true,
+  /** 3D body for previews (see src/lib/device-3d.ts `resolveDevice3d`). */
+  model3d: MODEL3D_SELECT,
   brand: { select: { id: true, slug: true, name: true } },
   category: { select: { id: true, slug: true, nameEn: true, nameHi: true } },
 } as const;

@@ -195,6 +195,9 @@ model DeviceModel {
   frame                 String?
   /// Search shorthands, e.g. "s24u", "15pm" (matched exactly, lower-case).
   aliases               String[]                     @default([])
+  /// 3D model shown in previews (Admin → 3D models); null → generated from `frame`.
+  model3dId             String?
+  model3d               Device3DModel?               @relation(fields: [model3dId], references: [id], onDelete: SetNull)
   compatibleProducts    ProductDeviceCompatibility[]
   cartItems             CartItem[]
   requestItems          ProductRequestItem[]
@@ -205,7 +208,30 @@ model DeviceModel {
 
   @@unique([brandId, slug])
   @@index([categoryId])
+  @@index([model3dId])
   @@map("device_models")
+}
+
+/// A 3D device body used by the studio, repair pages and admin previews. Either generated from a 2D frame
+/// family plus `params` (thickness, corner radius, camera bump, colours) or an uploaded .glb file.
+model Device3DModel {
+  id        String        @id @default(cuid())
+  slug      String        @unique
+  name      String
+  /// Frame family the generated body (and the flat skin layout) is built from; see src/lib/device-frames.ts.
+  frame     String
+  /// Generated-body parameters, see src/lib/device-3d.ts (`device3dParamsSchema`).
+  params    Json          @default("{}")
+  /// Uploaded glTF binary (.glb); when set it replaces the generated body.
+  fileId    String?       @unique
+  file      MediaAsset?   @relation("Device3DFile", fields: [fileId], references: [id], onDelete: SetNull)
+  notes     String?
+  active    Boolean       @default(true)
+  devices   DeviceModel[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("device_3d_models")
 }
 
 model RepairIssueType {
@@ -861,6 +887,7 @@ enum MediaPurpose {
   DESIGN_IMAGE
   CONTENT_IMAGE
   DEVICE_IMAGE
+  DEVICE_MODEL_3D // .glb file for a Device3DModel, public
   CUSTOM_ARTWORK // customer upload, private
 }
 
@@ -882,6 +909,7 @@ model MediaAsset {
   customizationRequestId String?
   customizationRequest   CustomizationRequest? @relation(fields: [customizationRequestId], references: [id])
   productImages          ProductImage[]
+  device3dModel          Device3DModel?        @relation("Device3DFile")
   createdAt              DateTime              @default(now())
 
   @@index([uploadedById, draftKey])
@@ -1166,6 +1194,8 @@ model Design {
   style          Json                   @default("{}")
   previewMediaId String?
   basePricePaise Int?
+  /// Studio steps hidden when this design is chosen (subset of "colour" | "finish" | "artwork").
+  hiddenSteps    String[]               @default([])
   featured       Boolean                @default(false)
   active         Boolean                @default(true)
   sortOrder      Int                    @default(0)

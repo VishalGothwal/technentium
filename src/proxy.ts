@@ -14,7 +14,13 @@ export async function proxy(request: NextRequest) {
     return refreshSupabaseSession(request, () => NextResponse.next({ request }));
   }
 
-  const first = pathname.split("/")[1];
+  const [, first, second] = pathname.split("/");
+  // The admin console is not localised: `/en/admin/...` → `/admin/...`.
+  if (isLocale(first) && second === "admin") {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.slice(first.length + 1);
+    return NextResponse.redirect(url);
+  }
   if (isLocale(first)) {
     return refreshSupabaseSession(request, () => {
       const res = NextResponse.next({ request });

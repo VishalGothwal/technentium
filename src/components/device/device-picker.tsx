@@ -5,6 +5,7 @@ import { localized } from "@/i18n/translate";
 import { apiFetch } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 import { deviceKindFor } from "@/lib/customization/style";
+import type { Device3DRow } from "@/lib/device-3d";
 import { DeviceFrame } from "./device-frame";
 
 export type PickedDevice = {
@@ -15,6 +16,8 @@ export type PickedDevice = {
   popular: boolean;
   /** 2D frame family (camera layout); see src/lib/device-frames.ts. */
   frame: string | null;
+  /** Assigned 3D model, if any (resolve with `resolveDevice3d`). */
+  model3d?: Device3DRow;
   brand: { id: string; slug: string; name: string };
   category: { id: string; slug: string; nameEn: string; nameHi: string | null };
 };

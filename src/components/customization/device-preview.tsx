@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { FONT_FAMILIES, type DesignStyle, type DeviceKind, type TextFont, type TextPosition } from "@/lib/customization/style";
-import { frameFor, frontLayout, type FrameGeometry, type ModuleShape } from "@/lib/device-frames";
+import { frameFor, frontLayout, sizedFrame, type FrameGeometry, type ModuleShape } from "@/lib/device-frames";
 
 /**
  * Generative, dependency-free SVG preview of a device skin. Pure (no hooks), so it renders the same
@@ -11,6 +11,8 @@ export type PreviewProps = {
   kind: DeviceKind;
   /** The model's frame family (camera layout, see src/lib/device-frames.ts); unknown → the kind's generic shape. */
   frame?: string | null;
+  /** Real height / width (from the model's mm dimensions); default: the frame family's proportions. */
+  aspect?: number | null;
   /** "front" shows the display side (skin visible only on the edges for sides/full coverage). */
   view?: "back" | "front";
   style: DesignStyle;
@@ -333,10 +335,10 @@ function Shape({ s, ...props }: { s: ModuleShape } & React.SVGAttributes<SVGElem
   return s.shape === "rect" ? <rect x={s.x} y={s.y} width={s.w} height={s.h} rx={s.r} {...props} /> : <circle cx={s.cx} cy={s.cy} r={s.r} {...props} />;
 }
 
-export function DevicePreview({ kind, frame, view = "back", style, finish, coverage, text, artwork, seed, label, className }: PreviewProps) {
-  const g = frameFor(frame, kind);
+export function DevicePreview({ kind, frame, aspect, view = "back", style, finish, coverage, text, artwork, seed, label, className }: PreviewProps) {
+  const g = sizedFrame(frameFor(frame, kind), aspect);
   const { w, h } = g;
-  const key = JSON.stringify([kind, frame, view, style, finish, coverage, text, artwork?.href, artwork?.scale, artwork?.x, artwork?.y, seed]);
+  const key = JSON.stringify([kind, frame, g.h, view, style, finish, coverage, text, artwork?.href, artwork?.scale, artwork?.x, artwork?.y, seed]);
   const uid = `dp${hash(key).toString(36)}`;
   const seedStr = seed ?? JSON.stringify(style);
 
@@ -428,6 +430,14 @@ export function DevicePreview({ kind, frame, view = "back", style, finish, cover
               strokeLinecap="round"
             />
           )}
+          {/* Skin cut-outs: a thin gap around each lens and flash (and around the modules when they're not covered). */}
+          {[...g.lenses, ...g.flash].map(([x, y, r], i) => (
+            <circle key={`cut${i}`} cx={x} cy={y} r={r + 4} fill="none" stroke="#000" strokeOpacity={0.45} strokeWidth={2} />
+          ))}
+          {!coverModules &&
+            g.modules.map((m, i) => (
+              <Shape key={`mcut${i}`} s={m.shape === "rect" ? { ...m, x: m.x - 3, y: m.y - 3, w: m.w + 6, h: m.h + 6, r: m.r + 3 } : { ...m, r: m.r + 3 }} fill="none" stroke="#000" strokeOpacity={0.4} strokeWidth={1.5} />
+            ))}
           {g.lenses.map(([x, y, r], i) => (
             <g key={i}>
               <circle cx={x} cy={y} r={r} fill="#0b0d12" stroke="#3b4150" strokeWidth={4} />

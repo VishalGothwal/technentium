@@ -1,4 +1,5 @@
 import "server-only";
+import { MODEL3D_SELECT } from "@/lib/device-3d";
 import { db } from "@/server/db";
 import { previewDiagnosisFee } from "./catalog.service";
 import { pickEstimate, type EstimateRow } from "@/lib/repair-estimates";
@@ -62,6 +63,7 @@ export async function getRepairModel(categorySlug: string, brandSlug: string, mo
       slug: true,
       name: true,
       frame: true,
+      model3d: MODEL3D_SELECT,
       releaseYear: true,
       brand: { select: { id: true, slug: true, name: true } },
       category: {

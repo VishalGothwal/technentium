@@ -52,6 +52,7 @@ const NAV: { label: string | null; items: NavItem[] }[] = [
     label: "Configuration",
     items: [
       { href: "/admin/catalog", label: "Devices & pricing", icon: "devices", anyOf: ["catalog.manage", "settings.fees"] },
+      { href: "/admin/models-3d", label: "3D models", icon: "box", anyOf: ["catalog.manage"] },
       { href: "/admin/settings", label: "Settings", icon: "settings", anyOf: ["settings.manage", "settings.fees"] },
       { href: "/admin/controls", label: "Feature controls", icon: "toggle", anyOf: ["system.features"] },
       { href: "/admin/notifications", label: "Notification log", icon: "bell", anyOf: ["notification.view_log"] },

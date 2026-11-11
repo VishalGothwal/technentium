@@ -114,3 +114,41 @@ dialog::backdrop {
     padding-bottom: 0.7rem;
   }
 }
+
+/* ───────────── Mobile OTP sign-in ───────────── */
+@keyframes otp-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes otp-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes otp-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-7px); }
+  40%, 80% { transform: translateX(7px); }
+}
+@keyframes otp-caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes otp-wave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes otp-check {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+.otp-step { animation: otp-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.otp-digit { animation: otp-pop 0.25s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+.otp-shake { animation: otp-shake 0.4s ease-in-out; }
+.otp-caret { animation: otp-caret 1s step-end infinite; }
+.otp-wave { animation: otp-wave 0.6s ease-in-out infinite; }
+.otp-check { stroke-dasharray: 24; animation: otp-check 0.4s 0.1s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .otp-step, .otp-digit, .otp-shake, .otp-wave, .otp-check { animation: none; }
+  .otp-check { stroke-dasharray: none; }
+}

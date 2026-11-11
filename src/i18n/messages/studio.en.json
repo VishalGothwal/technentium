@@ -137,7 +137,9 @@
       "front": "Front",
       "label": "Preview of the custom design on {device}",
       "generic": "Design preview",
-      "illustrative": "Illustrative preview — final colours may vary slightly by material."
+      "illustrative": "Illustrative preview — final colours may vary slightly by material.",
+      "rotateHint": "Drag to rotate",
+      "view3d": "3D view of {device}"
     },
     "validation": {
       "textTooLong": "Use 24 characters or fewer.",

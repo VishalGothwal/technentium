@@ -11,7 +11,9 @@ import { Breadcrumbs } from "@/components/content/breadcrumbs";
 import { RepairFaq } from "@/components/repair/blocks";
 import { ServicePicker } from "@/components/repair/service-picker";
 import { DeviceArt } from "@/components/repair/visuals";
+import { DeviceViewer } from "@/components/device/device-viewer";
 import { DeviceFrame } from "@/components/device/device-frame";
+import { cachedFeatures } from "@/server/features";
 import { CUSTOMIZABLE_CATEGORIES, deviceKindFor } from "@/lib/customization/style";
 
 export const instant = false;
@@ -35,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RepairModelPage({ params }: Props) {
   const { category, brand, model } = await params;
   const { t, locale } = await getT();
-  const data = await getRepairModel(category, brand, model);
+  const [data, features] = await Promise.all([getRepairModel(category, brand, model), cachedFeatures()]);
   if (!data) notFound();
   const { model: m, services, fee } = data;
   const name = deviceName(m.brand.name, m.name);
@@ -54,13 +56,22 @@ export default async function RepairModelPage({ params }: Props) {
       />
 
       <div className="mt-5 flex flex-col gap-5 rounded-xl border border-border bg-surface p-5 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-4 sm:w-64 sm:shrink-0">
-          {(CUSTOMIZABLE_CATEGORIES as readonly string[]).includes(m.category.slug) ? (
-            // The model's own outline (front + back camera layout) so customers can confirm the device.
+        <div className="flex items-center gap-4 sm:w-80 sm:shrink-0">
+          {(CUSTOMIZABLE_CATEGORIES as readonly string[]).includes(m.category.slug) && !features.preview3d.repairs ? (
             <span className="flex h-24 shrink-0 items-end gap-1.5 rounded-xl bg-surface-muted px-3 py-2.5">
               <DeviceFrame frame={m.frame} kind={deviceKindFor(m.category.slug)} view="front" className="h-full w-auto" />
               <DeviceFrame frame={m.frame} kind={deviceKindFor(m.category.slug)} view="back" className="h-full w-auto" />
             </span>
+          ) : (CUSTOMIZABLE_CATEGORIES as readonly string[]).includes(m.category.slug) ? (
+            // The model in 3D (its own camera layout, front and back) so customers can confirm the device.
+            <DeviceViewer
+              kind={deviceKindFor(m.category.slug)}
+              frame={m.frame}
+              model3d={m.model3d}
+              compact
+              label={t("studio.preview.view3d", { device: name })}
+              className={cn("h-56 shrink-0 rounded-xl bg-surface-muted", deviceKindFor(m.category.slug) === "phone" ? "w-36" : "w-48")}
+            />
           ) : (
             <span className="flex size-20 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
               <DeviceArt category={m.category.slug} className="size-14 text-foreground" />

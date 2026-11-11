@@ -7,7 +7,7 @@
  *                          catalogue and sample content only into an empty database; demo users only
  *                          with SEED_TEST_USERS=true, which also requires SEED_DEMO_PASSWORD)
  */
-import "dotenv/config";
+import "./load-env";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { PrismaClient } from "../src/generated/prisma/client";
@@ -287,6 +287,8 @@ async function upsertPasswordUser(email: string, name: string, password: string,
 async function seedDemoUsers() {
   const password = process.env.SEED_DEMO_PASSWORD ?? "Technentium#2026";
   if (isProd && !process.env.SEED_DEMO_PASSWORD) throw new Error("SEED_TEST_USERS needs SEED_DEMO_PASSWORD in production.");
+  // Local backend testing: sign in as "admin" / "admin123" (the username alias only works outside production).
+  await upsertPasswordUser("admin@technentium.test", "Admin (demo)", isProd ? password : "admin123", ["owner"]);
   await upsertPasswordUser("owner@technentium.test", "Owner (demo)", password, ["owner"]);
   await upsertPasswordUser("staff@technentium.test", "Priya (staff)", password, ["staff"]);
   await upsertPasswordUser("tech@technentium.test", "Ravi (technician)", password, ["technician"]);
@@ -294,7 +296,8 @@ async function seedDemoUsers() {
   await upsertPasswordUser("customer@technentium.test", "Asha (customer)", password, []);
   await upsertPasswordUser("editor@technentium.test", "Meera (editor)", password, ["editor"]);
   await upsertPasswordUser("inventory@technentium.test", "Arjun (inventory)", password, ["inventory"]);
-  console.log(`Demo users (password: ${password}): owner@, staff@, tech@, tech2@, editor@, inventory@, customer@technentium.test`);
+  if (!isProd) console.log("Test admin: admin / admin123 (admin@technentium.test)");
+  console.log(`Demo users (password: ${password}): admin@ (prod only), owner@, staff@, tech@, tech2@, editor@, inventory@, customer@technentium.test`);
   if (!supabase) console.warn("SUPABASE_SECRET_KEY not set: demo accounts have no Supabase login yet (re-run the seed once it is set).");
 }
 
@@ -321,7 +324,7 @@ async function defaultSignInSwitches() {
   const settings = (await res?.json().catch(() => null)) as { external?: { google?: boolean; phone?: boolean } } | null;
   if (!settings?.external) return;
   for (const [key, value] of [
-    ["features.signIn.google", !!settings.external.google],
+    ["features.signIn.google", false], // customers sign in with mobile OTP only; the owner can turn Google on in Feature controls
     ["features.signIn.phoneOtp", !!settings.external.phone],
   ] as const) {
     await db.businessSetting.upsert({ where: { key }, create: { key, value }, update: {} });

@@ -13,6 +13,8 @@ export interface StorageAdapter {
   put(key: string, body: Buffer, contentType: string): Promise<void>;
   /** Signed URL for direct download, or null when the adapter must stream through the app. */
   signedUrl(key: string, ttlSeconds: number): Promise<string | null>;
+  /** Signed URL the browser can PUT a file to directly (large uploads), or null when uploads must go through the app. */
+  signedPutUrl(key: string, contentType: string, ttlSeconds: number): Promise<string | null>;
   read(key: string): Promise<Buffer>;
   remove(key: string): Promise<void>;
 }
@@ -32,6 +34,9 @@ const localAdapter: StorageAdapter = {
     await writeFile(p, body);
   },
   async signedUrl() {
+    return null;
+  },
+  async signedPutUrl() {
     return null;
   },
   async read(key) {
@@ -61,6 +66,9 @@ function s3Adapter(): StorageAdapter {
     },
     async signedUrl(Key, ttl) {
       return getSignedUrl(client, new GetObjectCommand({ Bucket, Key }), { expiresIn: ttl });
+    },
+    async signedPutUrl(Key, ContentType, ttl) {
+      return getSignedUrl(client, new PutObjectCommand({ Bucket, Key, ContentType }), { expiresIn: ttl });
     },
     async read(Key) {
       const res = await client.send(new GetObjectCommand({ Bucket, Key }));

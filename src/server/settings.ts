@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { db, type Tx } from "@/server/db";
+import { hiddenStepsSchema, type OptionalStep } from "@/lib/customization/steps";
 
 /**
  * Typed business settings (PRD: "avoid hardcoding serviceability, pricing, and warranty rules").
@@ -17,12 +18,14 @@ export const SETTINGS = {
   "warranty.defaultPolicyId": { schema: z.string().nullable(), default: null as string | null },
   "business.supportPhone": { schema: z.string(), default: "+91 00000 00000" },
   "business.shopAddress": { schema: z.string(), default: "Technentium, Jaipur, Rajasthan" },
+  /** Customization studio steps hidden for every design (Admin → Design catalogue → Studio sections). */
+  "studio.hiddenSteps": { schema: hiddenStepsSchema, default: [] as OptionalStep[] },
 
   // Feature controls (Admin → Feature controls). Read through `server/features.ts`.
   "features.signUp": { schema: z.boolean(), default: true },
-  "features.signIn.google": { schema: z.boolean(), default: true },
+  "features.signIn.google": { schema: z.boolean(), default: false },
   "features.signIn.phoneOtp": { schema: z.boolean(), default: true },
-  "features.signIn.emailPassword": { schema: z.boolean(), default: true },
+  "features.signIn.emailPassword": { schema: z.boolean(), default: false },
   "features.section.repairs": { schema: z.boolean(), default: true },
   "features.section.shop": { schema: z.boolean(), default: true },
   "features.section.customization": { schema: z.boolean(), default: true },
@@ -31,6 +34,9 @@ export const SETTINGS = {
   "features.maintenance": { schema: z.boolean(), default: false },
   "features.maintenanceMessage": { schema: z.string().max(300), default: "" },
   "features.impersonation": { schema: z.boolean(), default: true },
+  /** 3D device previews per section; off shows the 2D drawings. */
+  "features.preview3d.studio": { schema: z.boolean(), default: true },
+  "features.preview3d.repairs": { schema: z.boolean(), default: true },
 } as const;
 
 export type SettingKey = keyof typeof SETTINGS;

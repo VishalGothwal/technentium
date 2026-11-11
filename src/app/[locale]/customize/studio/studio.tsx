@@ -16,6 +16,9 @@ import { Alert, DescriptionList, Skeleton } from "@/components/ui/surface";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
 import { DevicePicker, type PickedDevice } from "@/components/device/device-picker";
 import { DevicePreview } from "@/components/customization/device-preview";
+import { Device3D } from "@/components/device/device-3d";
+import { resolveDevice3d } from "@/lib/device-3d";
+import { STUDIO_STEPS, visibleSteps, type StudioStep } from "@/lib/customization/steps";
 
 export type StudioDesign = {
   id: string;
@@ -25,6 +28,8 @@ export type StudioDesign = {
   collection: string;
   style: DesignStyle;
   basePricePaise: number | null;
+  /** Studio steps this design hides. */
+  hiddenSteps: string[];
 };
 export type StudioOption = { id: string; slug: string; nameEn: string; nameHi: string | null; descriptionEn: string | null; descriptionHi: string | null; priceDeltaPaise: number };
 
@@ -45,7 +50,6 @@ type Draft = {
   idempotencyKey: string;
 };
 
-const STEPS = ["device", "design", "colour", "finish", "artwork", "review"] as const;
 const STORAGE_KEY = "tn_studio_draft_v1";
 const CUSTOMIZABLE = ["phone", "tablet", "laptop"];
 const BLANK_PALETTE = ["#1b1d2b", "#c4b5fd"];
@@ -57,12 +61,18 @@ export function Studio({
   coverages,
   initialDesignSlug,
   initialSignedIn,
+  hiddenSteps = [],
+  use3d = true,
 }: {
   designs: StudioDesign[];
   finishes: StudioOption[];
   coverages: StudioOption[];
   initialDesignSlug: string | null;
   initialSignedIn: boolean;
+  /** Steps the owner switched off for the whole studio. */
+  hiddenSteps?: string[];
+  /** Admin → Feature controls → Device previews. */
+  use3d?: boolean;
 }) {
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -132,18 +142,28 @@ export function Studio({
   }, [artFile]);
 
   const update = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }));
-  const step = STEPS[draft.step];
   const design = designs.find((d) => d.id === draft.designId) ?? null;
-  const finish = finishes.find((f) => f.id === draft.finishId) ?? null;
-  const coverage = coverages.find((c) => c.id === draft.coverageId) ?? null;
+  // Admin -> Design catalogue decides which steps exist (globally and per design).
+  const STEPS = visibleSteps(hiddenSteps, design?.hiddenSteps ?? []);
+  const stepIndex = Math.min(draft.step, STEPS.length - 1);
+  const step = STEPS[stepIndex];
+  const showColour = STEPS.includes("colour");
+  const showFinish = STEPS.includes("finish");
+  const showArtwork = STEPS.includes("artwork");
+  // Hidden steps fall back to their defaults (the server applies the same rule).
+  const finish = (showFinish ? finishes.find((f) => f.id === draft.finishId) : finishes[0]) ?? null;
+  const coverage = (showFinish ? coverages.find((c) => c.id === draft.coverageId) : coverages[0]) ?? null;
+  const palette = showColour || !design ? draft.palette : design.style.palette;
+  const textCfg = showColour && draft.text?.value.trim() ? draft.text : null;
+  const artworkCfg = showArtwork ? draft.artwork : null;
   const kind = deviceKindFor(draft.device?.category.slug ?? "phone");
   const [view, setView] = useState<"back" | "front">("back");
   const style: DesignStyle = useMemo(
-    () => (design ? { ...design.style, palette: draft.palette } : { pattern: "solid", palette: draft.palette, density: 5, angle: 45 }),
-    [design, draft.palette],
+    () => (design ? { ...design.style, palette } : { pattern: "solid", palette, density: 5, angle: 45 }),
+    [design, palette],
   );
   const estimate = estimatePaise({ basePricePaise: design?.basePricePaise, finishDeltaPaise: finish?.priceDeltaPaise ?? 0, coverageDeltaPaise: coverage?.priceDeltaPaise ?? 0 });
-  const artworkHref = artFile?.url ?? (draft.artwork?.mediaId ? mediaUrl(draft.artwork.mediaId) : null);
+  const artworkHref = artFile?.url ?? (artworkCfg?.mediaId ? mediaUrl(artworkCfg.mediaId) : null);
   const deviceName = draft.device ? `${draft.device.brand.name} ${draft.device.name}` : t("studio.preview.generic");
 
   const goTo = (n: number) => {
@@ -153,11 +173,12 @@ export function Studio({
     requestAnimationFrame(() => headingRef.current?.focus());
   };
 
-  function validate(upTo: number): boolean {
+  function validate(upTo: StudioStep): boolean {
     const errs: Record<string, string> = {};
-    if (upTo >= 0 && !draft.device) errs.device = t("studio.validation.device");
-    if (upTo >= 3 && (!draft.finishId || !draft.coverageId)) errs.options = t("studio.validation.options");
-    if (upTo >= 2 && draft.text && (!draft.text.value.trim() || draft.text.value.length > 24)) errs.text = t("studio.validation.textTooLong");
+    const reached = (s: StudioStep) => STUDIO_STEPS.indexOf(upTo) >= STUDIO_STEPS.indexOf(s);
+    if (!draft.device) errs.device = t("studio.validation.device");
+    if (reached("finish") && (!finish || !coverage)) errs.options = t("studio.validation.options");
+    if (reached("colour") && showColour && draft.text && (!draft.text.value.trim() || draft.text.value.length > 24)) errs.text = t("studio.validation.textTooLong");
     setErrors(errs);
     if (errs.device) goTo(0);
     return Object.keys(errs).length === 0;
@@ -203,11 +224,11 @@ export function Studio({
   }
 
   async function submit() {
-    if (!validate(5)) return;
+    if (!validate("review")) return;
     if (!draft.acceptTerms) return setErrors({ acceptTerms: t("studio.validation.acceptTerms") });
     setFormError(null);
     try {
-      let artwork = draft.artwork;
+      let artwork = artworkCfg;
       if (artwork && !artwork.mediaId) {
         if (!artFile) artwork = null;
         else {
@@ -225,10 +246,10 @@ export function Studio({
         body: JSON.stringify({
           deviceModelId: draft.device!.id,
           designId: draft.designId,
-          finishOptionId: draft.finishId,
-          coverageOptionId: draft.coverageId,
-          palette: draft.palette,
-          text: draft.text?.value.trim() ? { ...draft.text, value: draft.text.value.trim() } : null,
+          finishOptionId: finish?.id,
+          coverageOptionId: coverage?.id,
+          palette,
+          text: textCfg ? { ...textCfg, value: textCfg.value.trim() } : null,
           artwork: artwork?.mediaId ? artwork : null,
           notes: draft.notes,
           acceptTerms: true,
@@ -249,7 +270,7 @@ export function Studio({
     }
   }
 
-  const preview = (
+  const preview = !use3d ? (
     <DevicePreview
       kind={kind}
       frame={draft.device?.frame}
@@ -257,11 +278,25 @@ export function Studio({
       style={style}
       finish={finish?.slug}
       coverage={coverage?.slug}
-      text={draft.text?.value.trim() ? draft.text : null}
-      artwork={artworkHref && draft.artwork ? { href: artworkHref, ...draft.artwork } : null}
+      text={textCfg}
+      artwork={artworkHref && artworkCfg ? { href: artworkHref, ...artworkCfg } : null}
       seed={design?.slug}
       label={t("studio.preview.label", { device: deviceName })}
       className="h-full w-full drop-shadow-2xl"
+    />
+  ) : (
+    <Device3D
+      kind={kind}
+      spec={resolveDevice3d(draft.device?.frame, draft.device?.model3d, kind)}
+      view={view}
+      style={style}
+      finish={finish?.slug ?? null}
+      coverage={coverage?.slug ?? null}
+      text={textCfg}
+      artwork={artworkHref && artworkCfg ? { href: artworkHref, ...artworkCfg } : null}
+      seed={design?.slug}
+      label={t("studio.preview.label", { device: deviceName })}
+      className="h-full w-full"
     />
   );
 
@@ -317,7 +352,7 @@ export function Studio({
               </div>
             )}
           </div>
-          <div className={cn("relative h-full", kind === "laptop" ? "w-full max-w-xl" : "max-w-full")}>{preview}</div>
+          <div className="relative h-full w-full">{preview}</div>
           <p className="absolute bottom-3 left-4 right-4 text-center text-xs text-muted">{t("studio.preview.illustrative")}</p>
         </div>
       </div>
@@ -325,19 +360,19 @@ export function Studio({
       {/* Panel */}
       <div className="mt-5 lg:mt-0">
         <nav aria-label={t("studio.title")} className="mb-4">
-          <p className="text-sm text-muted lg:hidden">{t("studio.stepOf", { current: draft.step + 1, total: STEPS.length })}</p>
+          <p className="text-sm text-muted lg:hidden">{t("studio.stepOf", { current: stepIndex + 1, total: STEPS.length })}</p>
           <ol className="mt-2 flex gap-1 lg:mt-0 lg:grid lg:grid-cols-3 lg:gap-2">
             {STEPS.map((s, i) => (
               <li key={s} className="flex-1">
                 <button
                   type="button"
-                  onClick={() => (i <= draft.step || draft.device ? goTo(i) : undefined)}
+                  onClick={() => (i <= stepIndex || draft.device ? goTo(i) : undefined)}
                   disabled={i > 0 && !draft.device}
-                  aria-current={i === draft.step ? "step" : undefined}
+                  aria-current={i === stepIndex ? "step" : undefined}
                   className={cn(
                     "block h-1.5 w-full rounded-full lg:h-auto lg:rounded-xl lg:border lg:px-3 lg:py-2 lg:text-left lg:text-xs lg:font-medium",
-                    i <= draft.step ? "bg-primary lg:border-primary/50 lg:bg-primary-soft" : "bg-border lg:border-border lg:bg-surface",
-                    i === draft.step && "lg:ring-2 lg:ring-primary/50",
+                    i <= stepIndex ? "bg-primary lg:border-primary/50 lg:bg-primary-soft" : "bg-border lg:border-border lg:bg-surface",
+                    i === stepIndex && "lg:ring-2 lg:ring-primary/50",
                     "disabled:cursor-not-allowed",
                   )}
                 >
@@ -510,10 +545,14 @@ export function Studio({
                 items={[
                   [t("studio.review.device"), deviceName],
                   [t("studio.review.design"), design ? localized(locale, design.nameEn, design.nameHi) : t("studio.design.blank")],
-                  [t("studio.review.finish"), finish ? localized(locale, finish.nameEn, finish.nameHi) : "—"],
-                  [t("studio.review.coverage"), coverage ? localized(locale, coverage.nameEn, coverage.nameHi) : "—"],
-                  [t("studio.review.text"), draft.text?.value.trim() || t("studio.review.none")],
-                  [t("studio.review.artwork"), draft.artwork ? t("studio.review.artworkYes") : t("studio.review.none")],
+                  ...(showFinish
+                    ? ([
+                        [t("studio.review.finish"), finish ? localized(locale, finish.nameEn, finish.nameHi) : "—"],
+                        [t("studio.review.coverage"), coverage ? localized(locale, coverage.nameEn, coverage.nameHi) : "—"],
+                      ] as [string, string][])
+                    : []),
+                  ...(showColour ? ([[t("studio.review.text"), textCfg?.value.trim() || t("studio.review.none")]] as [string, string][]) : []),
+                  ...(showArtwork ? ([[t("studio.review.artwork"), artworkCfg ? t("studio.review.artworkYes") : t("studio.review.none")]] as [string, string][]) : []),
                 ]}
               />
               <Field label={t("studio.review.notes")}>
@@ -540,15 +579,15 @@ export function Studio({
           )}
 
           <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4">
-            {draft.step > 0 ? (
-              <Button type="button" variant="ghost" onClick={() => goTo(draft.step - 1)} disabled={!!submitting}>
+            {stepIndex > 0 ? (
+              <Button type="button" variant="ghost" onClick={() => goTo(stepIndex - 1)} disabled={!!submitting}>
                 {t("common.back")}
               </Button>
             ) : (
               <span />
             )}
             {step !== "review" ? (
-              <Button type="button" onClick={() => validate(draft.step) && goTo(draft.step + 1)}>
+              <Button type="button" onClick={() => validate(step) && goTo(stepIndex + 1)}>
                 {t("common.next")}
               </Button>
             ) : (

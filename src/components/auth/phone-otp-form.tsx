@@ -4,7 +4,8 @@ import { sendPhoneOtpAction, verifyPhoneOtpAction } from "@/app/[locale]/auth/ac
 import { isCompleteNational, normalizeIndianMobile } from "@/lib/phone";
 import { useI18n } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
-import { Field, Input } from "@/components/ui/field";
+import { Field } from "@/components/ui/field";
+import { cn } from "@/lib/cn";
 import { PhoneInput } from "@/components/ui/phone-input";
 
 const RESEND_SECONDS = 30;
@@ -23,6 +24,9 @@ export function PhoneOtpForm({ onSuccess, autoFocus }: { onSuccess: () => void; 
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [focused, setFocused] = useState(false);
+  const [shake, setShake] = useState(0);
+  const [done, setDone] = useState(false);
   const codeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -39,10 +43,14 @@ export function PhoneOtpForm({ onSuccess, autoFocus }: { onSuccess: () => void; 
       if (!res.ok) {
         setPending(false);
         setError(t(res.error));
-        codeRef.current?.select();
+        setShake((n) => n + 1);
+        setCode("");
+        codeRef.current?.focus();
         return;
       }
-      onSuccess();
+      // Brief success state (green boxes + tick) before moving on.
+      setDone(true);
+      setTimeout(onSuccess, 650);
     },
     [onSuccess, t],
   );
@@ -79,7 +87,7 @@ export function PhoneOtpForm({ onSuccess, autoFocus }: { onSuccess: () => void; 
   if (!normalized) {
     return (
       <form
-        className="space-y-4"
+        className="otp-step space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
           const n = normalizeIndianMobile(phone);
@@ -114,16 +122,21 @@ export function PhoneOtpForm({ onSuccess, autoFocus }: { onSuccess: () => void; 
     );
   }
 
+  const active = Math.min(code.length, 5);
   return (
     <form
-      className="space-y-4"
+      className="otp-step space-y-5"
       onSubmit={(e) => {
         e.preventDefault();
         void verify(normalized, code);
       }}
     >
-      <div className="flex items-center justify-between gap-3 rounded-lg bg-primary-soft px-3 py-2.5">
-        <p className="text-sm" role="status">
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary-soft px-3.5 py-3">
+        <p className="flex items-center gap-2 text-sm" role="status">
+          <svg viewBox="0 0 24 24" aria-hidden className="size-5 shrink-0 text-primary" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="6" y="2.5" width="12" height="19" rx="2.5" />
+            <path d="M10.5 18.5h3" />
+          </svg>
           {t("auth.codeSent", { phone: formatPhone(normalized) })}
         </p>
         <button
@@ -138,38 +151,100 @@ export function PhoneOtpForm({ onSuccess, autoFocus }: { onSuccess: () => void; 
           {t("auth.changeNumber")}
         </button>
       </div>
+
       <Field label={t("auth.code")} error={error} required>
         {(p) => (
-          <Input
-            {...p}
-            ref={codeRef}
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={6}
-            value={code}
-            onChange={(e) => {
-              const next = e.target.value.replace(/\D/g, "").slice(0, 6);
-              setCode(next);
-              // All six digits typed or pasted: check straight away, no extra tap.
-              if (next.length === 6 && !pending) void verify(normalized, next);
-            }}
-            placeholder="••••••"
-            className="h-14 text-center font-mono text-2xl tracking-[0.6em]"
-          />
+          <div key={shake} className={cn("relative", shake > 0 && "otp-shake")}>
+            {/* One real input (SMS autofill, paste, screen readers) under six display boxes. */}
+            <input
+              {...p}
+              ref={codeRef}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              value={code}
+              disabled={done}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              onChange={(e) => {
+                const next = e.target.value.replace(/\D/g, "").slice(0, 6);
+                setCode(next);
+                setError(null);
+                // All six digits typed or pasted: check straight away, no extra tap.
+                if (next.length === 6 && !pending) void verify(normalized, next);
+              }}
+              className="absolute inset-0 z-10 h-full w-full cursor-text opacity-0"
+            />
+            <div aria-hidden className="grid grid-cols-6 gap-2 sm:gap-2.5">
+              {Array.from({ length: 6 }, (_, i) => {
+                const digit = code[i];
+                const isActive = focused && !done && !pending && i === active && (code.length < 6 || i === 5);
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "relative flex h-14 items-center justify-center rounded-xl border-2 bg-surface font-mono text-2xl font-semibold tabular-nums shadow-sm transition-all duration-200 sm:h-16",
+                      done
+                        ? "border-success bg-success/10 text-success"
+                        : error
+                          ? "border-danger/70"
+                          : isActive
+                            ? "-translate-y-0.5 border-primary shadow-[0_6px_20px_-6px_var(--primary)] ring-4 ring-primary/15"
+                            : digit
+                              ? "border-foreground/30"
+                              : "border-border",
+                      pending && !done && "otp-wave",
+                    )}
+                    style={pending && !done ? { animationDelay: `${i * 70}ms` } : done ? { transitionDelay: `${i * 50}ms` } : undefined}
+                  >
+                    {digit ? <span className="otp-digit">{digit}</span> : isActive ? <span className="otp-caret h-7 w-0.5 rounded bg-primary" /> : <span className="size-1.5 rounded-full bg-border" />}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
       </Field>
-      <Button type="submit" block size="lg" pending={pending} disabled={code.length !== 6}>
-        {t("auth.verify")}
-      </Button>
-      <p className="text-center text-sm" aria-live="polite">
-        {cooldown > 0 ? (
-          <span className="text-muted">{t("auth.resendIn", { seconds: cooldown })}</span>
+
+      <Button type="submit" block size="lg" pending={pending && !done} disabled={code.length !== 6 || done} className={cn("transition-colors", done && "!bg-success")}>
+        {done ? (
+          <span className="flex items-center gap-2">
+            <svg viewBox="0 0 24 24" aria-hidden className="size-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path className="otp-check" d="M5 12.5l4.5 4.5L19 7.5" />
+            </svg>
+            {t("auth.verified")}
+          </span>
         ) : (
-          <button type="button" className="font-medium text-primary hover:underline" disabled={pending} onClick={() => void sendCode(normalized)}>
+          t("auth.verify")
+        )}
+      </Button>
+
+      <div className="flex items-center justify-center gap-2 text-sm" aria-live="polite">
+        {cooldown > 0 ? (
+          <>
+            <svg viewBox="0 0 20 20" aria-hidden className="size-5 -rotate-90">
+              <circle cx="10" cy="10" r="8" fill="none" stroke="var(--border)" strokeWidth="2" />
+              <circle
+                cx="10"
+                cy="10"
+                r="8"
+                fill="none"
+                stroke="var(--primary)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeDasharray={50.27}
+                strokeDashoffset={50.27 * (1 - cooldown / RESEND_SECONDS)}
+                className="transition-[stroke-dashoffset] duration-1000 ease-linear"
+              />
+            </svg>
+            <span className="text-muted tabular-nums">{t("auth.resendIn", { seconds: cooldown })}</span>
+          </>
+        ) : (
+          <button type="button" className="font-medium text-primary hover:underline" disabled={pending || done} onClick={() => void sendCode(normalized)}>
             {t("auth.resend")}
           </button>
         )}
-      </p>
+      </div>
     </form>
   );
 }

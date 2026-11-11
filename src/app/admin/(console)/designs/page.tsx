@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { requireStaffPage } from "@/server/auth/guards";
 import { can } from "@/server/rbac/actor";
-import { listDesignOptionsAdmin, listDesignsAdmin } from "@/server/modules/customization/design-admin.service";
+import { getStudioStepsAdmin, listDesignOptionsAdmin, listDesignsAdmin } from "@/server/modules/customization/design-admin.service";
 import { formatPaise } from "@/lib/format";
 import { DEFAULT_BASE_PRICE_PAISE } from "@/lib/customization/pricing";
 import { ButtonLink } from "@/components/ui/button";
-import { Badge, PageHeader } from "@/components/ui/surface";
+import { Badge, Card, CardBody, CardHeader, PageHeader } from "@/components/ui/surface";
+import { STEP_LABELS } from "@/lib/customization/steps";
+import { StudioStepsEditor } from "./studio-steps-editor";
 import { NoAccess } from "@/components/admin/no-access";
 import { DevicePreview } from "@/components/customization/device-preview";
 import { ArchiveToggle } from "./design-form";
@@ -17,7 +19,7 @@ export const instant = false;
 export default async function DesignsAdminPage() {
   const actor = await requireStaffPage();
   if (!can(actor, "customization.manage")) return <NoAccess />;
-  const [designs, options] = await Promise.all([listDesignsAdmin(actor), listDesignOptionsAdmin(actor)]);
+  const [designs, options, hiddenSteps] = await Promise.all([listDesignsAdmin(actor), listDesignOptionsAdmin(actor), getStudioStepsAdmin(actor)]);
 
   return (
     <>
@@ -26,6 +28,16 @@ export default async function DesignsAdminPage() {
         description="Designs, finishes and coverage options offered in the customization studio. Changes appear on the public site immediately."
         actions={<ButtonLink href="/admin/designs/new">New design</ButtonLink>}
       />
+
+      <Card className="mb-8">
+        <CardHeader
+          title="Studio sections"
+          description="Choose which steps customers see in the customization studio. A hidden step uses its default (first finish and coverage, the design's own colours, no text or artwork). Each design can hide more steps on its own edit page."
+        />
+        <CardBody>
+          <StudioStepsEditor hidden={hiddenSteps} />
+        </CardBody>
+      </Card>
 
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {designs.map((d) => (
@@ -44,6 +56,9 @@ export default async function DesignsAdminPage() {
                 <p className="mt-1 flex flex-wrap gap-1">
                   {!d.active && <Badge>Archived</Badge>}
                   {d.featured && <Badge tone="primary">Featured</Badge>}
+                  {d.hiddenSteps.map((s) => (
+                    <Badge key={s}>No {STEP_LABELS[s as keyof typeof STEP_LABELS]?.label.toLowerCase() ?? s}</Badge>
+                  ))}
                   {d._count.requests > 0 && <Badge tone="info">{d._count.requests} {d._count.requests === 1 ? "request" : "requests"}</Badge>}
                 </p>
                 <div className="mt-auto pt-2">

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { COLLECTIONS, designStyleSchema, hexColor, TEXT_FONTS, TEXT_POSITIONS } from "@/lib/customization/style";
+import { designHiddenStepsSchema, hiddenStepsSchema } from "@/lib/customization/steps";
 
 const id = z.string().min(1, "validation.required").max(64);
 
@@ -64,6 +65,8 @@ export const designInputSchema = z.object({
   collection: z.enum(COLLECTIONS),
   style: designStyleSchema,
   basePricePaise: z.number().int().min(0).max(10_000_000).nullable(),
+  /** Studio steps hidden when this design is chosen. */
+  hiddenSteps: designHiddenStepsSchema.default([]),
   featured: z.boolean().default(false),
   active: z.boolean().default(true),
   sortOrder: z.number().int().min(0).max(9999).default(0),
@@ -82,3 +85,5 @@ export const designOptionInputSchema = z.object({
   sortOrder: z.number().int().min(0).max(9999).default(0),
 });
 export type DesignOptionInput = z.input<typeof designOptionInputSchema>;
+
+export const studioStepsInputSchema = z.object({ hiddenSteps: hiddenStepsSchema });

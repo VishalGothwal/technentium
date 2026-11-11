@@ -6,7 +6,9 @@ import { AppError, notFound } from "@/server/errors";
 import { assertCan, type Actor } from "@/server/rbac/actor";
 import { parse } from "@/server/validation";
 import { readStyle } from "@/lib/customization/style";
-import { designInputSchema, designOptionInputSchema } from "@/lib/schemas/customization";
+import { designInputSchema, designOptionInputSchema, studioStepsInputSchema } from "@/lib/schemas/customization";
+import { readHiddenSteps } from "@/lib/customization/steps";
+import { getSetting } from "@/server/settings";
 
 /** Design catalogue and finish/coverage options (Admin → Design catalogue), `customization.manage`. */
 
@@ -59,6 +61,28 @@ export async function setDesignActive(actor: Actor | null, id: string, active: b
     await audit(tx, actor, { action: active ? "design.activate" : "design.archive", entityType: "Design", entityId: id });
   });
   return { ok: true };
+}
+
+/** Studio steps hidden for every design. */
+export async function getStudioStepsAdmin(actor: Actor | null) {
+  assertCan(actor, "customization.manage");
+  return readHiddenSteps(await getSetting("studio.hiddenSteps"));
+}
+
+export async function setStudioSteps(actor: Actor | null, rawInput: unknown) {
+  assertCan(actor, "customization.manage");
+  const { hiddenSteps } = parse(studioStepsInputSchema, rawInput);
+  const value = [...new Set(hiddenSteps)];
+  await db.$transaction(async (tx) => {
+    const before = await tx.businessSetting.findUnique({ where: { key: "studio.hiddenSteps" } });
+    await tx.businessSetting.upsert({
+      where: { key: "studio.hiddenSteps" },
+      create: { key: "studio.hiddenSteps", value, updatedBy: actor.userId },
+      update: { value, updatedBy: actor.userId },
+    });
+    await audit(tx, actor, { action: "studio.steps.update", entityType: "BusinessSetting", entityId: "studio.hiddenSteps", before: before?.value ?? [], after: value });
+  });
+  return { hiddenSteps: value };
 }
 
 export async function listDesignOptionsAdmin(actor: Actor | null) {

@@ -15,6 +15,8 @@ import { formatPaise } from "@/lib/format";
 import type { CustomizationConfig } from "@/lib/customization/config";
 import { estimatePaise } from "@/lib/customization/pricing";
 import { CUSTOMIZABLE_CATEGORIES, readStyle, type DeviceKind } from "@/lib/customization/style";
+import { readHiddenSteps, visibleSteps } from "@/lib/customization/steps";
+import { getSetting } from "@/server/settings";
 import {
   customizationCancelSchema,
   customizationDecisionSchema,
@@ -49,6 +51,7 @@ const DESIGN_PUBLIC_SELECT = {
   collection: true,
   style: true,
   basePricePaise: true,
+  hiddenSteps: true,
   featured: true,
 } as const;
 
@@ -74,6 +77,11 @@ export async function listDesignOptions() {
     select: { id: true, kind: true, slug: true, nameEn: true, nameHi: true, descriptionEn: true, descriptionHi: true, priceDeltaPaise: true },
   });
   return { finishes: rows.filter((r) => r.kind === "FINISH"), coverages: rows.filter((r) => r.kind === "COVERAGE") };
+}
+
+/** Studio steps the owner has switched off for every design. */
+export async function getStudioHiddenSteps() {
+  return readHiddenSteps(await getSetting("studio.hiddenSteps"));
 }
 
 // ───────────────────────────── Shared helpers ─────────────────────────────
@@ -130,14 +138,26 @@ export async function submitCustomization(actor: Actor | null, rawInput: unknown
   await enforce(`customization:${actor.userId}`, 3600, 10);
   const input = parse(customizationRequestSchema, rawInput);
 
-  const [device, design, finish, coverage] = await Promise.all([
+  const [device, design, globalHidden] = await Promise.all([
     db.deviceModel.findFirst({
       where: { id: input.deviceModelId, active: true, category: { slug: { in: [...CUSTOMIZABLE_CATEGORIES] }, active: true } },
       select: { id: true, name: true, frame: true, brand: { select: { name: true } }, category: { select: { slug: true } } },
     }),
     input.designId ? db.design.findFirst({ where: { id: input.designId, active: true } }) : Promise.resolve(null),
-    db.designOption.findFirst({ where: { id: input.finishOptionId, kind: "FINISH", active: true } }),
-    db.designOption.findFirst({ where: { id: input.coverageOptionId, kind: "COVERAGE", active: true } }),
+    getStudioHiddenSteps(),
+  ]);
+  // Hidden studio steps (Admin → Design catalogue): whatever the client sent for them is replaced by the defaults.
+  const steps = visibleSteps(globalHidden, design?.hiddenSteps ?? []);
+  const showFinish = steps.includes("finish");
+  if (!steps.includes("colour")) {
+    input.palette = undefined;
+    input.text = null;
+  }
+  if (!steps.includes("artwork")) input.artwork = null;
+  const firstOption = (kind: "FINISH" | "COVERAGE") => db.designOption.findFirst({ where: { kind, active: true }, orderBy: [{ sortOrder: "asc" }, { nameEn: "asc" }] });
+  const [finish, coverage] = await Promise.all([
+    showFinish ? db.designOption.findFirst({ where: { id: input.finishOptionId, kind: "FINISH", active: true } }) : firstOption("FINISH"),
+    showFinish ? db.designOption.findFirst({ where: { id: input.coverageOptionId, kind: "COVERAGE", active: true } }) : firstOption("COVERAGE"),
   ]);
   const invalid = (field: string) => new AppError("VALIDATION", "errors.validation", { fields: { [field]: "studio.validation.unavailable" } });
   if (!device) throw invalid("deviceModelId");

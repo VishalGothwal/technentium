@@ -103,6 +103,28 @@ export default async function FeatureControlsPage() {
         </Card>
 
         <Card>
+          <CardHeader title="Device previews" description="Show devices as rotatable 3D models or as flat 2D drawings, per section. 3D models are managed in Admin → 3D models." />
+          <CardBody>
+            <SwitchList
+              switches={[
+                {
+                  key: "features.preview3d.studio",
+                  label: "3D in the customization studio",
+                  description: "Off: the studio shows the 2D drawing with a front/back switch.",
+                  on: f.preview3d.studio,
+                },
+                {
+                  key: "features.preview3d.repairs",
+                  label: "3D on repair pages",
+                  description: "Off: repair model pages show the 2D front and back outline.",
+                  on: f.preview3d.repairs,
+                },
+              ]}
+            />
+          </CardBody>
+        </Card>
+
+        <Card>
           <CardHeader title="Testing" />
           <CardBody>
             <SwitchList

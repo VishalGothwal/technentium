@@ -3,7 +3,8 @@ import { Suspense } from "react";
 import { getT } from "@/i18n/server";
 import { pageMetadata } from "@/lib/seo";
 import { getSession } from "@/server/auth/session";
-import { cachedDesignOptions, cachedDesigns } from "@/server/modules/customization/catalog.cached";
+import { cachedFeatures } from "@/server/features";
+import { cachedDesignOptions, cachedDesigns, cachedStudioHiddenSteps } from "@/server/modules/customization/catalog.cached";
 import { Skeleton } from "@/components/ui/surface";
 import { StudioTheme } from "@/components/customization/studio-theme";
 import { Studio } from "./studio";
@@ -17,16 +18,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function StudioWithData({ searchParams }: { searchParams: PageProps<"/[locale]/customize/studio">["searchParams"] }) {
-  const [sp, session, designs, options] = await Promise.all([searchParams, getSession(), cachedDesigns(), cachedDesignOptions()]);
+  const [sp, session, designs, options, hiddenSteps, features] = await Promise.all([searchParams, getSession(), cachedDesigns(), cachedDesignOptions(), cachedStudioHiddenSteps(), cachedFeatures()]);
   const slug = typeof sp.design === "string" ? sp.design.slice(0, 80) : null;
   return (
     <Studio
       key={slug ?? "blank"}
-      designs={designs.map(({ id, slug, nameEn, nameHi, collection, style, basePricePaise }) => ({ id, slug, nameEn, nameHi, collection, style, basePricePaise }))}
+      designs={designs.map(({ id, slug, nameEn, nameHi, collection, style, basePricePaise, hiddenSteps }) => ({ id, slug, nameEn, nameHi, collection, style, basePricePaise, hiddenSteps }))}
       finishes={options.finishes}
       coverages={options.coverages}
       initialDesignSlug={slug}
       initialSignedIn={!!session}
+      hiddenSteps={hiddenSteps}
+      use3d={features.preview3d.studio}
     />
   );
 }
