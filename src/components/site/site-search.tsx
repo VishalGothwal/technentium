@@ -94,13 +94,13 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
       <div
         className={cn(
           "items-center bg-surface xl:flex",
-          expanded ? "search-bar absolute inset-0 z-10 flex gap-2 px-4 xl:animate-none" : "hidden",
-          "xl:static xl:w-full xl:justify-end xl:bg-transparent xl:px-0",
+          expanded ? "search-bar absolute inset-0 z-10 flex gap-2 px-4 sm:inset-auto sm:top-1/2 sm:right-4 sm:w-96 sm:-translate-y-1/2 sm:pr-0 sm:pl-3 sm:shadow-[-28px_0_20px_-6px_var(--color-surface)] lg:right-6 xl:animate-none xl:shadow-none" : "hidden",
+          "xl:static xl:w-full xl:translate-y-0 xl:justify-end xl:bg-transparent xl:px-0",
         )}
       >
         <label
           className={cn(
-            "flex h-11 flex-1 items-center gap-2.5 rounded-full border px-4 transition-[width,box-shadow,background-color,border-color] duration-300 ease-out xl:h-10 xl:flex-none",
+            "flex h-10 flex-1 items-center gap-2.5 rounded-full border px-4 sm:h-9 transition-[width,box-shadow,background-color,border-color] duration-300 ease-out xl:h-9 xl:flex-none",
             focused
               ? "border-foreground/20 bg-surface shadow-[0_10px_40px_-12px_rgba(0,0,0,0.28)] xl:w-full"
               : "border-border/80 bg-surface-muted/80 hover:border-foreground/20 hover:bg-surface xl:w-40",
@@ -115,7 +115,7 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
             onChange={(e) => setQ(e.target.value)}
             onFocus={() => setFocused(true)}
             placeholder={focused || expanded ? labels.placeholder : `${labels.open}…`}
-            className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none! placeholder:text-muted [&::-webkit-search-cancel-button]:hidden"
+            className="h-full min-w-0 flex-1 appearance-none border-0 bg-transparent! p-0 text-sm shadow-none! outline-none! placeholder:text-muted [&::-webkit-search-cancel-button]:hidden"
           />
           {q ? (
             <button type="button" onClick={() => setQ("")} aria-label={labels.close} className="hidden rounded-full p-0.5 text-muted transition hover:rotate-90 hover:text-foreground xl:inline-flex">
@@ -140,7 +140,7 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
 
       {showPanel && (
         <div
-          className="search-drop absolute inset-x-4 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-surface p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] xl:inset-x-auto xl:right-0 xl:w-96"
+          className="search-drop absolute inset-x-4 top-full z-50 mt-2 sm:inset-x-auto sm:right-4 sm:w-96 lg:right-6 max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-surface p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] xl:inset-x-auto xl:right-0 xl:w-96"
           aria-live="polite"
         >
           {q.trim().length < 2 ? (

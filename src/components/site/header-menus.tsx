@@ -72,7 +72,7 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
             <span
               aria-hidden
               className={cn(
-                "pointer-events-none absolute inset-x-0.5 top-1/2 -z-10 h-9 -translate-y-1/2 rounded-full bg-foreground/7 transition duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+                "pointer-events-none absolute inset-x-1 top-1/2 -z-10 h-9 -translate-y-1/2 rounded-full bg-foreground/12 ring-1 ring-foreground/5 transition duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
                 active || isOpen ? "scale-100 opacity-100" : "scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-60",
               )}
             />
@@ -123,7 +123,7 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
                     clearTimeout(timer.current);
                     setOpen(isOpen ? null : entry.key);
                   }}
-                  className={cn(triggerClass, "pl-0.5 xl:pl-1")}
+                  className={cn(triggerClass, "pr-1.5 pl-0.5 xl:pr-2 xl:pl-1")}
                 >
                   <ChevronDown aria-hidden className={cn("size-4 transition-transform", isOpen && "rotate-180")} />
                 </button>
