@@ -85,7 +85,7 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
   const showPanel = focused;
 
   return (
-    <div ref={root} className="xl:relative xl:h-10 xl:w-44">
+    <div ref={root} className="xl:relative xl:flex xl:min-w-0 xl:max-w-[18rem] xl:flex-1 xl:justify-end">
       <button type="button" onClick={() => setExpanded(true)} aria-label={labels.open} title={`${labels.open} (Ctrl K)`} className={cn(HEADER_ICON_BUTTON, "xl:hidden")}>
         <Search aria-hidden className="size-5" strokeWidth={1.75} />
       </button>
@@ -95,15 +95,15 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
         className={cn(
           "items-center bg-surface xl:flex",
           expanded ? "search-bar absolute inset-0 z-10 flex gap-2 px-4 xl:animate-none" : "hidden",
-          "xl:absolute xl:inset-auto xl:top-0 xl:right-0 xl:z-20 xl:bg-transparent xl:px-0",
+          "xl:static xl:w-full xl:justify-end xl:bg-transparent xl:px-0",
         )}
       >
         <label
           className={cn(
             "flex h-11 flex-1 items-center gap-2.5 rounded-full border px-4 transition-[width,box-shadow,background-color,border-color] duration-300 ease-out xl:h-10 xl:flex-none",
             focused
-              ? "border-foreground/20 bg-surface shadow-[0_10px_40px_-12px_rgba(0,0,0,0.28)] xl:w-72"
-              : "border-border/80 bg-surface-muted/80 hover:border-foreground/20 hover:bg-surface xl:w-44",
+              ? "border-foreground/20 bg-surface shadow-[0_10px_40px_-12px_rgba(0,0,0,0.28)] xl:w-full"
+              : "border-border/80 bg-surface-muted/80 hover:border-foreground/20 hover:bg-surface xl:w-40",
           )}
         >
           <Search aria-hidden className={cn("size-4 shrink-0 transition-all duration-300", focused ? "scale-110 text-foreground" : "text-muted")} strokeWidth={2} />

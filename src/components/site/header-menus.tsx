@@ -72,8 +72,8 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
             <span
               aria-hidden
               className={cn(
-                "absolute inset-x-2 bottom-0 h-0.5 rounded-full xl:inset-x-3 bg-foreground transition-opacity",
-                active || isOpen ? "opacity-100" : "opacity-0",
+                "pointer-events-none absolute inset-x-0.5 top-1/2 -z-10 h-9 -translate-y-1/2 rounded-full bg-foreground/7 transition duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+                active || isOpen ? "scale-100 opacity-100" : "scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-60",
               )}
             />
           );
@@ -85,7 +85,7 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
           if (!entry.mega) {
             return (
               <li key={entry.key} className="flex">
-                <Link href={entry.href} aria-current={active ? "page" : undefined} className={triggerClass}>
+                <Link href={entry.href} aria-current={active ? "page" : undefined} className={cn(triggerClass, "group isolate")}>
                   {entry.label}
                   {indicator}
                 </Link>
@@ -101,7 +101,7 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
               onPointerLeave={(e) => e.pointerType === "mouse" && schedule(null, 160)}
             >
               {/* Label navigates to the section; the chevron opens the panel for keyboard and touch users. */}
-              <div className="relative flex">
+              <div className="group relative isolate flex">
                 <Link
                   href={entry.href}
                   aria-current={active ? "page" : undefined}

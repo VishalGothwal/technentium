@@ -139,14 +139,14 @@ export async function SiteHeader() {
 
       {/* Frosted glass bar with a hairline edge and a soft shadow, so it floats over the page. */}
       <header className="sticky top-0 z-40 border-b border-black/6 bg-surface/90 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_-16px_rgba(0,0,0,0.18)] backdrop-blur-2xl backdrop-saturate-150 supports-[backdrop-filter]:bg-surface/75">
-        <div className="relative mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 lg:h-[4.5rem] lg:gap-5 lg:px-6">
+        <div className="relative mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 lg:h-16 lg:gap-4 lg:px-6">
           <Link href={l("")} className="shrink-0 rounded-md" aria-label={t("common.brand")}>
             <Logo />
           </Link>
 
           <DesktopNav entries={entries} />
 
-          <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
+          <div className="ml-auto flex items-center justify-end gap-1 sm:gap-1.5 xl:min-w-0 xl:flex-1">
             <SiteSearch
               locale={locale}
               labels={{
@@ -170,7 +170,7 @@ export async function SiteHeader() {
             <ButtonLink
               href={l("/repairs/book")}
               size="sm"
-              className="ml-1.5 hidden h-10 rounded-full px-5 font-semibold shadow-[0_6px_16px_-6px_rgba(0,0,0,0.45)] transition hover:-translate-y-px hover:shadow-[0_10px_22px_-8px_rgba(0,0,0,0.5)] sm:inline-flex"
+              className="ml-1.5 hidden h-9 rounded-full px-4 font-semibold shadow-[0_6px_16px_-6px_rgba(0,0,0,0.45)] transition hover:-translate-y-px hover:shadow-[0_10px_22px_-8px_rgba(0,0,0,0.5)] sm:inline-flex"
             >
               {t("nav.bookRepair")}
             </ButtonLink>
