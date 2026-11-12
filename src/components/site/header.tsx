@@ -12,6 +12,7 @@ import { LanguageSwitcher } from "./language-switcher";
 import { Logo } from "./logo";
 import { deviceIcon, HEADER_ICON_BUTTON, productIcon } from "./nav-icons";
 import { SignOutButton } from "./sign-out-button";
+import { SiteSearch } from "./site-search";
 
 /**
  * Desktop: a black utility strip (area, hours, phone, language) above a sticky bar with mega menus fed by
@@ -145,6 +146,20 @@ export async function SiteHeader() {
           <DesktopNav entries={entries} />
 
           <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
+            <SiteSearch
+              locale={locale}
+              labels={{
+                open: t("site.search.open"),
+                close: t("site.search.close"),
+                placeholder: t("site.search.placeholder"),
+                empty: t("site.search.empty"),
+                hint: t("site.search.hint"),
+                devices: t("site.search.devices"),
+                specs: t("site.search.specs"),
+                products: t("site.search.products"),
+                articles: t("site.search.articles"),
+              }}
+            />
             <Suspense fallback={<span className="size-10" />}>
               <AccountButton locale={locale} />
             </Suspense>

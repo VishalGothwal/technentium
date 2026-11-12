@@ -43,6 +43,17 @@
       "repairsIn": "Repairs in Jaipur · Protection products shipped across India",
       "cookies": "Cookie settings"
     },
+    "search": {
+      "open": "Search",
+      "close": "Close search",
+      "placeholder": "Search phones, specs, products, articles…",
+      "empty": "No results. Try a different spelling or a shorter word.",
+      "hint": "Type at least 2 letters, e.g. iPhone 15, Galaxy S25 or screen guard.",
+      "devices": "Repairs",
+      "specs": "Phone specs",
+      "products": "Protection products",
+      "articles": "Articles"
+    },
     "consent": {
       "title": "Your privacy",
       "body": "We use essential cookies to keep you signed in and remember your cart. With your permission we also use analytics to understand which pages help people, so we can improve them. We never sell your data.",
