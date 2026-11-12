@@ -90,16 +90,30 @@ async function storeImage(db: PrismaClient, file: string, purpose: "DEVICE_IMAGE
  * Supabase) is written back from the repo copy, so its media row loads again.
  */
 async function restoreLocal(db: PrismaClient, mediaId: string, file: string) {
-  if (process.env.STORAGE_DRIVER === "s3" || supabaseStorage()) return;
-  const media = await db.mediaAsset.findUnique({ where: { id: mediaId }, select: { storageKey: true, uploadedById: true } });
+  const media = await db.mediaAsset.findUnique({ where: { id: mediaId }, select: { storageKey: true, uploadedById: true, mime: true, sizeBytes: true } });
   if (!media || media.uploadedById !== "seed") return;
+  const body = await readFile(file);
+  // The repo copy changed (e.g. re-encoded smaller): overwrite the stored file under the same key and id.
+  if (media.mime === `image/${file.endsWith(".png") ? "png" : "webp"}` && media.sizeBytes !== body.byteLength) {
+    try {
+      await put(media.storageKey, body, media.mime);
+    } catch (e) {
+      return console.warn(`Seed image refresh failed: ${(e as Error).message}`);
+    }
+    const meta = await sharp(body).metadata();
+    await db.mediaAsset.update({ where: { id: mediaId }, data: { sizeBytes: body.byteLength, width: meta.width ?? null, height: meta.height ?? null } });
+    refreshed++;
+    return;
+  }
+  if (process.env.STORAGE_DRIVER === "s3" || supabaseStorage()) return;
   const target = path.join(process.cwd(), ".uploads", media.storageKey);
   if (existsSync(target)) return;
   await mkdir(path.dirname(target), { recursive: true });
-  await writeFile(target, await readFile(file));
+  await writeFile(target, body);
   restored++;
 }
 let restored = 0;
+let refreshed = 0;
 
 const storageReady = () => !((process.env.NODE_ENV === "production" || process.env.SEED_MODE === "deploy") && process.env.STORAGE_DRIVER !== "s3" && !supabaseStorage());
 
@@ -173,5 +187,5 @@ export async function seedContentImages(db: PrismaClient) {
           }
         }
       }
-  console.log(`Content images: ${specs} phone photos, ${covers} article covers, ${models} model photos attached; ${restored} local files restored.`);
+  console.log(`Content images: ${specs} phone photos, ${covers} article covers, ${models} model photos attached; ${refreshed} refreshed, ${restored} local files restored.`);
 }

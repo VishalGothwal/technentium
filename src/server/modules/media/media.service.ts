@@ -49,7 +49,7 @@ export async function uploadMedia(actor: Actor | null, file: Buffer, input: Uplo
 export async function authorizeMedia(actor: Actor | null, id: string) {
   const media = await db.mediaAsset.findUnique({
     where: { id },
-    select: { storageKey: true, mime: true, isPublic: true, uploadedById: true, customizationRequest: { select: { customerId: true } } },
+    select: { storageKey: true, mime: true, isPublic: true, sizeBytes: true, uploadedById: true, customizationRequest: { select: { customerId: true } } },
   });
   if (!media) throw notFound("media");
   if (media.isPublic) return media;
