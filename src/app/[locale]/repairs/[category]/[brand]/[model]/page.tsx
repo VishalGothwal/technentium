@@ -61,7 +61,7 @@ export default async function RepairModelPage({ params }: Props) {
           {(CUSTOMIZABLE_CATEGORIES as readonly string[]).includes(m.category.slug) && !features.preview3d.repairs ? (
             m.imageMediaId ? (
               // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
-              <img src={mediaUrl(m.imageMediaId)} alt={name} className="size-32 shrink-0 rounded-xl bg-surface-muted object-contain p-2" />
+              <img src={mediaUrl(m.imageMediaId)} alt={name} className="size-32 shrink-0 object-contain" />
             ) : (
               <span className="flex h-24 shrink-0 items-end gap-1.5 rounded-xl bg-surface-muted px-3 py-2.5">
                 <DeviceFrame frame={m.frame} kind={deviceKindFor(m.category.slug)} view="front" className="h-full w-auto" />

@@ -139,17 +139,25 @@ async function SpecDetail({
             </Link>
           </div>
         </div>
-        <div className="hidden justify-center md:flex">
-          {s.imageMediaId ? (
-            // Light stage so white-background product shots blend in (multiply) on the dark header.
-            <div className="flex h-72 w-64 items-center justify-center rounded-3xl bg-[radial-gradient(circle_at_50%_40%,#ffffff_0%,#e9ecf2_75%)] p-5 shadow-2xl">
-              {/* eslint-disable-next-line @next/next/no-img-element -- media route serves re-encoded WebP */}
-              <img
-                src={mediaUrl(s.imageMediaId)}
-                alt={name}
-                className="max-h-full max-w-full object-contain mix-blend-multiply"
-              />
-            </div>
+        <div className="flex justify-center">
+          {features.preview3d.specs ? (
+            // One preview: the transparent product photo, with a switch to the 3D model (loaded on demand).
+            <PhotoOr3D
+              imageId={s.imageMediaId}
+              alt={name}
+              labels={{ photo: t("specs.photo"), view3d: "3D", open3d: t("specs.open3d") }}
+              fallback={<DeviceIllustration seed={s.slug} className="h-56 w-auto -rotate-6 drop-shadow-2xl" />}
+              kind={deviceKindFor(s.deviceModel.category.slug)}
+              frame={s.deviceModel.frame}
+              model3d={s.deviceModel.model3d}
+              initialView="back"
+              dark
+              label={t("studio.preview.view3d", { device: name })}
+              className="h-96 w-80 md:h-[30rem] md:w-96"
+            />
+          ) : s.imageMediaId ? (
+            // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
+            <img src={mediaUrl(s.imageMediaId)} alt={name} className="h-96 w-80 object-contain drop-shadow-2xl md:h-[30rem] md:w-96" />
           ) : (
             <DeviceIllustration
               seed={s.slug}
@@ -166,36 +174,6 @@ async function SpecDetail({
         <SpecHighlights specs={s.specs} locale={locale} t={t} />
       </section>
 
-      {features.preview3d.specs && (
-        <section
-          className="mt-8 grid items-center gap-6 overflow-hidden rounded-3xl border border-border bg-[radial-gradient(circle_at_30%_40%,#2a2352_0%,#0b0c14_70%)] p-6 text-white sm:p-8 md:grid-cols-[1fr_minmax(0,22rem)]"
-          aria-labelledby="view-3d-title"
-        >
-          <div>
-            <h2
-              id="view-3d-title"
-              className="text-2xl font-bold tracking-tight"
-            >
-              {t("specs.view3d")}
-            </h2>
-            <p className="mt-2 max-w-md text-white/70">
-              {t("specs.view3dHint")}
-            </p>
-          </div>
-          <PhotoOr3D
-            imageId={s.imageMediaId}
-            alt={name}
-            labels={{ photo: t("specs.photo"), view3d: "3D", open3d: t("specs.open3d") }}
-            kind={deviceKindFor(s.deviceModel.category.slug)}
-            frame={s.deviceModel.frame}
-            model3d={s.deviceModel.model3d}
-            initialView="back"
-            dark
-            label={t("studio.preview.view3d", { device: name })}
-            className="h-80 w-full"
-          />
-        </section>
-      )}
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section aria-labelledby="full-specs-title">

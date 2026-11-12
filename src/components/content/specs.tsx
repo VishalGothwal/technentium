@@ -115,10 +115,10 @@ export function SpecCard({ spec, locale, t }: { spec: SpecCardData; locale: Loca
   return (
     <article className="group relative flex h-full gap-4 rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       {spec.imageMediaId ? (
-        // White product shots melt into the tile (multiply); transparent PNGs simply sit on it.
-        <span className="flex h-32 w-20 shrink-0 items-center justify-center rounded-xl bg-surface-muted p-1.5">
-          {/* eslint-disable-next-line @next/next/no-img-element -- media route serves re-encoded WebP */}
-          <img src={mediaUrl(spec.imageMediaId)} alt="" loading="lazy" className="max-h-full max-w-full object-contain mix-blend-multiply transition group-hover:scale-105" />
+        // Transparent PNG cut-outs sit straight on the card.
+        <span className="flex h-32 w-20 shrink-0 items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs) */}
+          <img src={mediaUrl(spec.imageMediaId)} alt="" loading="lazy" className="max-h-full max-w-full object-contain transition group-hover:scale-105" />
         </span>
       ) : (
         <DeviceIllustration seed={spec.slug} className="h-28 w-16 shrink-0 transition group-hover:-rotate-3" />

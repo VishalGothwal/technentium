@@ -140,10 +140,10 @@ async function SpecSections({ specs }: { specs: SpecRow[] }) {
                   {b.items.map((s) => (
                     <li key={s.id}>
                       <Link href={`/${locale}/specs/${s.slug}`} className="flex items-center gap-3 rounded-2xl bg-surface p-2.5 transition hover:shadow-sm hover:ring-1 hover:ring-primary/40">
-                        <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface-muted">
+                        <span className={cn("flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl", !s.imageMediaId && "bg-surface-muted")}>
                           {s.imageMediaId ? (
-                            // eslint-disable-next-line @next/next/no-img-element -- media route serves re-encoded WebP
-                            <img src={mediaUrl(s.imageMediaId)} alt="" loading="lazy" className="max-h-11 max-w-11 object-contain mix-blend-multiply" />
+                            // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
+                            <img src={mediaUrl(s.imageMediaId)} alt="" loading="lazy" className="max-h-11 max-w-11 object-contain" />
                           ) : (
                             <DeviceIllustration seed={s.slug} className="h-10 w-auto" />
                           )}

@@ -113,12 +113,16 @@ export async function seedContentImages(db: PrismaClient) {
   let covers = 0;
   const specDir = path.join(process.cwd(), "prisma", "seed", "spec-images");
   if (existsSync(specDir))
-    for (const f of (await readdir(specDir)).filter((x) => x.endsWith(".webp"))) {
-      const spec = await db.deviceSpecification.findUnique({ where: { slug: f.slice(0, -5) }, select: { id: true, imageMediaId: true, deviceModel: { select: { name: true } } } });
+    for (const f of (await readdir(specDir)).filter((x) => /\.(png|webp)$/.test(x))) {
+      const spec = await db.deviceSpecification.findUnique({ where: { slug: f.replace(/\.(png|webp)$/, "") }, select: { id: true, imageMediaId: true, deviceModel: { select: { name: true } } } });
       if (!spec) continue;
       if (spec.imageMediaId) {
-        await restoreLocal(db, spec.imageMediaId, path.join(specDir, f));
-        continue;
+        // A seed photo from before the transparent PNGs is swapped; an editor's own upload is kept.
+        const current = await db.mediaAsset.findUnique({ where: { id: spec.imageMediaId }, select: { uploadedById: true, mime: true } });
+        if (!(f.endsWith(".png") && current?.uploadedById === "seed" && current.mime !== "image/png")) {
+          await restoreLocal(db, spec.imageMediaId, path.join(specDir, f));
+          continue;
+        }
       }
       const media = await storeImage(db, path.join(specDir, f), "DEVICE_IMAGE", spec.deviceModel.name);
       if (!media) break;

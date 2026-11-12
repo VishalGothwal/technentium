@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useState, type ComponentProps } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { mediaUrl } from "@/lib/media";
 import type { DeviceViewer as Viewer } from "./device-viewer";
@@ -16,9 +16,16 @@ export function PhotoOr3D({
   imageId,
   alt,
   labels,
+  fallback,
   className,
   ...viewer
-}: ComponentProps<typeof Viewer> & { imageId: string | null; alt: string; labels: { photo: string; view3d: string; open3d: string } }) {
+}: ComponentProps<typeof Viewer> & {
+  imageId: string | null;
+  alt: string;
+  labels: { photo: string; view3d: string; open3d: string };
+  /** Shown above the "View in 3D" button when there is no photo. */
+  fallback?: ReactNode;
+}) {
   const [mode, setMode] = useState<"photo" | "3d">("photo");
   const tab = (m: "photo" | "3d", text: string) => (
     <button
@@ -36,9 +43,10 @@ export function PhotoOr3D({
         <DeviceViewer {...viewer} className="size-full" />
       ) : imageId ? (
         // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
-        <img src={mediaUrl(imageId)} alt={alt} loading="lazy" className="size-full object-contain p-4" />
+        <img src={mediaUrl(imageId)} alt={alt} className="size-full object-contain p-4 drop-shadow-2xl" />
       ) : (
-        <div className="flex size-full items-center justify-center">
+        <div className="flex size-full flex-col items-center justify-center gap-4">
+          {fallback}
           <button type="button" onClick={() => setMode("3d")} className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-white/90">
             {labels.open3d}
           </button>
