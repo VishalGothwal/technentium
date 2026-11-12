@@ -113,7 +113,7 @@ export type SpecCardData = {
 
 export function SpecCard({ spec, locale, t }: { spec: SpecCardData; locale: Locale; t: TFunction }) {
   return (
-    <article className="group relative flex h-full gap-4 rounded-2xl border border-border bg-surface p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="group relative flex h-full gap-4 rounded-2xl border border-border bg-surface p-4 shadow-sm lift">
       {spec.imageMediaId ? (
         // Transparent PNG cut-outs sit straight on the card.
         <span className="flex h-32 w-20 shrink-0 items-center justify-center">

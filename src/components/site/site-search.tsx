@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Search, X } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
@@ -9,7 +9,7 @@ import { mediaUrl } from "@/lib/media";
 import type { SiteSearchResult } from "@/server/modules/search/site-search";
 import { HEADER_ICON_BUTTON } from "./nav-icons";
 
-type Labels = { open: string; close: string; cancel: string; placeholder: string; empty: string; hint: string; devices: string; specs: string; products: string; articles: string };
+type Labels = { open: string; close: string; placeholder: string; empty: string; hint: string; devices: string; specs: string; products: string; articles: string };
 type Hit = SiteSearchResult["devices"][number] & { pricePaise?: number };
 
 /**
@@ -94,7 +94,7 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
       <div
         className={cn(
           "items-center bg-surface xl:flex",
-          expanded ? "absolute inset-0 z-10 flex px-4" : "hidden",
+          expanded ? "search-bar absolute inset-0 z-10 flex gap-2 px-4 xl:animate-none" : "hidden",
           "xl:absolute xl:inset-auto xl:top-0 xl:right-0 xl:z-20 xl:bg-transparent xl:px-0",
         )}
       >
@@ -106,7 +106,7 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
               : "border-border/80 bg-surface-muted/80 hover:border-foreground/20 hover:bg-surface xl:w-44",
           )}
         >
-          <Search aria-hidden className="size-4 shrink-0 text-muted" strokeWidth={2} />
+          <Search aria-hidden className={cn("size-4 shrink-0 transition-all duration-300", focused ? "scale-110 text-foreground" : "text-muted")} strokeWidth={2} />
           <span className="sr-only">{labels.open}</span>
           <input
             ref={input}
@@ -118,21 +118,29 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
             className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none! placeholder:text-muted [&::-webkit-search-cancel-button]:hidden"
           />
           {q ? (
-            <button type="button" onClick={() => setQ("")} aria-label={labels.close} className="rounded-full p-0.5 text-muted hover:text-foreground">
+            <button type="button" onClick={() => setQ("")} aria-label={labels.close} className="hidden rounded-full p-0.5 text-muted transition hover:rotate-90 hover:text-foreground xl:inline-flex">
               <X aria-hidden className="size-4" />
             </button>
           ) : (
             <kbd className="hidden rounded-md border border-border bg-surface px-1.5 py-0.5 font-sans text-[10px] font-medium text-muted xl:inline">Ctrl K</kbd>
           )}
         </label>
-        <button type="button" onClick={close} className="ml-3 text-sm font-medium text-muted hover:text-foreground xl:hidden">
-          {labels.cancel}
+        <button
+          type="button"
+          onClick={() => {
+            setQ("");
+            close();
+          }}
+          aria-label={labels.close}
+          className="flex size-10 shrink-0 items-center justify-center rounded-full text-muted transition duration-200 hover:rotate-90 hover:bg-surface-muted hover:text-foreground xl:hidden"
+        >
+          <X aria-hidden className="size-5" />
         </button>
       </div>
 
       {showPanel && (
         <div
-          className="absolute inset-x-4 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-surface p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] xl:inset-x-auto xl:right-0 xl:w-96"
+          className="search-drop absolute inset-x-4 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-surface p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] xl:inset-x-auto xl:right-0 xl:w-96"
           aria-live="polite"
         >
           {q.trim().length < 2 ? (
@@ -150,13 +158,13 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
               <section key={title} className="py-1">
                 <h3 className="px-3 pt-2 pb-1 text-[11px] font-semibold tracking-wider text-muted uppercase">{title}</h3>
                 <ul>
-                  {hits.map((h) => (
-                    <li key={h.href}>
-                      <Link href={h.href} onClick={close} className="flex items-center gap-3 rounded-xl px-3 py-2 transition hover:bg-surface-muted">
+                  {hits.map((h, i) => (
+                    <li key={h.href} className="search-hit" style={{ "--i": i } as CSSProperties}>
+                      <Link href={h.href} onClick={close} className="group/hit flex items-center gap-3 rounded-xl px-3 py-2 transition duration-200 hover:translate-x-0.5 hover:bg-surface-muted">
                         <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg">
                           {h.imageId ? (
                             // eslint-disable-next-line @next/next/no-img-element -- served by the media route (cached, stable URL)
-                            <img src={mediaUrl(h.imageId)} alt="" loading="lazy" className="max-h-10 max-w-10 object-contain" />
+                            <img src={mediaUrl(h.imageId)} alt="" loading="lazy" className="max-h-10 max-w-10 object-contain transition duration-300 group-hover/hit:scale-110" />
                           ) : (
                             <Search aria-hidden className="size-4 text-muted" />
                           )}

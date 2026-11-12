@@ -7,7 +7,7 @@ import { DeviceArt, IssueIcon } from "./visuals";
 
 /** Building blocks shared by the repair landing, category, brand and model pages. */
 
-export const TILE = "flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-surface text-center shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md";
+export const TILE = "flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-surface text-center shadow-sm lift hover:border-primary";
 
 export function SectionTitle({ id, children, className }: { id?: string; children: React.ReactNode; className?: string }) {
   return (

@@ -67,7 +67,7 @@ export function ArticleCard({ card, locale, t, variant = "default" }: { card: Co
   }
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" lang={lang}>
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm lift" lang={lang}>
       <div className="relative aspect-[16/9] overflow-hidden">
         <CoverArt topic={card.topic} seed={card.slug} mediaId={card.coverMediaId} className="transition duration-500 group-hover:scale-[1.03]" />
         {card.type === "VIDEO" && <PlayBadge />}

@@ -152,7 +152,6 @@ export async function SiteHeader() {
               labels={{
                 open: t("site.search.open"),
                 close: t("site.search.close"),
-                cancel: t("site.search.cancel"),
                 placeholder: t("site.search.placeholder"),
                 empty: t("site.search.empty"),
                 hint: t("site.search.hint"),

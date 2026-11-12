@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowRight, Check, ChevronDown, ChevronRight, Clock, MapPin, Menu, Phone, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { HEADER_ICON_BUTTON, NavIcon, type NavIconName } from "./nav-icons";
@@ -134,8 +134,8 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
                 inert={!isOpen}
                 onClick={closeOnLink(() => setOpen(null))}
                 className={cn(
-                  "absolute inset-x-0 top-full border-b border-border bg-surface shadow-[0_24px_48px_-24px_rgb(0_0_0/0.25)] transition duration-150",
-                  isOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-1 opacity-0",
+                  "absolute inset-x-0 top-full origin-top border-b border-border bg-surface/95 shadow-[0_24px_48px_-24px_rgb(0_0_0/0.25)] backdrop-blur-xl transition duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+                  isOpen ? "visible translate-y-0 scale-100 opacity-100" : "invisible -translate-y-2 scale-[0.99] opacity-0",
                 )}
               >
                 <MegaPanel mega={entry.mega} />
@@ -287,7 +287,7 @@ export function MobileMenu({
           if (e.target === ref.current) close();
           else closeOnLink(close)(e);
         }}
-        className="m-0 ml-auto h-dvh max-h-none w-full max-w-md bg-surface p-0 text-foreground backdrop:bg-black/50 backdrop:backdrop-blur-sm open:flex open:flex-col lg:hidden"
+        className="menu-sheet m-0 ml-auto h-dvh max-h-none w-full max-w-md bg-surface p-0 text-foreground backdrop:bg-black/50 backdrop:backdrop-blur-sm open:flex open:flex-col lg:hidden"
       >
         {open && (
           <>
@@ -299,7 +299,7 @@ export function MobileMenu({
             </div>
 
             <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-5">
-              <Link href={book.href} className="group relative block overflow-hidden rounded-2xl bg-black p-5 text-white">
+              <Link href={book.href} className="rise group relative block overflow-hidden rounded-2xl bg-black p-5 text-white">
                 <div aria-hidden className="absolute -top-12 -right-12 size-36 rounded-full bg-white/10 blur-2xl" />
                 <span className="relative flex items-center justify-between gap-3">
                   <span className="font-display text-xl font-bold tracking-tight">{book.label}</span>
@@ -311,9 +311,9 @@ export function MobileMenu({
               </Link>
 
               <ul className="mt-5 divide-y divide-border border-y border-border">
-                {entries.map((entry) => {
+                {entries.map((entry, i) => {
                   const active = pathname === entry.href || pathname.startsWith(`${entry.href}/`);
-                  return <li key={entry.key}>{entry.mega ? <MobileSection entry={entry} active={active} /> : <MobileRow {...entry} active={active} />}</li>;
+                  return <li key={entry.key} className="rise" style={{ "--i": i + 2 } as CSSProperties}>{entry.mega ? <MobileSection entry={entry} active={active} /> : <MobileRow {...entry} active={active} />}</li>;
                 })}
                 <li>
                   <MobileRow href={track.href} label={track.label} description={track.description} icon="track" active={pathname.startsWith(track.href)} />

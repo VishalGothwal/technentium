@@ -152,3 +152,38 @@ dialog::backdrop {
   .otp-step, .otp-digit, .otp-shake, .otp-wave, .otp-check { animation: none; }
   .otp-check { stroke-dasharray: none; }
 }
+
+/* ───────────── Header search ───────────── */
+@keyframes search-drop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes search-bar {
+  from { opacity: 0; transform: scaleX(0.92); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes search-hit {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.search-drop { transform-origin: top right; animation: search-drop 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.search-bar { transform-origin: right center; animation: search-bar 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.search-hit, .rise { animation: search-hit 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 35ms); }
+/* Mobile menu: slides in from the right over a fading backdrop. */
+@keyframes sheet-in {
+  from { transform: translateX(100%); }
+  to { transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+dialog.menu-sheet[open] { animation: sheet-in 0.38s cubic-bezier(0.2, 0.8, 0.2, 1); }
+dialog.menu-sheet[open]::backdrop { animation: fade-in 0.3s ease both; }
+/* Cards and tiles: one shared lift on hover. */
+.lift { transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.2s ease; }
+.lift:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -20px rgb(0 0 0 / 0.35); }
+@media (prefers-reduced-motion: reduce) {
+  .search-drop, .search-bar, .search-hit, .rise, dialog.menu-sheet[open], dialog.menu-sheet[open]::backdrop { animation: none; }
+  .lift:hover { transform: none; }
+}
