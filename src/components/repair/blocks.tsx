@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { TFunction } from "@/i18n/translate";
 import { cn } from "@/lib/cn";
+import { mediaUrl } from "@/lib/media";
 import { Rail } from "@/components/shop/rail";
 import { DeviceArt, IssueIcon } from "./visuals";
 
@@ -67,10 +68,15 @@ export function ServiceRail({ services, href, label }: { services: { id: string;
   );
 }
 
-export function ModelTile({ href, name, category, sub }: { href: string; name: string; category: string; sub?: string }) {
+export function ModelTile({ href, name, category, sub, imageId }: { href: string; name: string; category: string; sub?: string; imageId?: string | null }) {
   return (
     <Link href={href} className={cn(TILE, "h-full min-h-40 px-3 py-4")}>
-      <DeviceArt category={category} className="size-16 text-foreground" />
+      {imageId ? (
+        // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
+        <img src={mediaUrl(imageId)} alt={name} loading="lazy" decoding="async" className="size-28 object-contain" />
+      ) : (
+        <DeviceArt category={category} className="size-16 text-foreground" />
+      )}
       <span className="text-sm leading-snug font-medium">{name}</span>
       {sub && <span className="text-xs text-muted">{sub}</span>}
     </Link>

@@ -21,7 +21,7 @@ import {
   SpecTable,
 } from "@/components/content/specs";
 import { JsonLd } from "@/components/seo/json-ld";
-import { DeviceViewer } from "@/components/device/device-viewer";
+import { PhotoOr3D } from "@/components/device/photo-or-3d";
 import { deviceKindFor } from "@/lib/customization/style";
 import { cachedFeatures } from "@/server/features";
 
@@ -182,7 +182,10 @@ async function SpecDetail({
               {t("specs.view3dHint")}
             </p>
           </div>
-          <DeviceViewer
+          <PhotoOr3D
+            imageId={s.imageMediaId}
+            alt={name}
+            labels={{ photo: t("specs.photo"), view3d: "3D", open3d: t("specs.open3d") }}
             kind={deviceKindFor(s.deviceModel.category.slug)}
             frame={s.deviceModel.frame}
             model3d={s.deviceModel.model3d}

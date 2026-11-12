@@ -96,6 +96,7 @@ const DEVICE_SELECT = {
   releaseYear: true,
   popular: true,
   frame: true,
+  imageMediaId: true,
   /** 3D body for previews (see src/lib/device-3d.ts `resolveDevice3d`). */
   model3d: MODEL3D_SELECT,
   brand: { select: { id: true, slug: true, name: true } },

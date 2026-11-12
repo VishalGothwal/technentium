@@ -143,6 +143,8 @@
     "foldables": "Foldables",
     "view3d": "See it in 3D",
     "view3dHint": "Drag to turn it around. Real proportions, buttons and camera layout.",
+    "photo": "Photo",
+    "open3d": "View in 3D",
     "phonesCount": "{n} phones",
     "title": "Phone specifications",
     "subtitle": "Clear, consistent spec sheets. Where we don't have verified data, we say so.",

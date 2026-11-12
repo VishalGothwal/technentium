@@ -6,6 +6,7 @@ import { localized, type TFunction } from "@/i18n/translate";
 import { pageMetadata } from "@/lib/seo";
 import { deviceName } from "@/lib/device-name";
 import { cn } from "@/lib/cn";
+import { mediaUrl } from "@/lib/media";
 import { getRepairModel } from "@/server/modules/catalog/repair-pages.service";
 import { Breadcrumbs } from "@/components/content/breadcrumbs";
 import { RepairFaq } from "@/components/repair/blocks";
@@ -58,10 +59,15 @@ export default async function RepairModelPage({ params }: Props) {
       <div className="mt-5 flex flex-col gap-5 rounded-xl border border-border bg-surface p-5 sm:flex-row sm:items-center">
         <div className="flex items-center gap-4 sm:w-80 sm:shrink-0">
           {(CUSTOMIZABLE_CATEGORIES as readonly string[]).includes(m.category.slug) && !features.preview3d.repairs ? (
-            <span className="flex h-24 shrink-0 items-end gap-1.5 rounded-xl bg-surface-muted px-3 py-2.5">
-              <DeviceFrame frame={m.frame} kind={deviceKindFor(m.category.slug)} view="front" className="h-full w-auto" />
-              <DeviceFrame frame={m.frame} kind={deviceKindFor(m.category.slug)} view="back" className="h-full w-auto" />
-            </span>
+            m.imageMediaId ? (
+              // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
+              <img src={mediaUrl(m.imageMediaId)} alt={name} className="size-32 shrink-0 rounded-xl bg-surface-muted object-contain p-2" />
+            ) : (
+              <span className="flex h-24 shrink-0 items-end gap-1.5 rounded-xl bg-surface-muted px-3 py-2.5">
+                <DeviceFrame frame={m.frame} kind={deviceKindFor(m.category.slug)} view="front" className="h-full w-auto" />
+                <DeviceFrame frame={m.frame} kind={deviceKindFor(m.category.slug)} view="back" className="h-full w-auto" />
+              </span>
+            )
           ) : (CUSTOMIZABLE_CATEGORIES as readonly string[]).includes(m.category.slug) ? (
             // The model in 3D (its own camera layout, front and back) so customers can confirm the device.
             <DeviceViewer

@@ -61,7 +61,7 @@ export default async function RepairBrandPage({ params }: Props) {
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
           {models.map((m) => (
             <li key={m.id}>
-              <ModelTile href={`${brandBase}/${m.slug}`} name={deviceName(brand.name, m.name)} category={category.slug} />
+              <ModelTile href={`${brandBase}/${m.slug}`} name={deviceName(brand.name, m.name)} category={category.slug} imageId={m.imageMediaId} />
             </li>
           ))}
         </ul>
@@ -82,7 +82,7 @@ export default async function RepairBrandPage({ params }: Props) {
           <Rail className="mt-5" label={t("repairFlow.topModels")} listClassName="gap-3 py-1">
             {popular.map((m) => (
               <li key={m.id} className="w-40 shrink-0 snap-start">
-                <ModelTile href={`${catBase}/${m.brand.slug}/${m.slug}`} name={deviceName(m.brand.name, m.name)} category={category.slug} />
+                <ModelTile href={`${catBase}/${m.brand.slug}/${m.slug}`} name={deviceName(m.brand.name, m.name)} category={category.slug} imageId={m.imageMediaId} />
               </li>
             ))}
           </Rail>

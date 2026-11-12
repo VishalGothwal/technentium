@@ -198,6 +198,8 @@ model DeviceModel {
   /// 3D model shown in previews (Admin → 3D models); null → generated from `frame`.
   model3dId             String?
   model3d               Device3DModel?               @relation(fields: [model3dId], references: [id], onDelete: SetNull)
+  /// Product photo (public media asset) shown on repair tiles; null → drawn `frame`.
+  imageMediaId          String?
   compatibleProducts    ProductDeviceCompatibility[]
   cartItems             CartItem[]
   requestItems          ProductRequestItem[]

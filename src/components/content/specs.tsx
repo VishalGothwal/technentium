@@ -61,11 +61,11 @@ export function SpecHighlights({ specs, locale, t, compact }: { specs: SpecGroup
         if (!item) return null;
         return (
           <div key={`${g}.${k}`} className={cn("rounded-xl bg-surface-muted", compact ? "p-2.5" : "p-4")}>
-            <dt className="flex items-center gap-1.5 text-xs text-muted">
-              <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden>
+            <dt className="flex min-w-0 items-center gap-1.5 text-xs text-muted" title={localized(locale, item.labelEn, item.labelHi)}>
+              <svg viewBox="0 0 24 24" className="size-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden>
                 <path d={icon} />
               </svg>
-              {localized(locale, item.labelEn, item.labelHi)}
+              <span className="truncate">{localized(locale, item.labelEn, item.labelHi)}</span>
             </dt>
             <dd className={cn("mt-1 font-semibold leading-snug", compact ? "text-sm" : "text-base")}>
               <SpecValue value={specValue(specs, g, k)} t={t} />

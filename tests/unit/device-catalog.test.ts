@@ -56,7 +56,7 @@ describe("device slugs and seed catalogue", () => {
       expect(new Set(slugs).size, brand).toBe(slugs.length);
       for (const [name, year, frame] of models) {
         expect(isFrameKey(frame), `${brand} ${name}`).toBe(true);
-        expect(year, `${brand} ${name}`).toBeGreaterThanOrEqual(2019);
+        expect(year, `${brand} ${name}`).toBeGreaterThanOrEqual(2016);
         expect(year, `${brand} ${name}`).toBeLessThanOrEqual(2026);
       }
     }

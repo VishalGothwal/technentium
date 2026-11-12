@@ -4,6 +4,7 @@ import { useI18n } from "@/i18n/client";
 import { localized } from "@/i18n/translate";
 import { apiFetch } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
+import { mediaUrl } from "@/lib/media";
 import { deviceKindFor } from "@/lib/customization/style";
 import type { Device3DRow } from "@/lib/device-3d";
 import { DeviceFrame } from "./device-frame";
@@ -16,6 +17,8 @@ export type PickedDevice = {
   popular: boolean;
   /** 2D frame family (camera layout); see src/lib/device-frames.ts. */
   frame: string | null;
+  /** Product photo (media asset id); null → the 2D outline. */
+  imageMediaId?: string | null;
   /** Assigned 3D model, if any (resolve with `resolveDevice3d`). */
   model3d?: Device3DRow;
   brand: { id: string; slug: string; name: string };
@@ -96,7 +99,12 @@ export function DevicePicker({
   if (value) {
     return (
       <div className={cn("flex items-center justify-between gap-3 rounded-xl border border-border bg-surface p-3", className)}>
-        <DeviceFrame frame={value.frame} kind={deviceKindFor(value.category.slug)} className="w-9 shrink-0" />
+        {value.imageMediaId ? (
+          // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
+          <img src={mediaUrl(value.imageMediaId)} alt="" className="size-12 shrink-0 object-contain" />
+        ) : (
+          <DeviceFrame frame={value.frame} kind={deviceKindFor(value.category.slug)} className="w-9 shrink-0" />
+        )}
         <div className="min-w-0 flex-1">
           <p className="text-xs font-medium uppercase tracking-wide text-muted">{t("devicePicker.selected")}</p>
           <p className="truncate font-semibold">
@@ -180,7 +188,12 @@ export function DevicePicker({
                 onClick={() => onChange(d)}
                 className="group flex h-full w-full items-center gap-3 rounded-xl border border-border bg-surface p-3 text-left transition hover:border-foreground"
               >
-                <DeviceFrame frame={d.frame} kind={deviceKindFor(d.category.slug)} className="w-7 shrink-0 text-muted transition group-hover:text-foreground" />
+                {d.imageMediaId ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
+                  <img src={mediaUrl(d.imageMediaId)} alt="" loading="lazy" className="size-10 shrink-0 object-contain" />
+                ) : (
+                  <DeviceFrame frame={d.frame} kind={deviceKindFor(d.category.slug)} className="w-7 shrink-0 text-muted transition group-hover:text-foreground" />
+                )}
                 <span className="min-w-0">
                   <span className="block text-xs text-muted">
                     {d.brand.name}

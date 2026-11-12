@@ -142,6 +142,26 @@ const POPULAR = new Set([
 /** Slugs that predate `deviceSlug` (which spells "+" as "plus"); kept so existing URLs and links survive. */
 const LEGACY_MODEL_SLUGS: Record<string, string> = { "F27 Pro+": "f27-pro" };
 
+/** Deploys: add phone models that are new in PHONES (brands must already exist); existing rows are never touched. */
+async function addNewPhoneModels() {
+  const category = await db.deviceCategory.findUnique({ where: { slug: "phone" } });
+  if (!category) return;
+  let added = 0;
+  for (const [brandName, models] of Object.entries(PHONES)) {
+    const brand = await db.deviceBrand.findUnique({ where: { categoryId_slug: { categoryId: category.id, slug: slug(brandName) } } });
+    if (!brand) continue;
+    for (const [name] of models) {
+      const modelSlug = LEGACY_MODEL_SLUGS[name] ?? deviceSlug(name);
+      if (await db.deviceModel.findUnique({ where: { brandId_slug: { brandId: brand.id, slug: modelSlug } } })) continue;
+      await db.deviceModel.create({
+        data: { brandId: brand.id, categoryId: category.id, slug: modelSlug, name, releaseYear: RELEASE_YEAR[name] ?? null, popular: POPULAR.has(name), frame: FRAME.get(name) ?? null, aliases: phoneAliases(brandName, name) },
+      });
+      added++;
+    }
+  }
+  console.log(`Phone models: ${added} added.`);
+}
+
 async function seedCatalog() {
   let order = 0;
   for (const [catSlug, cat] of Object.entries(CATALOG)) {
@@ -342,6 +362,7 @@ async function main() {
     if (process.env.SEED_TEST_USERS === "true") await seedDemoUsers();
     if (!fresh) {
       // New catalogue items and articles added in code reach production; existing rows are never touched.
+      await addNewPhoneModels();
       await seedShop(db, { onlyNew: true });
       await seedProductImages(db);
       await seedContent(db, { onlyNew: true });

@@ -42,13 +42,13 @@ export async function getRepairBrand(categorySlug: string, brandSlug: string) {
     db.deviceModel.findMany({
       where: { brandId: brand.id, ...active },
       orderBy: [{ releaseYear: { sort: "desc", nulls: "last" } }, { name: "asc" }],
-      select: { id: true, slug: true, name: true },
+      select: { id: true, slug: true, name: true, imageMediaId: true },
     }),
     db.deviceModel.findMany({
       where: { categoryId: category.id, popular: true, ...active, brand: active },
       orderBy: [{ releaseYear: { sort: "desc", nulls: "last" } }, { name: "asc" }],
       take: 12,
-      select: { id: true, slug: true, name: true, brand: { select: { slug: true, name: true } } },
+      select: { id: true, slug: true, name: true, imageMediaId: true, brand: { select: { slug: true, name: true } } },
     }),
   ]);
   return { category, brand, models, popular };
@@ -63,6 +63,7 @@ export async function getRepairModel(categorySlug: string, brandSlug: string, mo
       slug: true,
       name: true,
       frame: true,
+      imageMediaId: true,
       model3d: MODEL3D_SELECT,
       releaseYear: true,
       brand: { select: { id: true, slug: true, name: true } },

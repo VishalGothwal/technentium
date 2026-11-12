@@ -10,9 +10,18 @@ export type PhoneSeed = [name: string, year: number, frame: FrameKey, popular?: 
 
 export const PHONES: Record<string, PhoneSeed[]> = {
   Apple: [
+    ["iPhone 7", 2016, "iphone-se"],
+    ["iPhone 7 Plus", 2016, "iphone-dual-square"],
+    ["iPhone 8", 2017, "iphone-se"],
+    ["iPhone 8 Plus", 2017, "iphone-dual-square"],
+    ["iPhone X", 2017, "iphone-dual-square"],
+    ["iPhone XR", 2018, "iphone-single"],
+    ["iPhone XS", 2018, "iphone-dual-square"],
+    ["iPhone XS Max", 2018, "iphone-dual-square"],
     ["iPhone 11", 2019, "iphone-dual-square"],
     ["iPhone 11 Pro", 2019, "iphone-pro-notch"],
     ["iPhone 11 Pro Max", 2019, "iphone-pro-notch"],
+    ["iPhone SE (2nd gen)", 2020, "iphone-se"],
     ["iPhone 12 mini", 2020, "iphone-dual-square"],
     ["iPhone 12", 2020, "iphone-dual-square"],
     ["iPhone 12 Pro", 2020, "iphone-pro-notch"],
@@ -39,6 +48,10 @@ export const PHONES: Record<string, PhoneSeed[]> = {
     ["iPhone Air", 2025, "iphone-air"],
     ["iPhone 17 Pro", 2025, "iphone-pro-plateau", 1],
     ["iPhone 17 Pro Max", 2025, "iphone-pro-plateau"],
+    ["iPhone 17e", 2026, "iphone-single"],
+    ["iPhone 18 Pro", 2026, "iphone-pro-plateau"],
+    ["iPhone 18 Pro Max", 2026, "iphone-pro-plateau"],
+    ["iPhone Duo", 2026, "iphone-air"],
   ],
   Samsung: [
     ["Galaxy S21 FE", 2022, "galaxy-s"],
@@ -479,6 +492,9 @@ export const PHONES: Record<string, PhoneSeed[]> = {
     ["Phone (3a) Pro", 2025, "pill-horizontal"],
     ["Phone (3)", 2025, "nothing-glyph"],
     ["CMF Phone 2 Pro", 2025, "square-corner"],
+    ["Phone (4a)", 2026, "pill-horizontal"],
+    ["Phone (4a) Pro", 2026, "pill-horizontal"],
+    ["Phone (4b)", 2026, "pill-vertical"],
   ],
   Infinix: [
     ["Note 10 Pro", 2021, "square-corner"],
