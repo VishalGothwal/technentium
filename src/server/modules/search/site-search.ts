@@ -1,4 +1,6 @@
 import type { Locale } from "@/i18n/config";
+import { deviceName } from "@/lib/device-name";
+import { db } from "@/server/db";
 import { searchDevices } from "@/server/modules/catalog/catalog.service";
 import { queryContentList, querySpecList } from "@/server/modules/content/content.queries";
 import { listProducts } from "@/server/modules/shop/catalog.service";
@@ -15,13 +17,19 @@ export async function siteSearch(rawQ: string, locale: Locale) {
     listProducts({ q, pageSize: PER_GROUP }),
     queryContentList(locale, { type: "ARTICLE", q, page: 1, pageSize: PER_GROUP }),
   ]);
+  // Models without their own photo borrow their spec sheet's.
+  const specPhotos = new Map(
+    (await db.deviceSpecification.findMany({ where: { deviceModelId: { in: devices.filter((d) => !d.imageMediaId).map((d) => d.id) }, imageMediaId: { not: null } }, select: { deviceModelId: true, imageMediaId: true } })).map(
+      (s) => [s.deviceModelId, s.imageMediaId],
+    ),
+  );
   return {
     q,
     devices: devices.map((d) => ({
       href: `/${locale}/repairs/${d.category.slug}/${d.brand.slug}/${d.slug}`,
-      title: `${d.brand.name} ${d.name}`,
+      title: deviceName(d.brand.name, d.name),
       sub: d.releaseYear ? String(d.releaseYear) : null,
-      imageId: d.imageMediaId,
+      imageId: d.imageMediaId ?? specPhotos.get(d.id) ?? null,
     })),
     specs: specs.slice(0, PER_GROUP).map((s) => ({
       href: `/${locale}/specs/${s.slug}`,

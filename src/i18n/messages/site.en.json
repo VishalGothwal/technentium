@@ -46,6 +46,7 @@
     "search": {
       "open": "Search",
       "close": "Close search",
+      "cancel": "Cancel",
       "placeholder": "Search phones, specs, products, articles…",
       "empty": "No results. Try a different spelling or a shorter word.",
       "hint": "Type at least 2 letters, e.g. iPhone 15, Galaxy S25 or screen guard.",
