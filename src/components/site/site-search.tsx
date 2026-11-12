@@ -102,7 +102,7 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
           className={cn(
             "flex h-11 flex-1 items-center gap-2.5 rounded-full border px-4 transition-[width,box-shadow,background-color,border-color] duration-300 ease-out xl:h-10 xl:flex-none",
             focused
-              ? "border-foreground/20 bg-surface shadow-[0_10px_40px_-12px_rgba(0,0,0,0.28)] xl:w-[26rem]"
+              ? "border-foreground/20 bg-surface shadow-[0_10px_40px_-12px_rgba(0,0,0,0.28)] xl:w-72"
               : "border-border/80 bg-surface-muted/80 hover:border-foreground/20 hover:bg-surface xl:w-44",
           )}
         >
@@ -132,7 +132,7 @@ export function SiteSearch({ locale, labels }: { locale: string; labels: Labels 
 
       {showPanel && (
         <div
-          className="absolute inset-x-4 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-surface p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] xl:inset-x-auto xl:right-0 xl:w-[34rem]"
+          className="absolute inset-x-4 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-surface p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] xl:inset-x-auto xl:right-0 xl:w-96"
           aria-live="polite"
         >
           {q.trim().length < 2 ? (
