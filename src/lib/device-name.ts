@@ -12,7 +12,13 @@ export function deviceSlug(name: string) {
     .slice(0, 80);
 }
 
+/** Catalogue entries for devices that aren't listed: one per brand, plus an "Other" brand per category. */
+export const OTHER_MODEL_NAME = "Other model";
+export const OTHER_BRAND_NAME = "Other";
+
 /** "Apple" + "iPhone 16" → "Apple iPhone 16", but "OnePlus" + "OnePlus 12" → "OnePlus 12" (no doubled brand). */
 export function deviceName(brand: string, model: string) {
-  return model.toLowerCase().startsWith(brand.toLowerCase()) ? model : `${brand} ${model}`;
+  if (model.toLowerCase().startsWith(brand.toLowerCase())) return model;
+  if (model === OTHER_MODEL_NAME) return `Other ${brand} model`;
+  return `${brand} ${model}`;
 }

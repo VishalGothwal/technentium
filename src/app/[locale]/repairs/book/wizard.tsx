@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch, ApiRequestError } from "@/lib/api-client";
 import { formatDate, formatPaise } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { OTHER_MODEL_NAME } from "@/lib/device-name";
 import { formatNational, isCompleteNational, isValidPincode, nationalDigits, normalizeIndianMobile } from "@/lib/phone";
 import { HANDOVER_METHODS, METHODS_NEEDING_ADDRESS, type HandoverMethodKey } from "@/lib/schemas/repair";
 import { useI18n } from "@/i18n/client";
@@ -163,6 +164,8 @@ export function BookingWizard({
   );
 
   const needsAddress = !!draft.handoverMethod && METHODS_NEEDING_ADDRESS.includes(draft.handoverMethod);
+  // "Other model" catalogue entries (see prisma/seed.ts addOtherOptions): the customer types the real device.
+  const isOtherModel = draft.modelName === OTHER_MODEL_NAME;
   const step = STEPS[draft.step];
 
   async function checkPincode(pincode: string) {
@@ -184,6 +187,7 @@ export function BookingWizard({
     const errs: Record<string, string> = {};
     if (step === "device" && !draft.modelId) errs.modelId = t("validation.required");
     if (step === "issues" && draft.issueTypeIds.length === 0) errs.issueTypeIds = t("validation.issues");
+    if (step === "details" && isOtherModel && draft.description.trim().length < 3) errs.description = t("booking.otherModelRequired");
     if (step === "handover" && !draft.handoverMethod) errs.handoverMethod = t("validation.required");
     if (step === "location") {
       if (draft.contactName.trim().length < 2) errs.contactName = t("validation.name");
@@ -386,7 +390,11 @@ export function BookingWizard({
 
         {step === "details" && (
           <div className="space-y-5">
-            <Field label={t("booking.descriptionLabel")} hint={t("booking.descriptionHint")}>
+            <Field
+              label={isOtherModel ? t("booking.otherModelLabel") : t("booking.descriptionLabel")}
+              hint={isOtherModel ? t("booking.otherModelHint") : t("booking.descriptionHint")}
+              error={errors.description}
+            >
               {(p) => <Textarea {...p} value={draft.description} maxLength={2000} onChange={(e) => update({ description: e.target.value })} />}
             </Field>
             <div>

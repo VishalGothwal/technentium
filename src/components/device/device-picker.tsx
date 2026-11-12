@@ -5,6 +5,7 @@ import { localized } from "@/i18n/translate";
 import { apiFetch } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 import { mediaUrl } from "@/lib/media";
+import { OTHER_MODEL_NAME } from "@/lib/device-name";
 import { deviceKindFor } from "@/lib/customization/style";
 import type { Device3DRow } from "@/lib/device-3d";
 import { DeviceFrame } from "./device-frame";
@@ -77,6 +78,17 @@ export function DevicePicker({
     };
   }, [scopedCategoryId, locale]);
   const brandChips = scopedCategoryId && brands?.categoryId === scopedCategoryId ? brands.items : [];
+
+  /** Picks the "Other model" entry: of the chosen brand, else of the category's "Other" brand. */
+  async function pickOther() {
+    const params = new URLSearchParams({ q: OTHER_MODEL_NAME, limit: "60" });
+    if (scopedCategoryId) params.set("categoryId", scopedCategoryId);
+    if (brand) params.set("brand", brand);
+    const found = await apiFetch<PickedDevice[]>(`/api/v1/devices/search?${params}`, { locale }).catch(() => []);
+    const others = found.filter((d) => d.slug === "other-model" && (!categorySlugs || categorySlugs.includes(d.category.slug)));
+    const pick = (brand && others.find((d) => d.brand.slug === brand)) || others.find((d) => d.brand.slug === "other") || others[0];
+    if (pick) onChange(pick);
+  }
 
   useEffect(() => {
     if (value) return;
@@ -178,7 +190,12 @@ export function DevicePicker({
         {loading ? t("devicePicker.loading") : q.trim() || brand ? t("devicePicker.results") : t("devicePicker.popular")}
       </p>
       {!loading && items.length === 0 ? (
-        <p className="rounded-xl bg-surface-muted p-4 text-sm text-muted">{t("devicePicker.noResults")}</p>
+        <div className="rounded-xl bg-surface-muted p-4 text-sm text-muted">
+          <p>{t("devicePicker.noResults")}</p>
+          <button type="button" onClick={() => void pickOther()} className="mt-2 font-semibold text-foreground underline underline-offset-4 hover:no-underline">
+            {t("devicePicker.notListed")}
+          </button>
+        </div>
       ) : (
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {items.map((d) => (

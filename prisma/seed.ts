@@ -13,7 +13,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { directDatabaseUrl } from "../src/server/db-url";
 import { PERMISSIONS, ROLE_DEFINITIONS, ROLE_KEYS } from "../src/server/rbac/permissions";
-import { deviceSlug } from "../src/lib/device-name";
+import { deviceSlug, OTHER_BRAND_NAME, OTHER_MODEL_NAME } from "../src/lib/device-name";
 import { seedContent } from "./seed/content";
 import { seedCustomization } from "./seed/customization";
 import { PHONES, phoneAliases } from "./seed/devices";
@@ -160,6 +160,28 @@ async function addNewPhoneModels() {
     }
   }
   console.log(`Phone models: ${added} added.`);
+}
+
+/**
+ * "Not listed" choices: an "Other" brand in every category and an "Other model" under every brand, so customers
+ * can still book, pick or customise an unlisted device (they type the real one). Create-only; safe on every deploy.
+ */
+async function addOtherOptions() {
+  let added = 0;
+  for (const category of await db.deviceCategory.findMany({ select: { id: true } })) {
+    await db.deviceBrand.upsert({
+      where: { categoryId_slug: { categoryId: category.id, slug: "other" } },
+      create: { categoryId: category.id, slug: "other", name: OTHER_BRAND_NAME, sortOrder: 999 },
+      update: {},
+    });
+    for (const brand of await db.deviceBrand.findMany({ where: { categoryId: category.id }, select: { id: true } })) {
+      const exists = await db.deviceModel.findUnique({ where: { brandId_slug: { brandId: brand.id, slug: "other-model" } }, select: { id: true } });
+      if (exists) continue;
+      await db.deviceModel.create({ data: { brandId: brand.id, categoryId: category.id, slug: "other-model", name: OTHER_MODEL_NAME, releaseYear: null } });
+      added++;
+    }
+  }
+  console.log(`Other options: ${added} added.`);
 }
 
 async function seedCatalog() {
@@ -363,6 +385,7 @@ async function main() {
     if (!fresh) {
       // New catalogue items and articles added in code reach production; existing rows are never touched.
       await addNewPhoneModels();
+      await addOtherOptions();
       await seedShop(db, { onlyNew: true });
       await seedProductImages(db);
       await seedContent(db, { onlyNew: true });
@@ -371,6 +394,7 @@ async function main() {
     }
   }
   await seedCatalog();
+  await addOtherOptions();
   await seedRepairEstimates(db);
   await seedAreasAndSlots();
   if (!isProd) await seedDemoUsers();
