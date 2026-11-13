@@ -29,6 +29,7 @@ type Settings = {
   "warranty.defaultPolicyId": string | null;
   "business.supportPhone": string;
   "business.shopAddress": string;
+  "business.whatsappNumber": string;
 };
 
 export function GeneralSettingsForm({ settings, feesOnly, policies }: { settings: Settings; feesOnly: boolean; policies: { id: string; label: string }[] }) {
@@ -66,6 +67,7 @@ export function GeneralSettingsForm({ settings, feesOnly, policies }: { settings
               changes["warranty.defaultPolicyId"] = String(f.get("warrantyPolicy") || "") || null;
               changes["business.supportPhone"] = String(f.get("supportPhone"));
               changes["business.shopAddress"] = String(f.get("shopAddress"));
+              changes["business.whatsappNumber"] = String(f.get("whatsappNumber") ?? "").trim();
             }
             run(() => updateSettingsAction(changes), () => setSaved(true));
           }}
@@ -114,12 +116,15 @@ export function GeneralSettingsForm({ settings, feesOnly, policies }: { settings
                 </Field>
               </fieldset>
               <fieldset className="grid gap-4 sm:grid-cols-2">
-                <legend className="mb-2 text-sm font-semibold">Contact details (shown on Help page)</legend>
+                <legend className="mb-2 text-sm font-semibold">Contact details (header Call / Chat buttons and Help page)</legend>
                 <Field label="Support phone" error={fields["business.supportPhone"]}>
                   {(p) => <Input {...p} name="supportPhone" defaultValue={settings["business.supportPhone"]} />}
                 </Field>
                 <Field label="Shop address" error={fields["business.shopAddress"]}>
                   {(p) => <Input {...p} name="shopAddress" defaultValue={settings["business.shopAddress"]} />}
+                </Field>
+                <Field label="WhatsApp number (header Chat button)" hint="Leave empty to use the support phone." error={fields["business.whatsappNumber"]}>
+                  {(p) => <Input {...p} name="whatsappNumber" inputMode="tel" placeholder="+91 98765 43210" defaultValue={settings["business.whatsappNumber"]} />}
                 </Field>
               </fieldset>
             </>

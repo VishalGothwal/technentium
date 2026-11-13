@@ -21,7 +21,12 @@
       "articlesBody": "Guides, care tips and how-tos",
       "helpBody": "Contact, FAQs and policies",
       "trackBody": "Status of a repair or order",
-      "needHelp": "Need help?"
+      "needHelp": "Need help?",
+      "callShort": "Call",
+      "chatShort": "Chat",
+      "callToBook": "Call us to book a repair",
+      "chatToBook": "Chat on WhatsApp to book a repair",
+      "waMessage": "Hi Technentium, I'd like to book a repair."
     },
     "footer": {
       "services": "Services",

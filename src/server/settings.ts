@@ -18,6 +18,8 @@ export const SETTINGS = {
   "warranty.defaultPolicyId": { schema: z.string().nullable(), default: null as string | null },
   "business.supportPhone": { schema: z.string(), default: "+91 00000 00000" },
   "business.shopAddress": { schema: z.string(), default: "Technentium, Jaipur, Rajasthan" },
+  /** WhatsApp chat number for the header "Chat" button; empty → the support phone. */
+  "business.whatsappNumber": { schema: z.string().max(20), default: "" },
   /** Customization studio steps hidden for every design (Admin → Design catalogue → Studio sections). */
   "studio.hiddenSteps": { schema: hiddenStepsSchema, default: [] as OptionalStep[] },
 

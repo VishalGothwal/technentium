@@ -71,7 +71,8 @@ export const scheduleReturnAction = async (returnId: string, input: { scheduledA
 export const markHandedOverAction = async (returnId: string, notes?: string) => runAction((a) => markHandedOver(a, returnId, notes));
 
 // Settings & catalogue
-export const updateSettingsAction = async (changes: Record<string, unknown>) => runAction((a) => updateSettings(a, changes));
+// Settings feed the cached header (support phone, WhatsApp), so saving refreshes it too.
+export const updateSettingsAction = async (changes: Record<string, unknown>) => runAction((a) => refreshingDevices(() => updateSettings(a, changes)));
 export const upsertAreaAction = async (input: unknown) => runAction((a) => upsertArea(a, input));
 export const generateSlotsAction = async (input: unknown) => runAction((a) => generateSlots(a, input));
 export const updateSlotAction = async (slotId: string, input: { capacity?: number; active?: boolean }) => runAction((a) => updateSlot(a, slotId, input));

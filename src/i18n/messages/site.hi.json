@@ -21,7 +21,12 @@
       "articlesBody": "गाइड, देखभाल टिप्स और तरीके",
       "helpBody": "संपर्क, FAQ और नीतियाँ",
       "trackBody": "रिपेयर या ऑर्डर का स्टेटस",
-      "needHelp": "मदद चाहिए?"
+      "needHelp": "मदद चाहिए?",
+      "callShort": "कॉल",
+      "chatShort": "चैट",
+      "callToBook": "रिपेयर बुक करने के लिए कॉल करें",
+      "chatToBook": "रिपेयर बुक करने के लिए WhatsApp पर चैट करें",
+      "waMessage": "नमस्ते Technentium, मुझे रिपेयर बुक करनी है।"
     },
     "footer": {
       "services": "सेवाएँ",

@@ -13,7 +13,16 @@ export async function cachedHeaderNav() {
   "use cache";
   cacheTag(DEVICES_TAG);
   cacheLife("hours");
-  const [repairs, products, types, phone] = await Promise.all([listRepairCatalogue(), listProductCategories(), listProductTypes(), getSetting("business.supportPhone")]);
+  const [repairs, products, types, phone, whatsapp] = await Promise.all([
+    listRepairCatalogue(),
+    listProductCategories(),
+    listProductTypes(),
+    getSetting("business.supportPhone"),
+    getSetting("business.whatsappNumber"),
+  ]);
+  const supportPhone = phone && phone !== SETTINGS["business.supportPhone"].default ? phone : null;
+  // wa.me wants the number in international form without "+" or spaces.
+  const waDigits = (whatsapp || supportPhone || "").replace(/\D/g, "");
   return {
     repairs: repairs
       .filter((c) => c.brands.length > 0)
@@ -32,7 +41,8 @@ export async function cachedHeaderNav() {
         count: c._count.products,
         types: types.filter((x) => x.category.slug === c.slug).map((x) => ({ slug: x.slug, nameEn: x.nameEn, nameHi: x.nameHi })),
       })),
-    supportPhone: phone && phone !== SETTINGS["business.supportPhone"].default ? phone : null,
+    supportPhone,
+    whatsapp: waDigits.length >= 10 ? (waDigits.length === 10 ? `91${waDigits}` : waDigits) : null,
   };
 }
 

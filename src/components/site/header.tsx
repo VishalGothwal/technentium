@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Clock, MapPin, Phone, User } from "lucide-react";
+import { Clock, MapPin, MessageCircle, Phone, User } from "lucide-react";
 import { getT } from "@/i18n/server";
 import { localized } from "@/i18n/translate";
 import { getSession } from "@/server/auth/session";
@@ -23,6 +23,7 @@ export async function SiteHeader() {
   const nav = await cachedHeaderNav();
   const l = (path: string) => `/${locale}${path}`;
   const tel = nav.supportPhone ? `tel:${nav.supportPhone.replace(/\s/g, "")}` : null;
+  const wa = nav.whatsapp ? `https://wa.me/${nav.whatsapp}?text=${encodeURIComponent(t("site.header.waMessage"))}` : null;
 
   const entries: NavEntry[] = [
     {
@@ -161,6 +162,35 @@ export async function SiteHeader() {
                 articles: t("site.search.articles"),
               }}
             />
+            {(tel || wa) && (
+              // Book by phone or WhatsApp: one compact pill, same height as the search and the bubble.
+              <div className="flex h-9 shrink-0 items-center rounded-full border border-border/80 bg-surface-muted/80 p-0.5">
+                {tel && (
+                  <a
+                    href={tel}
+                    aria-label={t("site.header.callToBook")}
+                    title={t("site.header.callToBook")}
+                    className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold text-foreground transition hover:bg-surface hover:shadow-sm"
+                  >
+                    <Phone aria-hidden className="size-4" strokeWidth={2} />
+                    <span className="hidden 2xl:inline">{t("site.header.callShort")}</span>
+                  </a>
+                )}
+                {wa && (
+                  <a
+                    href={wa}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t("site.header.chatToBook")}
+                    title={t("site.header.chatToBook")}
+                    className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold text-[#128c4a] transition hover:bg-surface hover:shadow-sm"
+                  >
+                    <MessageCircle aria-hidden className="size-4" strokeWidth={2} />
+                    <span className="hidden 2xl:inline">{t("site.header.chatShort")}</span>
+                  </a>
+                )}
+              </div>
+            )}
             <Suspense fallback={<span className="size-10" />}>
               <AccountButton locale={locale} />
             </Suspense>
