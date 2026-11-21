@@ -73,7 +73,6 @@ export default async function UserDetailPage({ params }: PageProps<"/admin/users
                   name: u.name,
                   blocked: !!u.blockedAt,
                   hasEmail: !!u.email,
-                  twoFactor: !!u.twoFactorEnabled || (u.auth?.factors ?? 0) > 0,
                   isSelf,
                   linked: !!u.authUserId,
                   adminConfigured: u.adminConfigured,
@@ -106,7 +105,6 @@ export default async function UserDetailPage({ params }: PageProps<"/admin/users
                   ["Methods", u.auth ? u.auth.providers.join(", ") || "—" : "—"],
                   ["Email confirmed", yes(u.auth?.emailConfirmed ?? u.emailVerified)],
                   ["Phone confirmed", yes(u.auth?.phoneConfirmed ?? u.phoneNumberVerified)],
-                  ["Two-factor", yes(!!u.twoFactorEnabled || (u.auth?.factors ?? 0) > 0, "On", "Off")],
                   ["Last sign-in", u.auth?.lastSignInAt ? formatDate(u.auth.lastSignInAt) : u.lastSignInAt ? formatDate(u.lastSignInAt) : "—"],
                   ["Signed out everywhere", u.sessionsRevokedAt ? formatDate(u.sessionsRevokedAt) : "—"],
                 ]}

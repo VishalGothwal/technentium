@@ -73,7 +73,7 @@ export function ModelTile({ href, name, category, sub, imageId }: { href: string
     <Link href={href} className={cn(TILE, "h-full min-h-40 px-3 py-4")}>
       {imageId ? (
         // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
-        <img src={mediaUrl(imageId)} alt={name} loading="lazy" decoding="async" className="size-28 object-contain" />
+        <img src={mediaUrl(imageId)} alt={name} loading="lazy" decoding="async" className="h-36 w-full object-contain" />
       ) : (
         <DeviceArt category={category} className="size-16 text-foreground" />
       )}

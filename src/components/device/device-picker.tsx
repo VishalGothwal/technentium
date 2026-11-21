@@ -113,7 +113,7 @@ export function DevicePicker({
       <div className={cn("flex items-center justify-between gap-3 rounded-xl border border-border bg-surface p-3", className)}>
         {value.imageMediaId ? (
           // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
-          <img src={mediaUrl(value.imageMediaId)} alt="" className="size-12 shrink-0 object-contain" />
+          <img src={mediaUrl(value.imageMediaId)} alt="" className="h-14 w-10 shrink-0 object-contain" />
         ) : (
           <DeviceFrame frame={value.frame} kind={deviceKindFor(value.category.slug)} className="w-9 shrink-0" />
         )}
@@ -207,7 +207,7 @@ export function DevicePicker({
               >
                 {d.imageMediaId ? (
                   // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
-                  <img src={mediaUrl(d.imageMediaId)} alt="" loading="lazy" className="size-10 shrink-0 object-contain" />
+                  <img src={mediaUrl(d.imageMediaId)} alt="" loading="lazy" className="h-12 w-9 shrink-0 object-contain" />
                 ) : (
                   <DeviceFrame frame={d.frame} kind={deviceKindFor(d.category.slug)} className="w-7 shrink-0 text-muted transition group-hover:text-foreground" />
                 )}

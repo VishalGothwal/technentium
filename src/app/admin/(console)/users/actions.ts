@@ -7,7 +7,6 @@
 import { runAction } from "@/server/actions";
 import { getActor } from "@/server/auth/session";
 import {
-  resetTwoFactor,
   sendPasswordReset,
   setTemporaryPassword,
   setUserBlocked,
@@ -22,7 +21,6 @@ export const setUserBlockedAction = async (userId: string, blocked: boolean, rea
 export const sendPasswordResetAction = async (userId: string) => runAction((a) => sendPasswordReset(a, userId));
 export const setTemporaryPasswordAction = async (userId: string, password: string) => runAction((a) => setTemporaryPassword(a, userId, password));
 export const signOutEverywhereAction = async (userId: string) => runAction((a) => signOutEverywhere(a, userId));
-export const resetTwoFactorAction = async (userId: string) => runAction((a) => resetTwoFactor(a, userId));
 
 export const startViewAsAction = async (userId: string) => runAction((real) => startViewAs(real, userId), { real: true });
 export const stopViewAsAction = async () => {

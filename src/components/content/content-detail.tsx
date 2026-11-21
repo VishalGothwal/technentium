@@ -95,14 +95,3 @@ export async function ContentDetail({ type, slug }: { type: Type; slug: string }
     </>
   );
 }
-
-export function ArticleSkeleton() {
-  return (
-    <div className="mx-auto max-w-3xl space-y-4 px-4 py-12" aria-hidden>
-      <div className="h-4 w-24 animate-pulse rounded bg-surface-muted" />
-      <div className="h-10 w-full animate-pulse rounded bg-surface-muted" />
-      <div className="h-10 w-3/4 animate-pulse rounded bg-surface-muted" />
-      <div className="mt-8 aspect-[16/8] animate-pulse rounded-3xl bg-surface-muted" />
-    </div>
-  );
-}

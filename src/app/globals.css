@@ -73,6 +73,8 @@ body {
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.02em;
+    /* No lone words on the last line (e.g. "Apple iPhone / 15"). */
+    text-wrap: balance;
   }
 }
 

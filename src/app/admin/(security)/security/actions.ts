@@ -12,12 +12,5 @@ async function ownAccount<T extends flows.AuthResult>(fn: () => Promise<T>): Pro
   return res;
 }
 
-export const startTotpAction = async (password: string) => ownAccount(() => flows.startTotpEnrollment(password));
-export const confirmTotpAction = async (factorId: string, code: string) => ownAccount(() => flows.confirmTotpEnrollment(factorId, code));
-export const disableTotpAction = async (password: string) => {
-  // Owners must keep two-factor on (PRD §7.6).
-  if ((await getRealActor())?.roles.includes("owner")) return { ok: false as const, error: "errors.generic" as const };
-  return ownAccount(() => flows.disableTotp(password));
-};
 export const changePasswordAction = async (currentPassword: string, newPassword: string) =>
   ownAccount(() => flows.changePassword(currentPassword, newPassword));

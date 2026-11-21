@@ -1,7 +1,7 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { staffSignInAction, verifyTotpAction } from "./actions";
+import { staffSignInAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Alert } from "@/components/ui/surface";
@@ -14,11 +14,9 @@ const STAFF_ERRORS: Partial<Record<string, string>> = {
   "auth.notConfigured": "Sign-in isn't configured yet: set the Supabase environment variables.",
 };
 
-/** Email + password, then a TOTP step when two-factor is enabled (Owner accounts). */
+/** Email and password staff sign-in. */
 export function StaffSignIn() {
   const router = useRouter();
-  const params = useSearchParams();
-  const [step, setStep] = useState<"password" | "2fa">(params.get("step") === "2fa" ? "2fa" : "password");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -26,32 +24,6 @@ export function StaffSignIn() {
     router.replace("/admin");
     router.refresh();
   };
-
-  if (step === "2fa") {
-    return (
-      <form
-        className="space-y-4"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setPending(true);
-          setError(null);
-          const code = String(new FormData(e.currentTarget).get("code")).trim();
-          const res = await verifyTotpAction(code);
-          setPending(false);
-          if (!res.ok) return setError(res.error === "auth.tooMany" ? "Too many attempts. Wait a minute and try again." : "That code is not valid. Try the current code from your authenticator app.");
-          done();
-        }}
-      >
-        {error && <Alert tone="danger">{error}</Alert>}
-        <Field label="Authenticator code" hint="6-digit code from your authenticator app." required>
-          {(p) => <Input {...p} name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} />}
-        </Field>
-        <Button type="submit" block pending={pending}>
-          Verify
-        </Button>
-      </form>
-    );
-  }
 
   return (
     <form
@@ -64,7 +36,6 @@ export function StaffSignIn() {
         const res = await staffSignInAction(String(form.get("email")), String(form.get("password")));
         setPending(false);
         if (!res.ok) return setError(STAFF_ERRORS[res.error] ?? "Email or password is incorrect.");
-        if (res.needsTotp) return setStep("2fa");
         done();
       }}
     >

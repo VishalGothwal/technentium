@@ -18,7 +18,6 @@ export default async function MyProfilePage() {
       email: true,
       phoneNumber: true,
       preferredLocale: true,
-      twoFactorEnabled: true,
       staffProfile: { select: { displayName: true } },
     },
   });
@@ -58,11 +57,10 @@ export default async function MyProfilePage() {
                 items={[
                   ["Roles", actor.roles.map((r) => ROLE_DEFINITIONS[r].name).join(", ")],
                   ["Mobile number", user.phoneNumber ?? "—"],
-                  ["Two-factor", user.twoFactorEnabled ? "On" : "Off"],
                 ]}
               />
               <p className="mt-3 text-sm text-muted">
-                Password and two-factor are on the{" "}
+                Password is managed on the{" "}
                 <Link href="/admin/security" className="text-primary hover:underline">
                   Security
                 </Link>{" "}

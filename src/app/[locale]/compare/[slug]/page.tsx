@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { getT } from "@/i18n/server";
 import { localized } from "@/i18n/translate";
 import { alignSpecs } from "@/lib/content/specs";
@@ -9,7 +8,6 @@ import { pageMetadata } from "@/lib/seo";
 import { getComparisonDetail } from "@/server/modules/content/content.public";
 import { Breadcrumbs } from "@/components/content/breadcrumbs";
 import { CompareTable } from "@/components/content/compare-client";
-import { ArticleSkeleton } from "@/components/content/content-detail";
 import { DeviceIllustration, SpecHighlights } from "@/components/content/specs";
 import { RelatedGuides } from "@/components/content/related-guides";
 
@@ -87,10 +85,9 @@ async function Comparison({ params }: { params: PageProps<"/[locale]/compare/[sl
   );
 }
 
+// Resolved outside Suspense (blocking route) so an unknown slug returns a real 404 for search engines.
+export const instant = false;
+
 export default function ComparisonPage({ params }: PageProps<"/[locale]/compare/[slug]">) {
-  return (
-    <Suspense fallback={<ArticleSkeleton />}>
-      <Comparison params={params} />
-    </Suspense>
-  );
+  return <Comparison params={params} />;
 }

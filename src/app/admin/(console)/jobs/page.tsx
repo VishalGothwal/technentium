@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { HandoverMethod, JobStatus } from "@/generated/prisma/enums";
 import { requireStaffPage } from "@/server/auth/guards";
-import { can } from "@/server/rbac/actor";
+import { can, canAny } from "@/server/rbac/actor";
+import { NoAccess } from "@/components/admin/no-access";
 import { listJobs, listTechnicians, type JobFilter } from "@/server/modules/repairs/job.service";
 import { createT } from "@/i18n/translate";
 import { formatDateTime } from "@/lib/format";
@@ -22,6 +23,7 @@ const str = (v: string | string[] | undefined) => (typeof v === "string" && v ? 
 
 export default async function JobsPage({ searchParams }: PageProps<"/admin/jobs">) {
   const actor = await requireStaffPage();
+  if (!canAny(actor, "job.view_all", "job.view_assigned")) return <NoAccess />;
   const sp = await searchParams;
   const values = {
     q: str(sp.q),

@@ -112,9 +112,9 @@ async function SpecSections({ specs }: { specs: SpecRow[] }) {
           </h2>
           {sub && <p className="text-sm text-muted">{sub}</p>}
         </div>
-        <ul className="-mx-4 mt-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+        <ul className="-mx-4 mt-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0">
           {items.map((s) => (
-            <li key={s.id} className="w-[85%] shrink-0 snap-start sm:w-[48%] md:w-auto">
+            <li key={s.id} className="w-[85%] shrink-0 snap-start sm:w-[48%] lg:w-auto">
               <SpecCard spec={s} locale={locale} t={t} />
             </li>
           ))}
@@ -129,21 +129,21 @@ async function SpecSections({ specs }: { specs: SpecRow[] }) {
           <h2 id="by-budget" className="text-2xl font-bold tracking-tight">
             {t("specs.byBudget")}
           </h2>
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {bands.map((b) => (
               <div key={b.key} className="rounded-3xl border border-border bg-surface-muted/50 p-4">
                 <h3 className="flex items-baseline justify-between font-semibold">
                   {t(`specs.${b.key}`)}
                   <span className="text-xs font-normal text-muted">{t("specs.phonesCount", { n: b.items.length })}</span>
                 </h3>
-                <ul className="mt-3 grid gap-2">
+                <ul className="mt-3 grid grid-cols-1 gap-2">
                   {b.items.map((s) => (
                     <li key={s.id}>
                       <Link href={`/${locale}/specs/${s.slug}`} className="flex items-center gap-3 rounded-2xl bg-surface p-2.5 transition hover:shadow-sm hover:ring-1 hover:ring-primary/40">
-                        <span className={cn("flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl", !s.imageMediaId && "bg-surface-muted")}>
+                        <span className={cn("flex h-16 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl", !s.imageMediaId && "bg-surface-muted")}>
                           {s.imageMediaId ? (
                             // eslint-disable-next-line @next/next/no-img-element -- served by the media route (redirects to signed storage URLs)
-                            <img src={mediaUrl(s.imageMediaId)} alt="" loading="lazy" className="max-h-11 max-w-11 object-contain" />
+                            <img src={mediaUrl(s.imageMediaId)} alt="" loading="lazy" className="max-h-15 max-w-11 object-contain" />
                           ) : (
                             <DeviceIllustration seed={s.slug} className="h-10 w-auto" />
                           )}

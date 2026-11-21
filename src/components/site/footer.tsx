@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { Mail, Phone } from "lucide-react";
 import { getT } from "@/i18n/server";
+import { cachedHeaderNav } from "@/server/modules/catalog/nav.cached";
 import { CookieSettingsButton } from "./analytics";
 import { Logo } from "./logo";
 
 export async function SiteFooter() {
-  const { t, locale } = await getT();
+  const [{ t, locale }, nav] = await Promise.all([getT(), cachedHeaderNav()]);
   const l = (path: string) => `/${locale}${path}`;
   const columns: { title: string; links: [string, string][] }[] = [
     {
@@ -51,6 +53,26 @@ export async function SiteFooter() {
           <Logo tone="inverse" className="text-white" />
           <p className="max-w-xs text-sm leading-relaxed text-neutral-400">{t("footer.tagline")}</p>
           <p className="text-sm text-neutral-400">{t("site.footer.repairsIn")}</p>
+          {(nav.supportPhone || nav.supportEmail) && (
+            <ul className="space-y-1 text-sm">
+              {nav.supportPhone && (
+                <li>
+                  <a href={`tel:${nav.supportPhone.replace(/\s/g, "")}`} className="inline-flex min-h-10 items-center gap-2 text-white transition hover:underline">
+                    <Phone aria-hidden className="size-4" />
+                    {nav.supportPhone}
+                  </a>
+                </li>
+              )}
+              {nav.supportEmail && (
+                <li>
+                  <a href={`mailto:${nav.supportEmail}`} className="inline-flex min-h-10 items-center gap-2 break-all text-white transition hover:underline">
+                    <Mail aria-hidden className="size-4 shrink-0" />
+                    {nav.supportEmail}
+                  </a>
+                </li>
+              )}
+            </ul>
+          )}
         </div>
         {columns.map((col) => (
           <nav key={col.title} aria-label={col.title} className="text-sm">

@@ -40,7 +40,7 @@ function BenefitIcon({ k }: { k: (typeof BENEFITS)[number] }) {
 export async function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle?: string; children: ReactNode; footer?: ReactNode }) {
   const { t } = await getT();
   return (
-    <div className="mx-auto grid max-w-5xl gap-8 px-4 py-8 sm:py-12 lg:grid-cols-[1fr_28rem] lg:items-center lg:gap-12">
+    <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-4 py-8 sm:py-12 lg:grid-cols-[1fr_28rem] lg:items-center lg:gap-12">
       <aside className="relative hidden overflow-hidden rounded-3xl bg-black p-10 text-white lg:block">
         <div className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-white/10 blur-2xl" aria-hidden />
         <div className="pointer-events-none absolute -bottom-32 -left-16 size-80 rounded-full bg-white/10 blur-3xl" aria-hidden />
@@ -58,7 +58,7 @@ export async function AuthShell({ title, subtitle, children, footer }: { title: 
           ))}
         </ul>
       </aside>
-      <div className="w-full">
+      <div className="w-full min-w-0">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
         {subtitle && <p className="mt-1.5 text-muted">{subtitle}</p>}
         <div className="mt-6 rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">{children}</div>

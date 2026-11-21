@@ -1,14 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { getActor, getRealActor } from "@/server/auth/session";
-import { db } from "@/server/db";
-import { can, type Actor } from "@/server/rbac/actor";
+import { getActor } from "@/server/auth/session";
+import { can } from "@/server/rbac/actor";
 import type { Permission } from "@/server/rbac/permissions";
 import { ROLE_DEFINITIONS } from "@/server/rbac/permissions";
 import { Logo } from "@/components/site/logo";
 import { SignOutButton } from "@/components/site/sign-out-button";
-import { Alert } from "@/components/ui/surface";
 import { AdminNavLinks, type NavGroup, type NavIcon } from "./nav-links";
 import { StopViewAsButton } from "./users/view-as";
 
@@ -63,13 +61,6 @@ const NAV: { label: string | null; items: NavItem[] }[] = [
   },
 ];
 
-/** Owners must use two-factor sign-in (PRD §7.6). Enforced in production; flagged in development. */
-async function ownerNeedsTwoFactor(actor: Actor) {
-  if (!actor.roles.includes("owner")) return false;
-  const user = await db.user.findUnique({ where: { id: actor.userId }, select: { twoFactorEnabled: true } });
-  return !user?.twoFactorEnabled;
-}
-
 const initials = (name: string) =>
   name
     .split(/\s+/)
@@ -79,25 +70,16 @@ const initials = (name: string) =>
     .join("") || "?";
 
 /** Staff console frame: dark grouped sidebar on desktop, dark top bar with a drawer on small screens. */
-/**
- * `twoFactorSetup` marks the Security page: it must stay reachable while an owner's console is locked,
- * otherwise the owner could never enable two-factor sign-in.
- */
-export async function AdminShell({ children, twoFactorSetup = false }: { children: ReactNode; twoFactorSetup?: boolean }) {
-  if ((await getRealActor())?.needsSecondFactor) redirect("/admin/sign-in?step=2fa");
+export async function AdminShell({ children }: { children: ReactNode }) {
   const actor = await getActor();
   // Switched into a customer account: the console isn't theirs; show their storefront account instead.
   if (actor?.impersonator && !actor.isStaff) redirect("/en/account");
   if (!actor || !actor.isStaff) redirect("/admin/sign-in");
 
-  const needs2fa = await ownerNeedsTwoFactor(actor);
-  const enforce2fa = needs2fa && process.env.NODE_ENV === "production";
-
   const groups: NavGroup[] = NAV.map((g) => ({
     label: g.label,
     items: g.items
       .filter((n) => n.anyOf.some((p) => can(actor, p)))
-      .filter((n) => !enforce2fa || n.href === "/admin/security")
       .map(({ href, label, icon }) => ({ href, label, icon })),
   })).filter((g) => g.items.length > 0);
   const roleNames = actor.roles.map((r) => ROLE_DEFINITIONS[r].name).join(", ");
@@ -175,26 +157,10 @@ export async function AdminShell({ children, twoFactorSetup = false }: { childre
           </div>
         )}
         <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-          {needs2fa && (
-            <Alert tone="warning" className="mb-4" title="Two-factor authentication required">
-              Owner accounts must enable two-factor sign-in.{" "}
-              <Link href="/admin/security" className="underline">
-                Set it up now
-              </Link>
-              {!enforce2fa && " (not enforced in development)."}
-            </Alert>
-          )}
-          {enforce2fa && !twoFactorSetup ? <EnforcedSecurity /> : children}
+          {children}
         </main>
       </div>
     </div>
   );
 }
 
-function EnforcedSecurity() {
-  return (
-    <p className="text-sm text-muted">
-      Other admin areas are locked until two-factor authentication is enabled. Open <Link href="/admin/security" className="underline">Security</Link>.
-    </p>
-  );
-}

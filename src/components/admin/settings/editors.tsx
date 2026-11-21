@@ -28,6 +28,7 @@ type Settings = {
   "policy.version": string;
   "warranty.defaultPolicyId": string | null;
   "business.supportPhone": string;
+  "business.supportEmail": string;
   "business.shopAddress": string;
   "business.whatsappNumber": string;
 };
@@ -66,6 +67,7 @@ export function GeneralSettingsForm({ settings, feesOnly, policies }: { settings
               changes["policy.version"] = String(f.get("policyVersion"));
               changes["warranty.defaultPolicyId"] = String(f.get("warrantyPolicy") || "") || null;
               changes["business.supportPhone"] = String(f.get("supportPhone"));
+              changes["business.supportEmail"] = String(f.get("supportEmail") ?? "").trim();
               changes["business.shopAddress"] = String(f.get("shopAddress"));
               changes["business.whatsappNumber"] = String(f.get("whatsappNumber") ?? "").trim();
             }
@@ -116,9 +118,12 @@ export function GeneralSettingsForm({ settings, feesOnly, policies }: { settings
                 </Field>
               </fieldset>
               <fieldset className="grid gap-4 sm:grid-cols-2">
-                <legend className="mb-2 text-sm font-semibold">Contact details (header Call / Chat buttons and Help page)</legend>
+                <legend className="mb-2 text-sm font-semibold">Contact details (header Call / Chat buttons, Help page and footer)</legend>
                 <Field label="Support phone" error={fields["business.supportPhone"]}>
                   {(p) => <Input {...p} name="supportPhone" defaultValue={settings["business.supportPhone"]} />}
+                </Field>
+                <Field label="Support email" hint="Leave empty to hide it." error={fields["business.supportEmail"]}>
+                  {(p) => <Input {...p} name="supportEmail" type="email" defaultValue={settings["business.supportEmail"]} />}
                 </Field>
                 <Field label="Shop address" error={fields["business.shopAddress"]}>
                   {(p) => <Input {...p} name="shopAddress" defaultValue={settings["business.shopAddress"]} />}

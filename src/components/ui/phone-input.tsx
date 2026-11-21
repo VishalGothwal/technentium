@@ -24,14 +24,21 @@ export const PhoneInput = forwardRef<HTMLInputElement, Props>(function PhoneInpu
   return (
     <div
       className={cn(
-        "flex w-full items-center overflow-hidden rounded-lg border bg-surface transition focus-within:border-foreground focus-within:ring-1 focus-within:ring-foreground",
+        "flex w-full items-center overflow-hidden rounded-lg border bg-surface transition hover:border-foreground/40 focus-within:border-foreground focus-within:ring-4 focus-within:ring-foreground/10",
         props["aria-invalid"] === true || props["aria-invalid"] === "true" || badStart ? "border-danger" : "border-border",
         size === "lg" ? "h-14" : "h-11",
         className,
       )}
     >
-      <span aria-hidden className={cn("flex h-full shrink-0 items-center gap-1.5 border-r border-border bg-surface-muted px-3 font-semibold text-foreground", size === "lg" ? "text-lg" : "text-sm")}>
-        <span className="text-base leading-none">🇮🇳</span>+91
+      <span aria-hidden className={cn("flex shrink-0 items-center gap-2 border-r border-border pr-3 pl-3.5 font-semibold text-foreground", size === "lg" ? "h-7 text-lg" : "h-5 text-sm")}>
+        {/* Drawn, not the 🇮🇳 emoji: Windows renders flag emoji as the letters "IN". */}
+        <svg viewBox="0 0 9 6" className="h-3.5 w-auto shrink-0 rounded-[2px] ring-1 ring-black/10">
+          <rect width="9" height="2" fill="#FF9933" />
+          <rect y="2" width="9" height="2" fill="#fff" />
+          <rect y="4" width="9" height="2" fill="#138808" />
+          <circle cx="4.5" cy="3" r=".7" fill="none" stroke="#000080" strokeWidth=".18" />
+        </svg>
+        +91
       </span>
       <input
         ref={ref}
@@ -41,6 +48,8 @@ export const PhoneInput = forwardRef<HTMLInputElement, Props>(function PhoneInpu
         placeholder="98765 43210"
         // No maxLength: it would cut a pasted "+91 98765-43210" before it can be cleaned; nationalDigits caps at 10.
         {...props}
+        // The wrapper draws the focus ring (focus-within); the global :focus-visible outline would box the input inside it.
+        style={{ outline: "none", boxShadow: "none", ...props.style }}
         value={formatNational(digits)}
         onChange={(e) => {
           const next = nationalDigits(e.target.value);

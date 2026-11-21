@@ -22,7 +22,6 @@
       "helpBody": "Contact, FAQs and policies",
       "trackBody": "Status of a repair or order",
       "needHelp": "Need help?",
-      "callShort": "Call",
       "chatShort": "Chat",
       "callToBook": "Call us to book a repair",
       "chatToBook": "Chat on WhatsApp to book a repair",
@@ -131,6 +130,20 @@
       "finalBody": "Track repairs, protection orders and custom designs with your reference number.",
       "finalCta": "Track a request",
       "viewAll": "View all"
+    },
+    "notFound": {
+      "eyebrow": "Error 404",
+      "title": "We couldn’t find that page",
+      "body": "The link may be old or mistyped. Try one of these instead, or search from the top of the page.",
+      "home": "Go to home",
+      "repairs": "Browse repairs",
+      "help": "Help & contact"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "body": "This page didn’t load properly. Please try again — if it keeps happening, contact us.",
+      "retry": "Try again",
+      "home": "Go to home"
     }
   }
 }

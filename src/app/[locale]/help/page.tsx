@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { getT } from "@/i18n/server";
 import { pageMetadata } from "@/lib/seo";
 import { getSetting } from "@/server/settings";
@@ -14,11 +14,12 @@ export async function generateMetadata(): Promise<Metadata> {
 async function ContactDetails() {
   "use cache";
   const { t } = await getT();
-  const [phone, address] = await Promise.all([getSetting("business.supportPhone"), getSetting("business.shopAddress")]);
+  const [phone, address, email] = await Promise.all([getSetting("business.supportPhone"), getSetting("business.shopAddress"), getSetting("business.supportEmail")]);
   return (
     <DescriptionList
       items={[
         [t("help.phone"), <a key="p" href={`tel:${phone.replace(/\s/g, "")}`} className="text-primary hover:underline">{phone}</a>],
+        ...(email ? [[t("help.email"), <a key="e" href={`mailto:${email}`} className="break-all text-primary hover:underline">{email}</a>] as [string, ReactNode]] : []),
         [t("help.address"), address],
         [t("help.hours"), t("help.hoursValue")],
       ]}

@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import {
-  resetTwoFactorAction,
   sendPasswordResetAction,
   setTemporaryPasswordAction,
   setUserBlockedAction,
@@ -85,13 +84,12 @@ type Access = {
   name: string;
   blocked: boolean;
   hasEmail: boolean;
-  twoFactor: boolean;
   isSelf: boolean;
   linked: boolean;
   adminConfigured: boolean;
 };
 
-/** Block, passwords, sessions and two-factor for one account. Each action is audited. */
+/** Block, passwords and sessions for one account. Each action is audited. */
 export function UserAccessControls({ user }: { user: Access }) {
   const { run, pending, error } = useAction();
   const [done, setDone] = useState<string | null>(null);
@@ -104,7 +102,7 @@ export function UserAccessControls({ user }: { user: Access }) {
 
   return (
     <div className="space-y-3">
-      {!user.adminConfigured && <Alert tone="warning">Set SUPABASE_SECRET_KEY to enable password, two-factor and block controls for Supabase logins.</Alert>}
+      {!user.adminConfigured && <Alert tone="warning">Set SUPABASE_SECRET_KEY to enable password and block controls for Supabase logins.</Alert>}
       {error && <Alert tone="danger">{error}</Alert>}
       {done && <Alert tone="success">{done}</Alert>}
       <div className="flex flex-wrap gap-2">
@@ -119,16 +117,6 @@ export function UserAccessControls({ user }: { user: Access }) {
         <Button size="sm" variant="secondary" pending={pending} onClick={() => act(() => signOutEverywhereAction(user.id), "Signed out on every device.")}>
           Sign out everywhere
         </Button>
-        {user.twoFactor && (
-          <Button
-            size="sm"
-            variant="secondary"
-            pending={pending}
-            onClick={() => act(() => resetTwoFactorAction(user.id), "Two-factor removed. They can set it up again from Security.")}
-          >
-            Reset two-factor
-          </Button>
-        )}
         {!user.isSelf &&
           (user.blocked ? (
             <Button size="sm" variant="secondary" pending={pending} onClick={() => act(() => setUserBlockedAction(user.id, false), "Account unblocked.")}>

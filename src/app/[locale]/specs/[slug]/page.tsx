@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { getT } from "@/i18n/server";
 import { localized } from "@/i18n/translate";
 import { absoluteUrl, pageMetadata } from "@/lib/seo";
@@ -14,7 +13,6 @@ import {
   getSpecDetail,
 } from "@/server/modules/content/content.public";
 import { Breadcrumbs } from "@/components/content/breadcrumbs";
-import { ArticleSkeleton } from "@/components/content/content-detail";
 import {
   DeviceIllustration,
   SpecHighlights,
@@ -244,12 +242,11 @@ async function SpecDetail({
   );
 }
 
+// Resolved outside Suspense (blocking route) so an unknown slug returns a real 404 for search engines.
+export const instant = false;
+
 export default function SpecPage({
   params,
 }: PageProps<"/[locale]/specs/[slug]">) {
-  return (
-    <Suspense fallback={<ArticleSkeleton />}>
-      <SpecDetail params={params} />
-    </Suspense>
-  );
+  return <SpecDetail params={params} />;
 }

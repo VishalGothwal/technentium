@@ -1,6 +1,7 @@
 import type { HandoverMethod } from "@/generated/prisma/enums";
 import { requireStaffPage } from "@/server/auth/guards";
-import { can } from "@/server/rbac/actor";
+import { can, canAny } from "@/server/rbac/actor";
+import { NoAccess } from "@/components/admin/no-access";
 import { listJobs, listTechnicians } from "@/server/modules/repairs/job.service";
 import { findJobRule, manualTargets } from "@/server/modules/repairs/state-machine";
 import { HANDOVER_METHODS } from "@/lib/schemas/repair";
@@ -19,6 +20,7 @@ const str = (v: string | string[] | undefined) => (typeof v === "string" && v ? 
 
 export default async function BoardPage({ searchParams }: PageProps<"/admin/jobs/board">) {
   const actor = await requireStaffPage();
+  if (!canAny(actor, "job.view_all", "job.view_assigned")) return <NoAccess />;
   const sp = await searchParams;
   const values = { q: str(sp.q), technicianId: str(sp.technicianId), handoverMethod: str(sp.handoverMethod) };
 

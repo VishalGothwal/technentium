@@ -72,7 +72,7 @@ export function InviteStaffForm({ roles }: { roles: Role[] }) {
   );
 }
 
-type Member = { id: string; name: string; email: string; phone: string | null; active: boolean; twoFactor: boolean; roles: RoleKey[] };
+type Member = { id: string; name: string; email: string; phone: string | null; active: boolean; roles: RoleKey[] };
 
 export function StaffRow({ member, roles, isSelf, canSwitch, canManage }: { member: Member; roles: Role[]; isSelf: boolean; canSwitch: boolean; canManage: boolean }) {
   const [editing, setEditing] = useState(false);
@@ -97,7 +97,6 @@ export function StaffRow({ member, roles, isSelf, canSwitch, canManage }: { memb
               </Badge>
             ))}
             <Badge tone={member.active ? "success" : "neutral"}>{member.active ? "Active" : "Deactivated"}</Badge>
-            <Badge tone={member.twoFactor ? "success" : "warning"}>{member.twoFactor ? "2FA on" : "2FA off"}</Badge>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -93,7 +93,7 @@ export async function completeSignIn(supabase: SupabaseClient, user?: AuthUser |
 export async function signInWithPassword(
   input: { email: string; password: string },
   opts: { staff?: boolean } = {},
-): Promise<AuthResult<{ needsTotp: boolean }>> {
+): Promise<AuthResult> {
   if (!supabaseConfigured()) return fail("auth.notConfigured");
   if (!opts.staff && !(await getFeatures()).signIn.emailPassword) return fail("auth.methodOff");
   const email = input.email.trim().toLowerCase();
@@ -118,11 +118,7 @@ export async function signInWithPassword(
       return fail("auth.notStaff");
     }
   }
-  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  return {
-    ok: true,
-    needsTotp: aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2",
-  };
+  return { ok: true };
 }
 
 export async function signUpWithPassword(input: {
@@ -293,85 +289,5 @@ export async function signOut(): Promise<AuthResult> {
   if (!supabaseConfigured()) return { ok: true };
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
-  return { ok: true };
-}
-
-// ───────────── Two-factor (TOTP via Supabase MFA) ─────────────
-
-async function syncTwoFactorFlag(supabase: SupabaseClient) {
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) return;
-  const { data } = await supabase.auth.mfa.listFactors();
-  const on = (data?.totp ?? []).some((f) => f.status === "verified");
-  await db.user.updateMany({
-    where: { authUserId: u.user.id },
-    data: { twoFactorEnabled: on },
-  });
-}
-
-/** Second sign-in step: lifts the session to aal2 with a code from the authenticator app. */
-export async function verifyTotp(code: string): Promise<AuthResult> {
-  const supabase = await createSupabaseServerClient();
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) return fail("auth.failed");
-  if (!(await hit(`totp:${u.user.id}`, 60, 10))) return fail("auth.tooMany");
-  const { data } = await supabase.auth.mfa.listFactors();
-  const factor = data?.totp.find((f) => f.status === "verified");
-  if (!factor) return fail("auth.codeInvalid");
-  const { error } = await supabase.auth.mfa.challengeAndVerify({
-    factorId: factor.id,
-    code: code.trim(),
-  });
-  if (error) return fail(mapError(error, "auth.codeInvalid"));
-  return { ok: true };
-}
-
-/** Starts authenticator setup after re-checking the password. Returns the otpauth URI and secret to show. */
-export async function startTotpEnrollment(password: string): Promise<AuthResult<{ factorId: string; uri: string; secret: string; qr: string }>> {
-  const supabase = await createSupabaseServerClient();
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user?.email) return fail("auth.failed");
-  if (!(await hit(`totp-enroll:${u.user.id}`, 300, 5))) return fail("auth.tooMany");
-  if (!(await passwordMatches(u.user.email, password))) return fail("auth.wrongPassword");
-  // Drop abandoned setups so the new one can be created.
-  const { data: existing } = await supabase.auth.mfa.listFactors();
-  for (const f of existing?.all ?? []) if (f.status !== "verified") await supabase.auth.mfa.unenroll({ factorId: f.id });
-  const { data, error } = await supabase.auth.mfa.enroll({
-    factorType: "totp",
-    issuer: "Technentium",
-    friendlyName: `Authenticator ${new Date().toISOString().slice(0, 10)}`,
-  });
-  if (error || !data) return fail("errors.generic");
-  return {
-    ok: true,
-    factorId: data.id,
-    uri: data.totp.uri,
-    secret: data.totp.secret,
-    qr: data.totp.qr_code,
-  };
-}
-
-export async function confirmTotpEnrollment(factorId: string, code: string): Promise<AuthResult> {
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.mfa.challengeAndVerify({
-    factorId,
-    code: code.trim(),
-  });
-  if (error) return fail(mapError(error, "auth.codeInvalid"));
-  await syncTwoFactorFlag(supabase);
-  return { ok: true };
-}
-
-export async function disableTotp(password: string): Promise<AuthResult> {
-  const supabase = await createSupabaseServerClient();
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user?.email) return fail("auth.failed");
-  if (!(await passwordMatches(u.user.email, password))) return fail("auth.wrongPassword");
-  const { data } = await supabase.auth.mfa.listFactors();
-  for (const f of data?.all ?? []) {
-    const { error } = await supabase.auth.mfa.unenroll({ factorId: f.id });
-    if (error) return fail(mapError(error, "errors.generic"));
-  }
-  await syncTwoFactorFlag(supabase);
   return { ok: true };
 }

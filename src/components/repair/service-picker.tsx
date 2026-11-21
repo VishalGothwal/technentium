@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
+import { Check, Phone } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon";
 import { useI18n } from "@/i18n/client";
 import { apiFetch } from "@/lib/api-client";
 import { formatPaise } from "@/lib/format";
@@ -18,10 +20,21 @@ const MAX_NOTES = 500;
  * Model page body: service cards with estimated prices, and a "repair list" summary with the estimated total,
  * diagnosis fee, pincode check and notes. "Book now" hands the selection to the booking wizard via the URL.
  */
-export function ServicePicker({ modelId, services, initialFee }: { modelId: string; services: PickerService[]; initialFee: Fee }) {
+export function ServicePicker({
+  modelId,
+  services,
+  initialFee,
+  contact,
+}: {
+  modelId: string;
+  services: PickerService[];
+  initialFee: Fee;
+  contact: { tel: string | null; wa: string | null };
+}) {
   const { t, locale } = useI18n();
   const [selected, setSelected] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+  const [notesOpen, setNotesOpen] = useState(false);
   const [fee, setFee] = useState<{ key: string; fee: Fee } | null>(null);
 
   const chosen = services.filter((s) => selected.includes(s.id));
@@ -47,14 +60,14 @@ export function ServicePicker({ modelId, services, initialFee }: { modelId: stri
   const bookHref = `/${locale}/repairs/book?${params}`;
   const range = (min: number, max: number | null) => (max ? `${formatPaise(min, locale)} – ${formatPaise(max, locale)}` : formatPaise(min, locale));
 
-  const bookButton = (extra?: string) =>
+  const bookButton = (extra?: string, disabledLabel = t("repairFlow.checkout")) =>
     selected.length ? (
       <Link href={bookHref} className={cn("flex h-12 items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground hover:bg-primary-hover", extra)}>
         {t("repairFlow.checkout")} <span aria-hidden>→</span>
       </Link>
     ) : (
       <span aria-disabled className={cn("flex h-12 cursor-not-allowed items-center justify-center rounded-lg bg-surface-muted font-semibold text-muted", extra)}>
-        {t("repairFlow.checkout")}
+        {disabledLabel}
       </span>
     );
 
@@ -74,13 +87,17 @@ export function ServicePicker({ modelId, services, initialFee }: { modelId: stri
       </section>
 
       <aside aria-labelledby="list-title" className="lg:sticky lg:top-24 lg:self-start">
-        <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
-          <h2 id="list-title" className="border-b border-border bg-surface-muted px-4 py-3 text-center font-semibold">
+        {/* Desktop: capped to the viewport so "Book now" stays pinned in view; the body scrolls instead. */}
+        <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm lg:max-h-[calc(100dvh-7rem)]">
+          <h2 id="list-title" className="shrink-0 border-b border-border bg-surface-muted px-4 py-3 text-center font-semibold">
             {t("repairFlow.repairList")}
           </h2>
-          <div className="space-y-4 p-4">
+          <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain p-4">
             {chosen.length === 0 ? (
-              <p className="py-3 text-center text-sm text-muted">{t("repairFlow.noneSelected")}</p>
+              <div className="rounded-lg border border-dashed border-border px-3 py-4 text-center">
+                <p className="text-sm font-semibold">{t("repairFlow.noneSelected")}</p>
+                <p className="mt-0.5 text-xs text-muted">{t("repairFlow.noneSelectedHint")}</p>
+              </div>
             ) : (
               <ul className="divide-y divide-border text-sm">
                 {chosen.map((s) => (
@@ -114,19 +131,54 @@ export function ServicePicker({ modelId, services, initialFee }: { modelId: stri
 
             <PincodeCheck />
 
-            <label className="block text-sm">
-              <span className="mb-1 block font-medium">{t("repairFlow.notesLabel")}</span>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                maxLength={MAX_NOTES}
-                rows={3}
-                placeholder={t("repairFlow.notesPlaceholder")}
-                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-base sm:text-sm"
-              />
-            </label>
+            {/* Optional, so it stays out of the way until asked for. */}
+            {notesOpen ? (
+              <label className="block text-sm">
+                <span className="mb-1 block font-medium">{t("repairFlow.notesLabel")}</span>
+                <textarea
+                  autoFocus
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  maxLength={MAX_NOTES}
+                  rows={3}
+                  placeholder={t("repairFlow.notesPlaceholder")}
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-base sm:text-sm"
+                />
+              </label>
+            ) : (
+              <button type="button" onClick={() => setNotesOpen(true)} className="text-sm font-semibold text-primary hover:underline">
+                {t("repairFlow.addNotes")}
+              </button>
+            )}
 
-            {bookButton("hidden lg:flex")}
+            {(contact.wa || contact.tel) && (
+              <div className="rounded-lg bg-surface-muted p-3 text-sm">
+                <p className="font-semibold">{t("repairFlow.unsureTitle")}</p>
+                <p className="text-xs text-muted">{t("repairFlow.unsureBody")}</p>
+                <div className="mt-2 flex gap-2">
+                  {contact.wa && (
+                    <a href={contact.wa} target="_blank" rel="noopener noreferrer" className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#25D366] text-xs font-semibold text-black hover:brightness-95">
+                      <WhatsAppIcon className="size-4" /> {t("repairFlow.chatWhatsapp")}
+                    </a>
+                  )}
+                  {contact.tel && (
+                    <a href={contact.tel} className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-surface text-xs font-semibold hover:bg-surface-muted">
+                      <Phone aria-hidden className="size-4" /> {t("repairFlow.callUs")}
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="hidden shrink-0 space-y-3 border-t border-border p-4 lg:block">
+            {bookButton(undefined, t("repairFlow.checkoutDisabled"))}
+            <ul className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-muted">
+              {(["point1", "point2", "point3"] as const).map((k) => (
+                <li key={k} className="flex items-center gap-1">
+                  <Check aria-hidden className="size-3.5 text-success" /> {t(`repairFlow.${k}`)}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </aside>
@@ -154,7 +206,7 @@ function ServiceCard({ service: s, active, onToggle, price }: { service: PickerS
       <div className="flex items-start gap-3">
         <IssueIcon slug={s.slug} className="size-11 shrink-0 text-foreground" />
         <div className="min-w-0">
-          <h3 className="text-sm leading-snug font-bold tracking-wide uppercase">{s.name}</h3>
+          <h3 className="text-[0.95rem] leading-snug font-bold">{s.name}</h3>
           {s.description && (
             <p id={descId} className={cn("mt-1 text-xs text-muted", !open && "line-clamp-2")}>
               {s.description}

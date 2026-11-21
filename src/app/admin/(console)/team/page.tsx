@@ -47,7 +47,6 @@ export default async function TeamPage() {
                     email: s.email,
                     phone: s.phoneNumber,
                     active: s.staffProfile?.active ?? false,
-                    twoFactor: !!s.twoFactorEnabled,
                     roles: s.roles.map((r) => r.role.key as RoleKey),
                   }}
                 />

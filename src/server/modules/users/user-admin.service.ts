@@ -356,40 +356,6 @@ export async function setTemporaryPassword(actor: Actor | null, userId: string, 
   );
 }
 
-/** Remove every two-factor factor (lost phone). The person sets it up again from Security. */
-export async function resetTwoFactor(actor: Actor | null, userId: string) {
-  assertCan(actor, "user.manage");
-  const user = await loadTarget(userId);
-  if (user.authUserId) {
-    const admin = supabaseAdmin();
-    const { data, error } = await admin.auth.admin.mfa.listFactors({
-      userId: user.authUserId,
-    });
-    authFailure(error);
-    for (const f of data?.factors ?? [])
-      authFailure(
-        (
-          await admin.auth.admin.mfa.deleteFactor({
-            id: f.id,
-            userId: user.authUserId,
-          })
-        ).error,
-      );
-  }
-  await db.$transaction(async (tx) => {
-    await tx.user.update({
-      where: { id: userId },
-      data: { twoFactorEnabled: false },
-    });
-    await audit(tx, actor, {
-      action: "user.two_factor_reset",
-      entityType: "User",
-      entityId: userId,
-    });
-  });
-  await revokeSessions(user);
-}
-
 // ───────────── Switch user ("view as") ─────────────
 
 /** `real` must be the signed-in admin themself (getRealActor), never an already-switched actor. */

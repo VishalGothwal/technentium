@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Clock, MapPin, MessageCircle, Phone, User } from "lucide-react";
+import { Clock, MapPin, Phone, User } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon";
 import { getT } from "@/i18n/server";
 import { localized } from "@/i18n/translate";
 import { getSession } from "@/server/auth/session";
@@ -133,6 +134,12 @@ export async function SiteHeader() {
                 {nav.supportPhone}
               </a>
             )}
+            {wa && (
+              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-white transition hover:text-white/80">
+                <WhatsAppIcon className="size-3.5" />
+                {t("site.header.chatShort")}
+              </a>
+            )}
             <LanguageSwitcher tone="inverse" />
           </div>
         </div>
@@ -142,7 +149,8 @@ export async function SiteHeader() {
       <header className="sticky top-0 z-40 border-b border-black/6 bg-surface/90 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_-16px_rgba(0,0,0,0.18)] backdrop-blur-2xl backdrop-saturate-150 supports-[backdrop-filter]:bg-surface/75">
         <div className="relative mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 lg:h-16 lg:gap-4 lg:px-6">
           <Link href={l("")} className="shrink-0 rounded-md" aria-label={t("common.brand")}>
-            <Logo />
+            {/* 1024–1279px: mark only, so the full nav and actions fit on one line. */}
+            <Logo className="lg:max-xl:[&>span]:sr-only" />
           </Link>
 
           <DesktopNav entries={entries} />
@@ -164,7 +172,9 @@ export async function SiteHeader() {
             />
             {(tel || wa) && (
               // Book by phone or WhatsApp: one compact pill, same height as the search and the bubble.
-              <div className="flex h-9 shrink-0 items-center rounded-full border border-border/80 bg-surface-muted/80 p-0.5">
+              // Tablets only: phones have Call in the menu sheet, and from lg the utility strip above shows both
+              // (in the bar they would squeeze the search field).
+              <div className="hidden h-9 shrink-0 items-center rounded-full border border-border/80 bg-surface-muted/80 p-0.5 sm:flex lg:hidden">
                 {tel && (
                   <a
                     href={tel}
@@ -173,7 +183,6 @@ export async function SiteHeader() {
                     className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold text-foreground transition hover:bg-surface hover:shadow-sm"
                   >
                     <Phone aria-hidden className="size-4" strokeWidth={2} />
-                    <span className="hidden 2xl:inline">{t("site.header.callShort")}</span>
                   </a>
                 )}
                 {wa && (
@@ -185,8 +194,7 @@ export async function SiteHeader() {
                     title={t("site.header.chatToBook")}
                     className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold text-[#128c4a] transition hover:bg-surface hover:shadow-sm"
                   >
-                    <MessageCircle aria-hidden className="size-4" strokeWidth={2} />
-                    <span className="hidden 2xl:inline">{t("site.header.chatShort")}</span>
+                    <WhatsAppIcon className="size-4" />
                   </a>
                 )}
               </div>

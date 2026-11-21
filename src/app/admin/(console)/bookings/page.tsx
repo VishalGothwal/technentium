@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { BookingStatus } from "@/generated/prisma/enums";
 import { requireStaffPage } from "@/server/auth/guards";
+import { can } from "@/server/rbac/actor";
+import { NoAccess } from "@/components/admin/no-access";
 import { listBookingsForStaff } from "@/server/modules/repairs/booking.service";
 import { createT } from "@/i18n/translate";
 import { formatDate, formatDateTime } from "@/lib/format";
@@ -16,6 +18,7 @@ const STATUSES = ["OPEN", "SUBMITTED", "NEEDS_INFO", "CONFIRMED", "DECLINED", "C
 
 export default async function BookingQueuePage({ searchParams }: PageProps<"/admin/bookings">) {
   const actor = await requireStaffPage();
+  if (!can(actor, "booking.view_all")) return <NoAccess />;
   const sp = await searchParams;
   const status = (STATUSES as readonly string[]).includes(String(sp.status)) ? (String(sp.status) as BookingStatus | "OPEN") : "OPEN";
   const q = typeof sp.q === "string" ? sp.q.trim().slice(0, 60) : "";

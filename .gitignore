@@ -54,4 +54,3 @@ next-env.d.ts
 /coverage/
 
 !.env.test
-.neon

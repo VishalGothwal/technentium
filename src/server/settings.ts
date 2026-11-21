@@ -16,7 +16,9 @@ export const SETTINGS = {
   "booking.defaultDiagnosisFeePaise": { schema: z.int().min(0), default: 19900 },
   "policy.version": { schema: z.string().min(1), default: "2026-10" },
   "warranty.defaultPolicyId": { schema: z.string().nullable(), default: null as string | null },
-  "business.supportPhone": { schema: z.string(), default: "+91 00000 00000" },
+  "business.supportPhone": { schema: z.string(), default: "+91 92160 40958" },
+  /** Shown on the Help page and in the footer; empty hides it. */
+  "business.supportEmail": { schema: z.union([z.literal(""), z.email()]), default: "technentium@gmail.com" },
   "business.shopAddress": { schema: z.string(), default: "Technentium, Jaipur, Rajasthan" },
   /** WhatsApp chat number for the header "Chat" button; empty → the support phone. */
   "business.whatsappNumber": { schema: z.string().max(20), default: "" },
