@@ -7,7 +7,6 @@ import { pageMetadata } from "@/lib/seo";
 import { cn } from "@/lib/cn";
 import { getComparisonList, getSpecBrands, getSpecList } from "@/server/modules/content/content.public";
 import { DeviceIllustration, SpecCard } from "@/components/content/specs";
-import { BrandLogo, hasBrandLogo } from "@/components/ui/brand-logo";
 import { deviceName, specValue } from "@/lib/content/specs";
 import { formatPaise } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
@@ -27,37 +26,30 @@ async function Results({ searchParams }: { searchParams: PageProps<"/[locale]/sp
   const brand = first(sp.brand)?.slice(0, 40) || null;
   const [brands, specs] = await Promise.all([getSpecBrands(), getSpecList({ q, brand })]);
   const base = `/${locale}/specs`;
-  const chip = (href: string, active: boolean, label: string, logo?: string) => (
+  const chip = (href: string, active: boolean, label: string) => (
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      title={logo ? label : undefined}
       className={cn(
         "inline-flex h-10 items-center rounded-full border px-4 text-sm font-medium whitespace-nowrap transition",
-        logo
-          ? active
-            ? "border-foreground bg-surface ring-2 ring-foreground"
-            : "border-border bg-surface hover:border-foreground/40"
-          : active
-            ? "border-foreground bg-foreground text-background"
-            : "border-border bg-surface hover:border-foreground/40",
+        active ? "border-foreground bg-foreground text-background" : "border-border bg-surface hover:border-foreground/40",
       )}
     >
-      {logo ? <BrandLogo slug={logo} name={label} scale={0.5} /> : label}
+      {label}
     </Link>
   );
   return (
     <>
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <nav aria-label={t("specs.allBrands")} className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-          <ul className="flex gap-2">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <nav aria-label={t("specs.allBrands")} className="scrollbar-none -mx-4 min-w-0 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0">
+          <ul className="flex gap-2 py-1 md:flex-wrap md:py-0">
             <li>{chip(q ? `${base}?q=${encodeURIComponent(q)}` : base, !brand, t("specs.allBrands"))}</li>
             {brands.map((b) => (
-              <li key={b.slug}>{chip(`${base}?brand=${b.slug}${q ? `&q=${encodeURIComponent(q)}` : ""}`, brand === b.slug, b.name, hasBrandLogo(b.slug) ? b.slug : undefined)}</li>
+              <li key={b.slug}>{chip(`${base}?brand=${b.slug}${q ? `&q=${encodeURIComponent(q)}` : ""}`, brand === b.slug, b.name)}</li>
             ))}
           </ul>
         </nav>
-        <form action={base} role="search" className="relative w-full md:max-w-xs">
+        <form action={base} role="search" className="relative w-full shrink-0 lg:w-72">
           {brand && <input type="hidden" name="brand" value={brand} />}
           <label htmlFor="spec-search" className="sr-only">
             {t("specs.searchLabel")}

@@ -16,7 +16,7 @@ import { PERMISSIONS, ROLE_DEFINITIONS, ROLE_KEYS } from "../src/server/rbac/per
 import { deviceSlug, OTHER_BRAND_NAME, OTHER_MODEL_NAME } from "../src/lib/device-name";
 import { seedContent } from "./seed/content";
 import { seedCustomization } from "./seed/customization";
-import { PHONES, phoneAliases } from "./seed/devices";
+import { OTHER_DEVICES, PHONES, phoneAliases, type DeviceSeed } from "./seed/devices";
 import { seedRepairEstimates } from "./seed/repair-estimates";
 import { seedShop } from "./seed/shop";
 import { seedContentImages, seedProductImages } from "./seed/product-images";
@@ -61,6 +61,9 @@ const JAIPUR_AREAS: [string, string][] = [
   ["302039", "Murlipura"],
 ];
 
+/** Brand → model names, for CATALOG. */
+const names = (byBrand: Record<string, DeviceSeed[]>) => Object.fromEntries(Object.entries(byBrand).map(([brand, models]) => [brand, models.map(([name]) => name)]));
+
 const CATALOG = {
   phone: {
     nameEn: "Mobile phone",
@@ -80,7 +83,7 @@ const CATALOG = {
   tablet: {
     nameEn: "Tablet",
     nameHi: "टैबलेट",
-    brands: { Apple: ["iPad (10th gen)", "iPad Air", "iPad Pro 11", "iPad mini"], Samsung: ["Galaxy Tab S9", "Galaxy Tab S9 FE", "Galaxy Tab A9"], Xiaomi: ["Pad 6"], OnePlus: ["OnePlus Pad", "OnePlus Pad Go"], Lenovo: ["Tab M11", "Tab P12"] },
+    brands: names(OTHER_DEVICES.tablet),
     issues: [
       ["Broken or cracked screen", "टूटी या चटकी स्क्रीन"],
       ["Battery or charging problem", "बैटरी या चार्जिंग की समस्या"],
@@ -90,7 +93,7 @@ const CATALOG = {
   laptop: {
     nameEn: "Laptop",
     nameHi: "लैपटॉप",
-    brands: { Apple: ["MacBook Air M2", "MacBook Air M3", "MacBook Pro 14"], Dell: ["Inspiron 15", "XPS 13", "Vostro 15"], HP: ["Pavilion 15", "Victus 16", "Envy x360"], Lenovo: ["IdeaPad Slim 5", "ThinkPad E14", "Legion 5"], Asus: ["Vivobook 15", "ROG Strix G16", "Zenbook 14"], Acer: ["Aspire 7", "Nitro V"] },
+    brands: names(OTHER_DEVICES.laptop),
     issues: [
       ["Screen damage", "स्क्रीन ख़राब"],
       ["Keyboard or trackpad problem", "कीबोर्ड या ट्रैकपैड की समस्या"],
@@ -102,7 +105,7 @@ const CATALOG = {
   smartwatch: {
     nameEn: "Smartwatch",
     nameHi: "स्मार्टवॉच",
-    brands: { Apple: ["Watch Series 9", "Watch Series 10", "Watch Ultra 2", "Watch SE"], Samsung: ["Galaxy Watch 6", "Galaxy Watch 7"], Noise: ["ColorFit Pro 5"], boAt: ["Wave Sigma"], OnePlus: ["Watch 2"] },
+    brands: names(OTHER_DEVICES.smartwatch),
     issues: [
       ["Broken screen", "टूटी स्क्रीन"],
       ["Battery or charging problem", "बैटरी या चार्जिंग की समस्या"],
@@ -113,7 +116,7 @@ const CATALOG = {
   audio: {
     nameEn: "Earbuds & audio",
     nameHi: "ईयरबड्स और ऑडियो",
-    brands: { Apple: ["AirPods Pro (2nd gen)", "AirPods (4th gen)"], Samsung: ["Galaxy Buds 3 Pro"], OnePlus: ["Buds 3"], Sony: ["WF-1000XM5", "WH-1000XM5"], boAt: ["Airdopes 141"] },
+    brands: names(OTHER_DEVICES.audio),
     issues: [
       ["One side not working", "एक तरफ़ आवाज़ नहीं"],
       ["Charging case problem", "चार्जिंग केस की समस्या"],
@@ -132,34 +135,55 @@ const RELEASE_YEAR: Record<string, number> = {
   "Xiaomi 14": 2024, "Poco X6 Pro": 2024, "Poco F6": 2024, "Phone (2)": 2023, "Phone (2a)": 2024, "iQOO 13": 2024, "Edge 50 Pro": 2024,
 };
 for (const models of Object.values(PHONES)) for (const [name, year] of models) RELEASE_YEAR[name] = year;
+for (const byBrand of Object.values(OTHER_DEVICES)) for (const models of Object.values(byBrand)) for (const [name, year] of models) if (year) RELEASE_YEAR[name] = year;
 const FRAME = new Map(Object.values(PHONES).flatMap((models) => models.map(([name, , frame]) => [name, frame] as const)));
 const POPULAR = new Set([
   "iPhone 16", "iPhone 16 Pro", "iPhone 15", "iPhone 14", "iPhone 13", "Galaxy S24 Ultra", "Galaxy S24", "Galaxy A55", "Pixel 9", "OnePlus 12", "OnePlus Nord CE 4",
   "Redmi Note 13 Pro", "Phone (2a)", "iPad (10th gen)", "MacBook Air M2", "Watch Series 9", "AirPods Pro (2nd gen)",
   ...Object.values(PHONES).flatMap((models) => models.filter((m) => m[3]).map(([name]) => name)),
+  ...Object.values(OTHER_DEVICES).flatMap((byBrand) => Object.values(byBrand).flatMap((models) => models.filter((m) => m[2]).map(([name]) => name))),
 ]);
 
 /** Slugs that predate `deviceSlug` (which spells "+" as "plus"); kept so existing URLs and links survive. */
 const LEGACY_MODEL_SLUGS: Record<string, string> = { "F27 Pro+": "f27-pro" };
 
-/** Deploys: add phone models that are new in PHONES (brands must already exist); existing rows are never touched. */
-async function addNewPhoneModels() {
-  const category = await db.deviceCategory.findUnique({ where: { slug: "phone" } });
-  if (!category) return;
+/**
+ * Deploys: add brands and models that are new in the catalogue (every category); existing rows are never touched.
+ * New brands go after the existing ones.
+ */
+async function addNewModels() {
   let added = 0;
-  for (const [brandName, models] of Object.entries(PHONES)) {
-    const brand = await db.deviceBrand.findUnique({ where: { categoryId_slug: { categoryId: category.id, slug: slug(brandName) } } });
-    if (!brand) continue;
-    for (const [name] of models) {
-      const modelSlug = LEGACY_MODEL_SLUGS[name] ?? deviceSlug(name);
-      if (await db.deviceModel.findUnique({ where: { brandId_slug: { brandId: brand.id, slug: modelSlug } } })) continue;
-      await db.deviceModel.create({
-        data: { brandId: brand.id, categoryId: category.id, slug: modelSlug, name, releaseYear: RELEASE_YEAR[name] ?? null, popular: POPULAR.has(name), frame: FRAME.get(name) ?? null, aliases: phoneAliases(brandName, name) },
-      });
-      added++;
+  let brands = 0;
+  for (const [catSlug, cat] of Object.entries(CATALOG)) {
+    const category = await db.deviceCategory.findUnique({ where: { slug: catSlug } });
+    if (!category) continue;
+    for (const [brandName, models] of Object.entries(cat.brands)) {
+      let brand = await db.deviceBrand.findUnique({ where: { categoryId_slug: { categoryId: category.id, slug: slug(brandName) } } });
+      if (!brand) {
+        const last = await db.deviceBrand.findFirst({ where: { categoryId: category.id, slug: { not: "other" } }, orderBy: { sortOrder: "desc" }, select: { sortOrder: true } });
+        brand = await db.deviceBrand.create({ data: { categoryId: category.id, slug: slug(brandName), name: brandName, sortOrder: (last?.sortOrder ?? -1) + 1 } });
+        brands++;
+      }
+      for (const name of models) {
+        const modelSlug = LEGACY_MODEL_SLUGS[name] ?? deviceSlug(name);
+        if (await db.deviceModel.findUnique({ where: { brandId_slug: { brandId: brand.id, slug: modelSlug } } })) continue;
+        await db.deviceModel.create({
+          data: {
+            brandId: brand.id,
+            categoryId: category.id,
+            slug: modelSlug,
+            name,
+            releaseYear: RELEASE_YEAR[name] ?? null,
+            popular: POPULAR.has(name),
+            frame: FRAME.get(name) ?? null,
+            aliases: catSlug === "phone" ? phoneAliases(brandName, name) : [],
+          },
+        });
+        added++;
+      }
     }
   }
-  console.log(`Phone models: ${added} added.`);
+  console.log(`Catalogue: ${brands} brands and ${added} models added.`);
 }
 
 /**
@@ -384,7 +408,7 @@ async function main() {
     if (process.env.SEED_TEST_USERS === "true") await seedDemoUsers();
     if (!fresh) {
       // New catalogue items and articles added in code reach production; existing rows are never touched.
-      await addNewPhoneModels();
+      await addNewModels();
       await addOtherOptions();
       await seedShop(db, { onlyNew: true });
       await seedProductImages(db);

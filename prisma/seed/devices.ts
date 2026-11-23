@@ -10,6 +10,16 @@ export type PhoneSeed = [name: string, year: number, frame: FrameKey, popular?: 
 
 export const PHONES: Record<string, PhoneSeed[]> = {
   Apple: [
+    ["iPhone 4", 2010, "iphone-se"],
+    ["iPhone 4s", 2011, "iphone-se"],
+    ["iPhone 5", 2012, "iphone-se"],
+    ["iPhone 5c", 2013, "iphone-se"],
+    ["iPhone 5s", 2013, "iphone-se"],
+    ["iPhone 6", 2014, "iphone-se"],
+    ["iPhone 6 Plus", 2014, "iphone-se"],
+    ["iPhone 6s", 2015, "iphone-se"],
+    ["iPhone 6s Plus", 2015, "iphone-se"],
+    ["iPhone SE (1st gen)", 2016, "iphone-se"],
     ["iPhone 7", 2016, "iphone-se"],
     ["iPhone 7 Plus", 2016, "iphone-dual-square"],
     ["iPhone 8", 2017, "iphone-se"],
@@ -536,6 +546,41 @@ export const PHONES: Record<string, PhoneSeed[]> = {
     ["Blaze Curve", 2024, "square-corner"],
     ["Blaze Duo", 2024, "square-corner"],
   ],
+};
+
+/** Tablets, laptops, smartwatches and audio, per brand. Tuple: [model name, release year (India), popular?]. Same rule as phones: names must not change. */
+export type DeviceSeed = [name: string, year: number | null, popular?: 1];
+
+export const OTHER_DEVICES: Record<"tablet" | "laptop" | "smartwatch" | "audio", Record<string, DeviceSeed[]>> = {
+  tablet: {
+    Apple: [["iPad (10th gen)", 2022, 1], ["iPad Air", 2022], ["iPad Pro 11", 2022], ["iPad mini", 2021]],
+    Samsung: [["Galaxy Tab S9", 2023], ["Galaxy Tab S9 FE", 2023], ["Galaxy Tab A9", 2023]],
+    Xiaomi: [["Pad 6", 2023]],
+    OnePlus: [["OnePlus Pad", 2023], ["OnePlus Pad Go", 2023]],
+    Lenovo: [["Tab M11", 2024], ["Tab P12", 2023]],
+  },
+  laptop: {
+    Apple: [["MacBook Air M2", 2022, 1], ["MacBook Air M3", 2024], ["MacBook Pro 14", 2021]],
+    Dell: [["Inspiron 15", 2022], ["XPS 13", 2022], ["Vostro 15", 2022]],
+    HP: [["Pavilion 15", 2022], ["Victus 16", 2022], ["Envy x360", 2022]],
+    Lenovo: [["IdeaPad Slim 5", 2022], ["ThinkPad E14", 2022], ["Legion 5", 2022]],
+    Asus: [["Vivobook 15", 2022], ["ROG Strix G16", 2023], ["Zenbook 14", 2022]],
+    Acer: [["Aspire 7", 2022], ["Nitro V", 2023]],
+  },
+  smartwatch: {
+    Apple: [["Watch Series 9", 2023, 1], ["Watch Series 10", 2024], ["Watch Ultra 2", 2023], ["Watch SE", 2022]],
+    Samsung: [["Galaxy Watch 6", 2023], ["Galaxy Watch 7", 2024]],
+    Noise: [["ColorFit Pro 5", 2023]],
+    boAt: [["Wave Sigma", 2023]],
+    OnePlus: [["Watch 2", 2024]],
+  },
+  audio: {
+    Apple: [["AirPods Pro (2nd gen)", 2022, 1], ["AirPods (4th gen)", 2024]],
+    Samsung: [["Galaxy Buds 3 Pro", 2024]],
+    OnePlus: [["Buds 3", 2024]],
+    Sony: [["WF-1000XM5", 2023], ["WH-1000XM5", 2022]],
+    boAt: [["Airdopes 141", 2021]],
+  },
 };
 
 /**

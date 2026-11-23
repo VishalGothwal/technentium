@@ -50,6 +50,7 @@ const NAV: { label: string | null; items: NavItem[] }[] = [
     label: "Configuration",
     items: [
       { href: "/admin/catalog", label: "Devices & pricing", icon: "devices", anyOf: ["catalog.manage", "settings.fees"] },
+      { href: "/admin/catalog/insights", label: "Device insights", icon: "chart", anyOf: ["catalog.manage"] },
       { href: "/admin/models-3d", label: "3D models", icon: "box", anyOf: ["catalog.manage"] },
       { href: "/admin/settings", label: "Settings", icon: "settings", anyOf: ["settings.manage", "settings.fees"] },
       { href: "/admin/controls", label: "Feature controls", icon: "toggle", anyOf: ["system.features"] },

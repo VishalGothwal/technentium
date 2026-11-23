@@ -695,6 +695,8 @@
     "brandsTitle": "Top brands",
     "selectBrand": "Select brand",
     "selectModel": "Select model",
+    "otherModels": "Other models",
+    "seriesNav": "Jump to a series",
     "categoryTitle": "{device} repair",
     "brandTitle": "{brand} repair & replacement",
     "topBrands": "Top repaired brands",

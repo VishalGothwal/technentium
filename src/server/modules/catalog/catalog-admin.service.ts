@@ -6,6 +6,7 @@ import { parseCsv } from "@/lib/csv";
 import { deviceSlug } from "@/lib/device-name";
 import { FRAME_KEYS } from "@/lib/device-frames";
 import { assertCan, type Actor } from "@/server/rbac/actor";
+import { AppError } from "@/server/errors";
 import { parse } from "@/server/validation";
 
 /** Device catalogue administration (categories, brands, models, issue types, price items). */
@@ -36,6 +37,8 @@ const modelSchema = z.object({
   popular: z.boolean().optional(),
   frame: z.enum(FRAME_KEYS).nullish(),
   aliases: aliasList.optional(),
+  /** Product photo (a DEVICE_IMAGE media id); null removes it. */
+  imageMediaId: z.string().min(1).max(40).nullish(),
 });
 const issueSchema = z.object({
   id: z.string().optional(),
@@ -72,6 +75,8 @@ export async function upsertModel(actor: Actor | null, raw: unknown) {
   const { id, ...d } = parse(modelSchema, raw);
   await db.$transaction(async (tx) => {
     const brand = await tx.deviceBrand.findUniqueOrThrow({ where: { id: d.brandId }, select: { categoryId: true } });
+    if (d.imageMediaId && !(await tx.mediaAsset.findFirst({ where: { id: d.imageMediaId, purpose: "DEVICE_IMAGE", isPublic: true }, select: { id: true } })))
+      throw new AppError("VALIDATION", "errors.validation", { fields: { imageMediaId: "errors.validation" } });
     // Keep an existing model's slug (its public URL) unless it is renamed.
     const current = id ? await tx.deviceModel.findUniqueOrThrow({ where: { id }, select: { name: true, slug: true } }) : null;
     const slug = current && current.name === d.name ? current.slug : deviceSlug(d.name);

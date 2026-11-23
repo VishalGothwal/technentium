@@ -6,7 +6,6 @@ import { specValue } from "@/lib/content/specs";
 import type { SpecGroup } from "@/lib/schemas/content";
 import { cn } from "@/lib/cn";
 import { mediaUrl } from "@/lib/media";
-import { BrandLogo } from "@/components/ui/brand-logo";
 
 /** Stylised device illustration for spec pages (until editors upload product shots). */
 export function DeviceIllustration({ seed, className }: { seed: string; className?: string }) {
@@ -109,7 +108,7 @@ export type SpecCardData = {
   specs: SpecGroup[];
   summaryEn: string | null;
   summaryHi: string | null;
-  deviceModel: { name: string; brand: { name: string; slug: string } };
+  deviceModel: { name: string; brand: { name: string } };
 };
 
 export function SpecCard({ spec, locale, t }: { spec: SpecCardData; locale: Locale; t: TFunction }) {
@@ -125,9 +124,7 @@ export function SpecCard({ spec, locale, t }: { spec: SpecCardData; locale: Loca
         <DeviceIllustration seed={spec.slug} className="h-28 w-16 shrink-0 transition group-hover:-rotate-3" />
       )}
       <div className="min-w-0 flex-1">
-        <p className="flex h-5 items-center text-xs font-semibold tracking-wider text-muted uppercase">
-          <BrandLogo slug={spec.deviceModel.brand.slug} name={spec.deviceModel.brand.name} scale={0.45} />
-        </p>
+        <p className="text-xs font-semibold tracking-wider text-muted uppercase">{spec.deviceModel.brand.name}</p>
         <h3 className="text-lg font-bold leading-tight">
           <Link href={`/${locale}/specs/${spec.slug}`} className="after:absolute after:inset-0 group-hover:text-primary">
             {spec.deviceModel.name}

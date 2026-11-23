@@ -168,7 +168,7 @@ export function DevicePicker({
           </Chip>
           {brandChips.map((b) => (
             <Chip key={b.id} small logo={hasBrandLogo(b.slug)} label={b.name} active={brand === b.slug} onClick={() => setBrand(brand === b.slug ? null : b.slug)}>
-              <BrandLogo slug={b.slug} name={b.name} scale={0.45} />
+              <BrandLogo slug={b.slug} name={b.name} scale={0.55} max={16} />
             </Chip>
           ))}
         </div>

@@ -32,12 +32,16 @@ const BRAND_LOGOS: Record<string, number> = {
 
 export const hasBrandLogo = (slug: string) => slug in BRAND_LOGOS;
 
-/** The brand's logo scaled from tile size (`scale` 1), or its name in `fallbackClassName` when there is no logo. */
-export function BrandLogo({ slug, name, scale = 1, className, fallbackClassName }: { slug: string; name: string; scale?: number; className?: string; fallbackClassName?: string }) {
-  const height = BRAND_LOGOS[slug];
-  if (!height) return <span className={fallbackClassName}>{name}</span>;
+/**
+ * The brand's logo scaled from tile size (`scale` 1), or its name in `fallbackClassName` when there is no logo.
+ * `max` caps the height so round marks don't tower over wordmarks in small chips.
+ */
+export function BrandLogo({ slug, name, scale = 1, max, className, fallbackClassName }: { slug: string; name: string; scale?: number; max?: number; className?: string; fallbackClassName?: string }) {
+  const base = BRAND_LOGOS[slug];
+  if (!base) return <span className={fallbackClassName}>{name}</span>;
+  const height = Math.min(Math.round(base * scale), max ?? Infinity);
   return (
     // eslint-disable-next-line @next/next/no-img-element -- small static logo files
-    <img src={`/brands/${slug}.png`} alt={name} loading="lazy" decoding="async" style={{ height: Math.round(height * scale) }} className={cn("w-auto max-w-none shrink-0 object-contain", className)} />
+    <img src={`/brands/${slug}.png`} alt={name} loading="lazy" decoding="async" style={{ height }} className={cn("w-auto max-w-none shrink-0 object-contain", className)} />
   );
 }

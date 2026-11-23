@@ -157,21 +157,28 @@ export async function seedContentImages(db: PrismaClient) {
       await db.contentItem.update({ where: { id: item.id }, data: { coverMediaId: media.id } });
       covers++;
     }
-  // Repair-tile photos: prisma/seed/model-images/<brand slug>/<model slug>.png (sources: docs/model-image-sources.csv).
+  // Repair-tile photos (sources: docs/model-image-sources.csv): phones in prisma/seed/model-images/<brand slug>/<model slug>.png,
+  // other categories in prisma/seed/model-images/<category slug>/<brand slug>/<model slug>.png.
   let models = 0;
   const modelDir = path.join(process.cwd(), "prisma", "seed", "model-images");
+  const CATEGORY_DIRS = new Set(["tablet", "laptop", "smartwatch", "audio"]);
+  const photoDirs: { category: string; brand: string; dir: string }[] = [];
   if (existsSync(modelDir))
-    for (const brand of await readdir(modelDir))
-      for (const f of (await readdir(path.join(modelDir, brand))).filter((x) => /\.(png|webp)$/.test(x))) {
+    for (const top of await readdir(modelDir)) {
+      if (!CATEGORY_DIRS.has(top)) photoDirs.push({ category: "phone", brand: top, dir: path.join(modelDir, top) });
+      else for (const brand of await readdir(path.join(modelDir, top))) photoDirs.push({ category: top, brand, dir: path.join(modelDir, top, brand) });
+    }
+  for (const { category, brand, dir } of photoDirs)
+      for (const f of (await readdir(dir)).filter((x) => /\.(png|webp)$/.test(x))) {
         const model = await db.deviceModel.findFirst({
-          where: { slug: f.replace(/\.(png|webp)$/, ""), brand: { slug: brand }, category: { slug: "phone" } },
+          where: { slug: f.replace(/\.(png|webp)$/, ""), brand: { slug: brand }, category: { slug: category } },
           select: { id: true, name: true, imageMediaId: true, specification: { select: { id: true, imageMediaId: true } } },
         });
         if (!model) continue;
         let mediaId = model.imageMediaId;
-        if (mediaId) await restoreLocal(db, mediaId, path.join(modelDir, brand, f));
+        if (mediaId) await restoreLocal(db, mediaId, path.join(dir, f));
         else {
-          const media = await storeImage(db, path.join(modelDir, brand, f), "DEVICE_IMAGE", model.name);
+          const media = await storeImage(db, path.join(dir, f), "DEVICE_IMAGE", model.name);
           if (!media) break;
           await db.deviceModel.update({ where: { id: model.id }, data: { imageMediaId: media.id } });
           mediaId = media.id;
