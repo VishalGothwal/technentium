@@ -96,25 +96,27 @@ export async function SiteHeader() {
       description: t("site.header.specsBody"),
     },
     {
-      key: "articles",
-      href: l("/articles"),
-      label: t("nav.articles"),
-      icon: "articles",
-      description: t("site.header.articlesBody"),
-    },
-    {
-      key: "help",
-      href: l("/help"),
-      label: t("nav.help"),
+      key: "company",
+      href: l("/about"),
+      label: t("site.company.label"),
       icon: "help",
-      description: t("site.header.helpBody"),
+      description: t("site.company.title"),
+      menu: [
+        { href: l("/about"), label: t("site.company.about") },
+        { href: l("/help"), label: t("site.company.contact") },
+        { href: l("/track"), label: t("site.company.track") },
+        { href: l("/articles"), label: t("site.company.articles") },
+        { href: l("/policies/repair"), label: t("site.company.repairPolicy") },
+        { href: l("/policies/privacy"), label: t("site.company.privacy") },
+        { href: l("/policies/terms"), label: t("site.company.terms") },
+      ],
     },
   ];
 
   return (
     <>
       {/* Utility strip: scrolls away; only the main bar is sticky. */}
-      <div className="hidden bg-black text-xs tracking-wide text-white/70 lg:block">
+      <div className="hidden border-b border-border bg-surface-muted text-xs tracking-wide text-muted lg:block">
         <div className="mx-auto flex h-9 max-w-7xl items-center gap-6 px-4 lg:px-6">
           <span className="inline-flex items-center gap-1.5">
             <MapPin aria-hidden className="size-3.5" />
@@ -125,22 +127,22 @@ export async function SiteHeader() {
             {t("site.header.hours")}
           </span>
           <div className="ml-auto flex items-center gap-5">
-            <Link href={l("/track")} className="transition hover:text-white">
+            <Link href={l("/track")} className="transition hover:text-foreground">
               {t("site.footer.track")}
             </Link>
             {tel && (
-              <a href={tel} className="inline-flex items-center gap-1.5 font-semibold text-white transition hover:text-white/80">
+              <a href={tel} className="inline-flex items-center gap-1.5 font-semibold text-foreground transition hover:underline">
                 <Phone aria-hidden className="size-3.5" />
                 {nav.supportPhone}
               </a>
             )}
             {wa && (
-              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-white transition hover:text-white/80">
+              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-[#128c4a] transition hover:underline">
                 <WhatsAppIcon className="size-3.5" />
                 {t("site.header.chatShort")}
               </a>
             )}
-            <LanguageSwitcher tone="inverse" />
+            <LanguageSwitcher />
           </div>
         </div>
       </div>

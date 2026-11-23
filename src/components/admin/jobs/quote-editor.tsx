@@ -157,7 +157,7 @@ export function QuoteEditor({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium">Draft — version {number}</p>
+        <p className="text-sm font-medium">Draft · version {number}</p>
         {dirty && <span className="text-xs text-warning">Unsaved changes</span>}
       </div>
 
@@ -274,7 +274,7 @@ export function QuoteEditor({
             <dd className="text-right font-semibold">{formatPaise(preview.totalPaise)}</dd>
           </dl>
         )}
-        <p className="mt-2 text-xs text-muted">Preview only — the server recalculates and stores the final totals.</p>
+        <p className="mt-2 text-xs text-muted">Preview only. The server recalculates and stores the final totals.</p>
       </div>
 
       <Field label="Message to customer" hint="Shown above the quote on the customer's booking page.">
@@ -307,7 +307,7 @@ export function QuoteEditor({
         open={confirmSend}
         onClose={() => setConfirmSend(false)}
         title={`Send quote version ${number}?`}
-        description="The customer is notified and must approve this quote before any repair work starts. Once sent, this version can't be edited — changes need a revision."
+        description="The customer is notified and must approve this quote before any repair work starts. Once sent, this version can't be edited; changes need a revision."
       >
         {send.error && <Alert tone="danger" className="mb-3">{send.error}</Alert>}
         <div className="flex justify-end gap-2">

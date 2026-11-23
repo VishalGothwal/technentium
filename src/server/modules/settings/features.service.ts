@@ -31,7 +31,7 @@ export async function getFeatureControls(actor: Actor | null) {
     {
       label: "Supabase secret key (admin controls, invites, switch user)",
       ok: supabaseAdminConfigured(),
-      hint: "SUPABASE_SECRET_KEY — server only",
+      hint: "SUPABASE_SECRET_KEY (server only)",
     },
     {
       label: "Send SMS hook secret (mobile number sign-in)",

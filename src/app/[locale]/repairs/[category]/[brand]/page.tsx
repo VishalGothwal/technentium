@@ -9,6 +9,7 @@ import { Breadcrumbs } from "@/components/content/breadcrumbs";
 import { Rail } from "@/components/shop/rail";
 import { RepairDeviceSearch } from "@/components/repair/device-search";
 import { BrandRail, ModelTile, SectionTitle } from "@/components/repair/blocks";
+import { BrandLogo, hasBrandLogo } from "@/components/ui/brand-logo";
 
 export const instant = false;
 
@@ -41,6 +42,7 @@ export default async function RepairBrandPage({ params }: Props) {
     <div className="mx-auto max-w-6xl px-4 pt-8 pb-16">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
+          {hasBrandLogo(brand.slug) && <BrandLogo slug={brand.slug} name={brand.name} className="mb-3" />}
           <h1 className="text-3xl font-bold tracking-tight">{t("repairFlow.brandTitle", { brand: brand.name })}</h1>
           <Breadcrumbs
             className="mt-2"

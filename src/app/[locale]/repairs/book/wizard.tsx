@@ -574,7 +574,7 @@ export function BookingWizard({
             <div className="rounded-lg border border-border bg-surface-muted p-4">
               <div className="flex items-baseline justify-between gap-4">
                 <p className="font-medium">{t("booking.diagnosisFee")}</p>
-                {fee.loading ? <Skeleton className="h-5 w-16" /> : <p className="text-lg font-semibold">{fee.data ? formatPaise(fee.data.feePaise, locale) : "—"}</p>}
+                {fee.loading ? <Skeleton className="h-5 w-16" /> : <p className="text-lg font-semibold">{fee.data ? formatPaise(fee.data.feePaise, locale) : "-"}</p>}
               </div>
               {fee.data && <p className="mt-1 text-sm text-muted">{fee.data.waivedIfApproved ? t("booking.feeWaived") : t("booking.feeNotWaived")}</p>}
             </div>

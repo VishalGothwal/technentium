@@ -1,0 +1,23 @@
+brand_slug,file,source,license
+acer,public/brands/acer.png,https://commons.wikimedia.org/wiki/File:Acer_2011.svg,Public domain
+apple,public/brands/apple.png,https://commons.wikimedia.org/wiki/File:Apple_logo_black.svg,Public domain
+dell,public/brands/dell.png,https://commons.wikimedia.org/wiki/File:Dell_logo_2016.svg,Public domain
+hp,public/brands/hp.png,https://commons.wikimedia.org/wiki/File:HP_logo_2012.svg,Public domain
+infinix,public/brands/infinix.png,https://commons.wikimedia.org/wiki/File:Infinix_logo.svg,Public domain
+iqoo,public/brands/iqoo.png,https://commons.wikimedia.org/wiki/File:IQOO_logo.svg,Public domain
+lenovo,public/brands/lenovo.png,https://commons.wikimedia.org/wiki/File:Lenovo_logo_2015.svg,Public domain
+oppo,public/brands/oppo.png,https://commons.wikimedia.org/wiki/File:OPPO_LOGO_2019.svg,Public domain
+realme,public/brands/realme.png,https://commons.wikimedia.org/wiki/File:Realme-realme-_logo_box-RGB-01_with_out_back_ground.svg,Public domain (yellow box added)
+boat,public/brands/boat.png,https://commons.wikimedia.org/wiki/File:Boat-logo.png,CC0
+asus,public/brands/asus.png,https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/asus.svg,CC0 (Simple Icons; filled with the brand colour)
+motorola,public/brands/motorola.png,https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/motorola.svg,CC0 (Simple Icons; filled with the brand colour)
+oneplus,public/brands/oneplus.png,https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/oneplus.svg,CC0 (Simple Icons; filled with the brand colour)
+samsung,public/brands/samsung.png,https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/samsung.svg,CC0 (Simple Icons; filled with the brand colour)
+sony,public/brands/sony.png,https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/sony.svg,CC0 (Simple Icons; filled with the brand colour)
+vivo,public/brands/vivo.png,https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/vivo.svg,CC0 (Simple Icons; filled with the brand colour)
+xiaomi,public/brands/xiaomi.png,https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/xiaomi.svg,CC0 (Simple Icons; filled with the brand colour)
+google,public/brands/google.png,https://cdn.jsdelivr.net/gh/gilbarbara/logos@main/logos/google-icon.svg,CC0 (gilbarbara/logos)
+nothing,public/brands/nothing.png,https://commons.wikimedia.org/wiki/File:Nothing.svg,Public domain
+tecno,public/brands/tecno.png,https://commons.wikimedia.org/wiki/File:Tecno_Mobile_logo.svg,Public domain
+poco,public/brands/poco.png,Supplied by the site owner (upscaled),Brand owner's logo
+lava,public/brands/lava.png,Supplied by the site owner (recoloured black on transparent; upscaled),Brand owner's logo

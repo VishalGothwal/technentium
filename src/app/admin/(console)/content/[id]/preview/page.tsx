@@ -42,7 +42,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps<"/
         banner={
           <div className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-2 bg-warning-soft px-4 py-2 text-sm text-foreground">
             <span>
-              <strong>Preview</strong> · {locale === "en" ? "English" : "Hindi"} · status <strong>{tr.status.toLowerCase()}</strong> — not visible to customers unless published. Links to unpublished items are hidden.
+              <strong>Preview</strong> · {locale === "en" ? "English" : "Hindi"} · status <strong>{tr.status.toLowerCase()}</strong>. Not visible to customers unless published. Links to unpublished items are hidden.
             </span>
             <Link href={`/admin/content/${item.id}`} className="font-medium underline">
               Back to editor

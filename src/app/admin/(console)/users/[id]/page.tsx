@@ -99,14 +99,14 @@ export default async function UserDetailPage({ params }: PageProps<"/admin/users
                         {u.authUserId}
                       </code>
                     ) : (
-                      "Not linked yet — links on their next sign-in, or create one with a password."
+                      "Not linked yet. It links on their next sign-in, or create one with a password."
                     ),
                   ],
-                  ["Methods", u.auth ? u.auth.providers.join(", ") || "—" : "—"],
+                  ["Methods", u.auth ? u.auth.providers.join(", ") || "-" : "-"],
                   ["Email confirmed", yes(u.auth?.emailConfirmed ?? u.emailVerified)],
                   ["Phone confirmed", yes(u.auth?.phoneConfirmed ?? u.phoneNumberVerified)],
-                  ["Last sign-in", u.auth?.lastSignInAt ? formatDate(u.auth.lastSignInAt) : u.lastSignInAt ? formatDate(u.lastSignInAt) : "—"],
-                  ["Signed out everywhere", u.sessionsRevokedAt ? formatDate(u.sessionsRevokedAt) : "—"],
+                  ["Last sign-in", u.auth?.lastSignInAt ? formatDate(u.auth.lastSignInAt) : u.lastSignInAt ? formatDate(u.lastSignInAt) : "-"],
+                  ["Signed out everywhere", u.sessionsRevokedAt ? formatDate(u.sessionsRevokedAt) : "-"],
                 ]}
               />
             </CardBody>
@@ -117,7 +117,7 @@ export default async function UserDetailPage({ params }: PageProps<"/admin/users
               <DescriptionList
                 items={[
                   ["Roles", u.roles.length ? u.roles.map((r) => r.role.name).join(", ") : "Customer"],
-                  ["Staff status", u.staffProfile ? (u.staffProfile.active ? "Active" : "Deactivated") : "—"],
+                  ["Staff status", u.staffProfile ? (u.staffProfile.active ? "Active" : "Deactivated") : "-"],
                   ["Repairs", String(u._count.bookings)],
                   ["Product requests", String(u._count.productRequests)],
                   ["Design requests", String(u._count.customizationRequests)],

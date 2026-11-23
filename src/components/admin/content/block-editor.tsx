@@ -188,7 +188,7 @@ function BlockFields({ block: b, onChange }: { block: EditorBlock; onChange: (pa
       return (
         <div className="space-y-2">
           <ImageUpload value={b.mediaId || null} onChange={(id) => onChange({ mediaId: id ?? "" })} />
-          <Input aria-label="Alt text" value={b.alt} onChange={(e) => onChange({ alt: e.target.value })} className="h-10" placeholder="Alt text — describe the image for screen readers (required)" />
+          <Input aria-label="Alt text" value={b.alt} onChange={(e) => onChange({ alt: e.target.value })} className="h-10" placeholder="Alt text: describe the image for screen readers (required)" />
           <Input aria-label="Caption" value={b.caption ?? ""} onChange={(e) => onChange({ caption: e.target.value || undefined })} className="h-10" placeholder="Caption (optional)" />
         </div>
       );
@@ -222,7 +222,7 @@ function BlockFields({ block: b, onChange }: { block: EditorBlock; onChange: (pa
             <option value="customize">Customization studio</option>
             <option value="specs">Compare phones</option>
           </Select>
-          <Input aria-label="CTA title" value={b.title ?? ""} onChange={(e) => onChange({ title: e.target.value || undefined })} className="h-10" placeholder="Custom title (optional — default text is translated)" />
+          <Input aria-label="CTA title" value={b.title ?? ""} onChange={(e) => onChange({ title: e.target.value || undefined })} className="h-10" placeholder="Custom title (optional; default text is translated)" />
           <Input aria-label="CTA text" value={b.text ?? ""} onChange={(e) => onChange({ text: e.target.value || undefined })} className="h-10" placeholder="Custom text (optional)" />
         </div>
       );

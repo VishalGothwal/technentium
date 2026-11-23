@@ -42,7 +42,7 @@ export default async function OrderQueuePage({ searchParams }: PageProps<"/admin
 
   return (
     <>
-      <PageHeader title="Product requests" description="Order requests from the protection store. Confirm availability and shipping before fulfilment — nothing is paid online." />
+      <PageHeader title="Product requests" description="Order requests from the protection store. Confirm availability and shipping before fulfilment. Nothing is paid online." />
 
       <nav aria-label="Status" className="mb-4 flex gap-1 overflow-x-auto">
         {FILTERS.map((f) => {

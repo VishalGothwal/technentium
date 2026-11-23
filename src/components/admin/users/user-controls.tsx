@@ -57,7 +57,7 @@ export function UserProfileForm({ user }: { user: Profile }) {
             {(p) => <Input {...p} name="displayName" defaultValue={user.displayName ?? ""} />}
           </Field>
         )}
-        <Field label="Email" hint="Saved as confirmed — no email is sent." error={fields.email}>
+        <Field label="Email" hint="Saved as confirmed. No email is sent." error={fields.email}>
           {(p) => <Input {...p} name="email" type="email" defaultValue={user.email ?? ""} />}
         </Field>
         <Field label="Mobile number" hint="Indian mobile, e.g. 98765 43210." error={fields.phoneNumber}>

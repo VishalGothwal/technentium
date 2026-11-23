@@ -103,7 +103,7 @@ export default async function AdminBookingPage({ params }: PageProps<"/admin/boo
                   <li key={h.id} className="flex flex-wrap gap-x-2">
                     <span className="text-muted">{formatDateTime(h.createdAt)}</span>
                     <span className="font-medium">{t(`status.${h.entityType === "JOB" ? "job" : "booking"}.${h.toStatus}`)}</span>
-                    {h.reason && <span className="text-muted">— {h.reason}</span>}
+                    {h.reason && <span className="text-muted">: {h.reason}</span>}
                   </li>
                 ))}
               </ol>

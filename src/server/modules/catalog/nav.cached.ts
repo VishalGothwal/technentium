@@ -3,7 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { DEVICES_TAG } from "./devices.cached";
 import { getSetting } from "@/server/settings";
 import { listProductCategories, listProductTypes } from "@/server/modules/shop/catalog.service";
-import { listRepairCatalogue } from "./repair-pages.service";
+import { categoryCoverImages, listRepairCatalogue } from "./repair-pages.service";
 
 /**
  * Everything the site header menus need, in one cached read: repair categories with their brands,
@@ -13,8 +13,9 @@ export async function cachedHeaderNav() {
   "use cache";
   cacheTag(DEVICES_TAG);
   cacheLife("hours");
-  const [repairs, products, types, phone, whatsapp, email] = await Promise.all([
+  const [repairs, covers, products, types, phone, whatsapp, email] = await Promise.all([
     listRepairCatalogue(),
+    categoryCoverImages(),
     listProductCategories(),
     listProductTypes(),
     getSetting("business.supportPhone"),
@@ -32,7 +33,8 @@ export async function cachedHeaderNav() {
         slug: c.slug,
         nameEn: c.nameEn,
         nameHi: c.nameHi,
-        brands: c.brands.map((b) => ({ slug: b.slug, name: b.name })),
+        image: covers.get(c.id) ?? null,
+        brands: c.brands.map((b) => ({ id: b.id, slug: b.slug, name: b.name })),
       })),
     products: products
       .filter((c) => c._count.products > 0)

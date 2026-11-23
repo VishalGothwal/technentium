@@ -151,7 +151,7 @@ export async function AdminShell({ children }: { children: ReactNode }) {
         {actor.impersonator && (
           <div role="status" className="sticky top-14 z-10 flex flex-wrap items-center justify-between gap-2 bg-warning px-4 py-2 text-sm font-medium text-black lg:top-16 lg:px-6">
             <span>
-              Switched into <strong>{actor.name}</strong> ({roleNames}) — you see and act as them. Signed in as {actor.impersonator.name}.
+              Switched into <strong>{actor.name}</strong> ({roleNames}). You see and act as them. Signed in as {actor.impersonator.name}.
             </span>
             <StopViewAsButton returnTo={`/admin/users/${actor.userId}`} />
           </div>

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { networkInterfaces } from "node:os";
 
 /** Baseline security headers (PRD §13.1). A strict CSP is a follow-up once third-party scripts are known. */
 const securityHeaders = [
@@ -13,6 +14,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // Dev only: let phones on the same Wi-Fi open the dev server by this machine's LAN IP.
+  allowedDevOrigins: Object.values(networkInterfaces())
+    .flat()
+    .flatMap((i) => (i && i.family === "IPv4" && !i.internal ? [i.address] : [])),
   // The local single-connection dev database (DATABASE_POOL_MAX=1) can't serve parallel prerender
   // workers; build serially there. Hosted Postgres builds keep Next's defaults.
   experimental:

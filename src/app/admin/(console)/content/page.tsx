@@ -110,7 +110,7 @@ export default async function ContentListPage({ searchParams }: PageProps<"/admi
                                 {t.status.toLowerCase()}
                               </Badge>
                             ) : (
-                              <Badge>—</Badge>
+                              <Badge>-</Badge>
                             )}
                           </span>
                         );

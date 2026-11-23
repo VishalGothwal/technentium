@@ -195,7 +195,7 @@ function IssueForm({ categoryId, issue, onDone }: { categoryId: string; issue?: 
       <Field label="Name (English)" error={fields.nameEn} required>
         {(p) => <Input {...p} name="nameEn" defaultValue={issue?.nameEn} />}
       </Field>
-      <Field label="Name (Hindi)" hint="Optional — English is shown if empty.">
+      <Field label="Name (Hindi)" hint="Optional. English is shown if empty.">
         {(p) => <Input {...p} name="nameHi" lang="hi" defaultValue={issue?.nameHi ?? ""} />}
       </Field>
       <Field label="Description (English)">
@@ -504,7 +504,7 @@ function EstimateForm({ item, modelOptions, issueOptions, onDone }: { item?: Est
       <Field label="From (₹)" error={fields.minPaise} required>
         {(p) => <Input {...p} name="min" inputMode="decimal" defaultValue={item ? (item.minPaise / 100).toFixed(0) : ""} />}
       </Field>
-      <Field label="Up to (₹)" hint="Optional — shows a range" error={fields.maxPaise}>
+      <Field label="Up to (₹)" hint="Optional: shows a range" error={fields.maxPaise}>
         {(p) => <Input {...p} name="max" inputMode="decimal" defaultValue={item?.maxPaise ? (item.maxPaise / 100).toFixed(0) : ""} />}
       </Field>
       <div className="flex items-center gap-4 sm:col-span-2 lg:col-span-4">

@@ -201,7 +201,7 @@ export default async function DevelopersPage() {
                     <summary className="flex cursor-pointer list-none flex-wrap items-center gap-2 p-4 [&::-webkit-details-marker]:hidden">
                       <span className={cn("w-16 rounded-md px-2 py-0.5 text-center font-mono text-xs font-bold uppercase", METHOD_STYLE[m])}>{m}</span>
                       <code className="break-all font-mono text-sm">{path}</code>
-                      <span className="text-sm text-muted">— {op.summary}</span>
+                      <span className="text-sm text-muted">· {op.summary}</span>
                       <span className="ml-auto">
                         <AuthBadge security={op.security} t={t} />
                       </span>

@@ -37,7 +37,7 @@ export function StudioStepsEditor({ hidden }: { hidden: OptionalStep[] }) {
         <li className="flex items-start justify-between gap-4 py-3 text-sm">
           <div>
             <p className="font-medium">Device</p>
-            <p className="text-muted">Always on — the customer must pick their model.</p>
+            <p className="text-muted">Always on: the customer must pick their model.</p>
           </div>
           <span className="text-xs text-muted">Required</span>
         </li>
@@ -68,7 +68,7 @@ export function StudioStepsEditor({ hidden }: { hidden: OptionalStep[] }) {
         <li className="flex items-start justify-between gap-4 py-3 text-sm">
           <div>
             <p className="font-medium">Review</p>
-            <p className="text-muted">Always on — terms and submit.</p>
+            <p className="text-muted">Always on: terms and submit.</p>
           </div>
           <span className="text-xs text-muted">Required</span>
         </li>

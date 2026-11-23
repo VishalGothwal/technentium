@@ -152,7 +152,7 @@ export const paths: PathsObject = {
     },
     post: {
       tags: ["Content admin"],
-      summary: "Create an article or video (draft) — content.edit",
+      summary: "Create an article or video (draft). Needs content.edit",
       security: "staff",
       requestBody: {
         schema: {
@@ -178,7 +178,7 @@ export const paths: PathsObject = {
     get: { tags: ["Content admin"], summary: "Get content for editing", security: "staff", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }] },
     patch: {
       tags: ["Content admin"],
-      summary: "Update item, translations and relations — content.edit",
+      summary: "Update item, translations and relations. Needs content.edit",
       security: "staff",
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
       requestBody: {
@@ -197,7 +197,7 @@ export const paths: PathsObject = {
   "/api/v1/admin/content/articles/{id}/publish": {
     post: {
       tags: ["Content admin"],
-      summary: "Publish, schedule, unpublish or archive one language — content.publish",
+      summary: "Publish, schedule, unpublish or archive one language. Needs content.publish",
       security: "staff",
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
       requestBody: {

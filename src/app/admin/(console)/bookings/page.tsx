@@ -107,7 +107,7 @@ export default async function BookingQueuePage({ searchParams }: PageProps<"/adm
                       {t(`handover.${b.handoverMethod}.title`)}
                       {b.handover?.pincode && <span className="block text-xs text-muted">{b.handover.pincode}</span>}
                     </td>
-                    <td className="px-3 py-2">{b.slot ? `${formatDate(b.slot.date)} ${b.slot.startTime}–${b.slot.endTime}` : "—"}</td>
+                    <td className="px-3 py-2">{b.slot ? `${formatDate(b.slot.date)} ${b.slot.startTime}–${b.slot.endTime}` : "-"}</td>
                     <td className="px-3 py-2 text-muted">{formatDateTime(b.createdAt)}</td>
                     <td className="px-3 py-2">
                       <Badge tone={BOOKING_TONE[b.status]}>{t(`status.booking.${b.status}`)}</Badge>

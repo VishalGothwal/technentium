@@ -66,7 +66,7 @@ export default async function NotificationLogPage({ searchParams }: PageProps<"/
                       {ref && <span className="text-muted"> · {ref}</span>}
                     </p>
                     <p className="text-xs text-muted">
-                      {d.channel} · {d.provider ?? "—"} · {d.attempts} attempt{d.attempts === 1 ? "" : "s"} · {formatDateTime(d.createdAt)}
+                      {d.channel} · {d.provider ?? "-"} · {d.attempts} attempt{d.attempts === 1 ? "" : "s"} · {formatDateTime(d.createdAt)}
                       {d.sentAt && ` · sent ${formatDateTime(d.sentAt)}`}
                     </p>
                     {d.lastError && <p className="mt-1 break-words text-xs text-danger">{d.lastError}</p>}

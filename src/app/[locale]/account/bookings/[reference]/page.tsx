@@ -192,7 +192,7 @@ export default async function BookingDetailPage({ params }: PageProps<"/[locale]
               ...(booking.handover?.addressLine1
                 ? [[t("booking.address"), [booking.handover.addressLine1, booking.handover.addressLine2, booking.handover.landmark, booking.handover.pincode].filter(Boolean).join(", ")] as [string, string]]
                 : []),
-              [t("booking.diagnosisFee"), `${formatPaise(booking.diagnosisFeePaise, locale)} — ${booking.feeWaivedIfApproved ? t("booking.feeWaived") : t("booking.feeNotWaived")}`],
+              [t("booking.diagnosisFee"), `${formatPaise(booking.diagnosisFeePaise, locale)} · ${booking.feeWaivedIfApproved ? t("booking.feeWaived") : t("booking.feeNotWaived")}`],
             ]}
           />
           {booking.attachments.length > 0 && (

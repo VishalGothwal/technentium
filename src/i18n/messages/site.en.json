@@ -67,7 +67,7 @@
     },
     "track": {
       "title": "Track your requests",
-      "subtitle": "Repairs, protection orders and custom designs — every update in one place.",
+      "subtitle": "Repairs, protection orders and custom designs: every update in one place.",
       "label": "Reference number",
       "placeholder": "e.g. TN-2610-00001, TN-P-2610-00001",
       "submit": "Track",
@@ -141,9 +141,118 @@
     },
     "error": {
       "title": "Something went wrong",
-      "body": "This page didn’t load properly. Please try again — if it keeps happening, contact us.",
+      "body": "This page didn’t load properly. Please try again, and if it keeps happening, contact us.",
       "retry": "Try again",
       "home": "Go to home"
+    },
+    "quickBook": {
+      "title": "Book a repair",
+      "body": "Pick your device. We'll take it from there.",
+      "device": "Device",
+      "brand": "Brand",
+      "model": "Model",
+      "cta": "Book now",
+      "pickup": "Pickup & drop in Jaipur",
+      "approve": "Approve the price first"
+    },
+    "company": {
+      "label": "Company",
+      "title": "About Technentium",
+      "about": "About us",
+      "contact": "Contact & FAQs",
+      "track": "Track a request",
+      "articles": "Guides & articles",
+      "repairPolicy": "Repair & warranty policy",
+      "privacy": "Privacy policy",
+      "terms": "Terms & conditions"
+    },
+    "about": {
+      "metaTitle": "About us",
+      "metaDescription": "Technentium is a new device repair service starting in Jaipur: clear prices, your approval before any work, and every step tracked.",
+      "eyebrow": "About Technentium",
+      "title": "A new way to get your device repaired.",
+      "intro": "Technentium is a new repair service, starting in Jaipur. We are building repairs the way we would want them for our own phones: a clear price, no surprises, and you know what is happening at every step.",
+      "whyTitle": "Why we started",
+      "whyBody": "Getting a phone or laptop fixed often means guesswork: a vague price, parts you can't check and no idea when it will be ready. We think it should be as simple and open as booking anything else online.",
+      "approachTitle": "What we do differently",
+      "points": {
+        "price": {
+          "title": "Price first",
+          "body": "You see the diagnosis fee before you book and approve an itemised quote before any work starts."
+        },
+        "handover": {
+          "title": "Your way",
+          "body": "Pickup and drop, walk in to our shop, or a technician at your door. Choose what suits you."
+        },
+        "tracking": {
+          "title": "Always in the loop",
+          "body": "Follow your repair from your account, from the moment we receive your device to the moment it is back."
+        },
+        "warranty": {
+          "title": "Backed by warranty",
+          "body": "Replaced parts and our workmanship are covered after the repair."
+        }
+      },
+      "jaipurTitle": "Starting in Jaipur",
+      "jaipurBody": "We are starting small on purpose, in Jaipur only for now, so we can get every repair right. We will reach more cities as we grow. Protection products already ship across India.",
+      "cta": "Book a repair",
+      "ctaSecondary": "Talk to us"
+    },
+    "categoryPage": {
+      "title": "{device} repair in Jaipur",
+      "subtitle": "Choose your brand and model to see repair prices, then book a pickup, a walk-in or a doorstep visit in Jaipur.",
+      "issuesTitle": "{device} issues we repair",
+      "compareTitle": "Why choose Technentium for {device} repair?",
+      "recommended": "Recommended",
+      "local": {
+        "title": "Local repair shops",
+        "points": [
+          "Price is often set at the counter",
+          "Part quality can be hard to check",
+          "Warranty varies from shop to shop",
+          "Usually no updates while you wait"
+        ]
+      },
+      "us": {
+        "title": "Technentium",
+        "points": [
+          "Diagnosis fee shown before you book",
+          "Itemised quote you approve first",
+          "Pickup, walk-in or doorstep visit",
+          "Track every step online",
+          "Warranty on parts and work"
+        ]
+      },
+      "centre": {
+        "title": "Brand service centres",
+        "points": [
+          "Queues and appointment waits are common",
+          "You travel to them, during their hours",
+          "Repairs can take several days",
+          "Out-of-warranty repairs can cost more"
+        ]
+      },
+      "ctaTitle": "Ready to fix your {device}?",
+      "ctaBody": "Book in two minutes. You approve the price before any work starts.",
+      "cta": "Book a repair"
+    },
+    "journey": {
+      "pickup": {
+        "title": "Pickup",
+        "body": "We collect your device from your door in Jaipur, or you walk in to our shop."
+      },
+      "diagnose": {
+        "title": "Diagnose",
+        "body": "Our technicians find the fault and send you an itemised price to approve."
+      },
+      "repair": {
+        "title": "Repair",
+        "body": "Once you approve, we fix it with quality parts. Follow every step online."
+      },
+      "return": {
+        "title": "Back to you",
+        "body": "Your device comes back tested, with a warranty on parts and work."
+      }
     }
   }
 }

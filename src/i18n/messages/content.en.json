@@ -9,7 +9,7 @@
     "latest": "Latest guides",
     "editorsPicks": "Editor's picks",
     "title": "Guides & articles",
-    "subtitle": "Practical, honest advice on repairs, protection and getting more from your devices — from the technicians at Technentium.",
+    "subtitle": "Practical, honest advice on repairs, protection and getting more from your devices, from the technicians at Technentium.",
     "metaDescription": "Repair guides, buying advice and device-care tips from Technentium's technicians in Jaipur.",
     "searchLabel": "Search articles",
     "searchPlaceholder": "Search guides, e.g. battery",
@@ -72,7 +72,7 @@
     "cta": {
       "repair": {
         "title": "Need it fixed?",
-        "text": "Book a repair in Jaipur — pickup, walk-in or on-site. You approve the price before any work starts.",
+        "text": "Book a repair in Jaipur with pickup, walk-in or on-site service. You approve the price before any work starts.",
         "button": "Book a repair"
       },
       "protection": {
@@ -153,7 +153,7 @@
     "searchPlaceholder": "Search a phone, e.g. Pixel 9",
     "allBrands": "All brands",
     "notAvailable": "Not available",
-    "unknownHint": "“Not available” means we don't have verified data yet — it doesn't mean the feature is missing.",
+    "unknownHint": "“Not available” means we don't have verified data yet. It doesn't mean the feature is missing.",
     "released": "Released {date}",
     "launchPrice": "Launch price",
     "compare": "Compare",
@@ -170,7 +170,7 @@
   "compare": {
     "title": "Compare phones",
     "subtitle": "Pick two or three phones to see their specifications side by side.",
-    "metaDescription": "Compare phone specifications side by side — display, cameras, battery and more.",
+    "metaDescription": "Compare phone specifications side by side: display, cameras, battery and more.",
     "add": "Add a phone",
     "remove": "Remove {name}",
     "highlight": "Highlight differences",

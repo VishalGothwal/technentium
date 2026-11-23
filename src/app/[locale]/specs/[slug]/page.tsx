@@ -34,7 +34,7 @@ export async function generateMetadata({
   return pageMetadata({
     locale,
     path: `/specs/${slug}`,
-    title: s.seoTitle || `${name} — ${t("specs.fullSpecs")}`,
+    title: s.seoTitle || `${name}: ${t("specs.fullSpecs")}`,
     description:
       s.metaDescription ||
       localized(locale, s.summaryEn ?? "", s.summaryHi) ||

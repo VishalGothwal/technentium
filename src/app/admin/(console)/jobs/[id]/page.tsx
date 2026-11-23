@@ -309,7 +309,7 @@ export default async function JobDetailPage({ params }: PageProps<"/admin/jobs/[
                   {v.sentAt && `Sent ${formatDateTime(v.sentAt)}${v.sentById ? ` by ${names[v.sentById] ?? "staff"}` : ""}`}
                   {v.expiresAt && v.status === "SENT" && ` · expires ${formatDateTime(v.expiresAt)}`}
                   {v.decision && ` · ${v.decision.decision.toLowerCase()} by customer ${formatDateTime(v.decision.createdAt)}`}
-                  {v.decision?.reason && ` — “${v.decision.reason}”`}
+                  {v.decision?.reason && `: “${v.decision.reason}”`}
                 </p>
               </div>
             ))}
@@ -351,7 +351,7 @@ export default async function JobDetailPage({ params }: PageProps<"/admin/jobs/[
                       {Object.entries(qc.checklist as Record<string, boolean>)
                         .filter(([, v]) => v)
                         .map(([k]) => k)
-                        .join(", ") || "—"}
+                        .join(", ") || "-"}
                     </p>
                   )}
                 </li>

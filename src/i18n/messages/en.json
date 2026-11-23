@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Technentium — Phone, tablet & laptop repair in Jaipur",
+    "title": "Technentium | Phone, tablet & laptop repair in Jaipur",
     "description": "Book a device repair in Jaipur, approve the quote before any work starts, and track every step."
   },
   "common": {
@@ -27,7 +27,7 @@
     "myAccount": "My account",
     "myBookings": "My bookings",
     "translationPending": "This page is not yet available in Hindi. Showing English.",
-    "draftNotice": "Draft content — pending business and legal review."
+    "draftNotice": "Draft content, pending business and legal review."
   },
   "nav": {
     "home": "Home",
@@ -55,7 +55,7 @@
   },
   "home": {
     "eyebrow": "Repairs in Jaipur",
-    "title": "Your device, repaired — with no surprises.",
+    "title": "Your device, repaired with no surprises.",
     "subtitle": "Book online, approve the quote before any work begins, and follow every step until your device is back in your hands.",
     "cta": "Book a repair",
     "ctaSecondary": "How it works",
@@ -221,14 +221,14 @@
     "hidePassword": "Hide password",
     "strength": {
       "0": "",
-      "1": "Too short — use at least 8 characters",
-      "2": "Fair — add length or mix in numbers and symbols",
+      "1": "Too short: use at least 8 characters",
+      "2": "Fair: add length or mix in numbers and symbols",
       "3": "Good password",
       "4": "Strong password"
     },
-    "emailNotVerified": "Please verify your email first — check your inbox for the link we sent.",
+    "emailNotVerified": "Please verify your email first. Check your inbox for the link we sent.",
     "phoneNewAccount": "New to Technentium? Verifying your number creates your account.",
-    "panelTitle": "Repairs, protection and custom designs — all in one account.",
+    "panelTitle": "Repairs, protection and custom designs, all in one account.",
     "benefits": {
       "track": {
         "title": "Live repair tracking",
@@ -247,10 +247,10 @@
         "body": "Your photos and details are only visible to you and our team."
       }
     },
-    "registerSubtitle": "Enter your mobile number — your account is created as soon as you verify.",
+    "registerSubtitle": "Enter your mobile number. Your account is created as soon as you verify.",
     "emailHint": "We'll send a link to verify this address.",
     "emailTaken": "An account with this email already exists. Sign in instead, or reset your password.",
-    "registerPhoneNote": "Prefer your mobile number? Use the Mobile number option on the sign-in page — it creates your account automatically.",
+    "registerPhoneNote": "Prefer your mobile number? Use the Mobile number option on the sign-in page. It creates your account automatically.",
     "backToSignIn": "Back to sign in",
     "allOff": "Sign-in is temporarily unavailable. Please try again later.",
     "methodOff": "This sign-in method is switched off right now. Please use another one.",
@@ -261,7 +261,7 @@
     "notStaff": "This account doesn't have staff access.",
     "codeInvalid": "That code is not valid. Try the current code from your authenticator app.",
     "wrongPassword": "Password is incorrect.",
-    "checkEmail": "Almost done — we sent a confirmation link to your email. Open it to finish creating your account.",
+    "checkEmail": "Almost done! We sent a confirmation link to your email. Open it to finish creating your account.",
     "linkInvalid": "That sign-in link is invalid or has expired. Please try again."
   },
   "booking": {
@@ -331,7 +331,7 @@
     "signInToSubmit": "Sign in to submit",
     "signInNotice": "Sign in with your mobile number to submit. Your selections are kept.",
     "signInFirstTitle": "Sign in to book",
-    "signInFirstBody": "Takes 10 seconds — your name, number and address are saved for next time, and you can track the repair.",
+    "signInFirstBody": "Takes 10 seconds. Your name, number and address are saved for next time, and you can track the repair.",
     "submit": "Submit booking",
     "submitting": "Submitting…",
     "uploading": "Uploading photos…",
@@ -391,7 +391,7 @@
     "needsInfoTitle": "We need more information",
     "reply": "Your reply",
     "sendReply": "Send reply",
-    "replySent": "Thanks — we've received your reply.",
+    "replySent": "Thanks, we've received your reply.",
     "declinedTitle": "This booking could not be accepted",
     "warrantyTitle": "Warranty",
     "warrantyUntil": "Covered until {date}",
@@ -596,7 +596,7 @@
     "all": "All devices",
     "popular": "Popular devices",
     "results": "Matching devices",
-    "notListed": "My device isn't listed — choose \"Other\"",
+    "notListed": "My device isn't listed? Choose \"Other\"",
     "noResults": "No matching devices. Try a different spelling, or contact us if your device is not listed.",
     "change": "Change device",
     "selected": "Selected device",
@@ -683,7 +683,7 @@
   "repairFlow": {
     "heroEyebrow": "Doorstep & walk-in repairs in Jaipur",
     "heroTitle": "Repair, the way you want it",
-    "heroBody": "Screens, batteries, charging ports, water damage and more — for phones, tablets, laptops, watches and earbuds.",
+    "heroBody": "Screens, batteries, charging ports, water damage and more, for phones, tablets, laptops, watches and earbuds.",
     "point1": "Pickup & drop",
     "point2": "Warranty on repairs",
     "point3": "Approve the price first",
@@ -701,14 +701,6 @@
     "topModels": "Popular models",
     "modelsCount": "{count} models",
     "howTitle": "How it works",
-    "how1Title": "Book a repair",
-    "how1Body": "Choose your device and the services you need. See an estimated price straight away.",
-    "how2Title": "Hand it over",
-    "how2Body": "We pick it up, you walk in, or a technician visits — whichever suits you.",
-    "how3Title": "Diagnose & approve",
-    "how3Body": "Our technicians inspect it and send the final price. Nothing is repaired until you approve.",
-    "how4Title": "Fast return",
-    "how4Body": "Get your device back with a warranty on replaced parts and workmanship.",
     "whyTitle": "Why Technentium",
     "stepDevice": "Select device",
     "stepServices": "Select repair",
@@ -727,10 +719,10 @@
     "estimatedTotal": "Estimated total",
     "diagnosisFee": "Diagnosis fee",
     "feeWaived": "Waived if you approve the quote",
-    "estimateNote": "Estimated price only. The final price is confirmed after diagnosis — nothing is repaired until you approve it.",
+    "estimateNote": "Estimated price only. The final price is confirmed after diagnosis, and nothing is repaired until you approve it.",
     "unpriced": "+ {count} priced after diagnosis",
     "notesLabel": "Device description (optional)",
-    "notesPlaceholder": "Anything we should know — colour, what happened, etc.",
+    "notesPlaceholder": "Anything we should know: colour, what happened, etc.",
     "checkout": "Book now",
     "noneSelectedHint": "Tap Add + on a service to see your estimate.",
     "checkoutDisabled": "Add a service to book",
@@ -743,20 +735,20 @@
     "pincodeTitle": "Check if we serve your pincode",
     "pincodePlaceholder": "Enter pincode",
     "check": "Check",
-    "serviceable": "Yes — we serve {locality}",
+    "serviceable": "Yes, we serve {locality}",
     "notServiceable": "We don't pick up from this pincode yet. You can still walk in to our Jaipur shop.",
     "otherIssueTitle": "Looking for another repair?",
-    "otherIssueBody": "Book now and describe the problem — our team will get back to you.",
+    "otherIssueBody": "Book now and describe the problem. Our team will get back to you.",
     "changeDevice": "Change",
     "otherDevices": "Other devices",
     "estimated": "Estimated"
   },
   "platform": {
-    "testMode": "Test mode — sign-in codes are not sent by SMS.",
+    "testMode": "Test mode: sign-in codes are not sent by SMS.",
     "viewingAs": "Viewing as {name} (switched by {admin}).",
     "maintenanceTitle": "We'll be back soon",
     "maintenanceBody": "We're making some improvements. Please check back in a little while.",
-    "staffMaintenance": "Maintenance mode is on — customers see the maintenance page.",
+    "staffMaintenance": "Maintenance mode is on. Customers see the maintenance page.",
     "sectionOffTitle": "Temporarily unavailable",
     "sectionOffBody": "This part of the site is paused for a short while. Please check back soon.",
     "backHome": "Back to home"

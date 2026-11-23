@@ -46,7 +46,7 @@ export default async function ProductAdminPage({ params }: PageProps<"/admin/pro
               View in store ↗
             </ButtonLink>
           ) : (
-            <Badge tone="warning">{p.status.toLowerCase()} — not visible in store</Badge>
+            <Badge tone="warning">{p.status.toLowerCase()}: not visible in store</Badge>
           )
         }
       />

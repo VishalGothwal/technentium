@@ -547,8 +547,8 @@ export function Studio({
                   [t("studio.review.design"), design ? localized(locale, design.nameEn, design.nameHi) : t("studio.design.blank")],
                   ...(showFinish
                     ? ([
-                        [t("studio.review.finish"), finish ? localized(locale, finish.nameEn, finish.nameHi) : "—"],
-                        [t("studio.review.coverage"), coverage ? localized(locale, coverage.nameEn, coverage.nameHi) : "—"],
+                        [t("studio.review.finish"), finish ? localized(locale, finish.nameEn, finish.nameHi) : "-"],
+                        [t("studio.review.coverage"), coverage ? localized(locale, coverage.nameEn, coverage.nameHi) : "-"],
                       ] as [string, string][])
                     : []),
                   ...(showColour ? ([[t("studio.review.text"), textCfg?.value.trim() || t("studio.review.none")]] as [string, string][]) : []),

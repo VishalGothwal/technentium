@@ -8,6 +8,7 @@ import { mediaUrl } from "@/lib/media";
 import { OTHER_MODEL_NAME } from "@/lib/device-name";
 import { deviceKindFor } from "@/lib/customization/style";
 import type { Device3DRow } from "@/lib/device-3d";
+import { BrandLogo, hasBrandLogo } from "@/components/ui/brand-logo";
 import { DeviceFrame } from "./device-frame";
 
 export type PickedDevice = {
@@ -166,8 +167,8 @@ export function DevicePicker({
             {t("devicePicker.all")}
           </Chip>
           {brandChips.map((b) => (
-            <Chip key={b.id} small active={brand === b.slug} onClick={() => setBrand(brand === b.slug ? null : b.slug)}>
-              {b.name}
+            <Chip key={b.id} small logo={hasBrandLogo(b.slug)} label={b.name} active={brand === b.slug} onClick={() => setBrand(brand === b.slug ? null : b.slug)}>
+              <BrandLogo slug={b.slug} name={b.name} scale={0.45} />
             </Chip>
           ))}
         </div>
@@ -227,16 +228,25 @@ export function DevicePicker({
   );
 }
 
-function Chip({ active, onClick, small, children }: { active: boolean; onClick: () => void; small?: boolean; children: React.ReactNode }) {
+/** A logo chip is always white (logos are drawn for light backgrounds, also in the dark studio) and marks the active state with an outline. */
+function Chip({ active, onClick, small, logo, label, children }: { active: boolean; onClick: () => void; small?: boolean; logo?: boolean; label?: string; children: React.ReactNode }) {
   return (
     <button
       type="button"
       aria-pressed={active}
       onClick={onClick}
+      title={logo ? label : undefined}
       className={cn(
         "shrink-0 rounded-full border font-medium transition",
         small ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
-        active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-surface hover:bg-surface-muted",
+        logo && "flex h-8 items-center",
+        logo
+          ? active
+            ? "border-primary bg-white ring-2 ring-primary"
+            : "border-border bg-white opacity-80 hover:opacity-100"
+          : active
+            ? "border-primary bg-primary text-primary-foreground"
+            : "border-border bg-surface hover:bg-surface-muted",
       )}
     >
       {children}

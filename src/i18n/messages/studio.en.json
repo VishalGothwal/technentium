@@ -1,13 +1,13 @@
 {
   "studio": {
     "meta": {
-      "title": "Custom device skins — design your own",
+      "title": "Custom device skins: design your own",
       "description": "Design a custom skin for your phone, tablet or laptop. Pick a pattern, tune the colours, add your name or artwork and see a live preview before you request it."
     },
     "hero": {
       "eyebrow": "Technentium Studio",
       "title": "Make your device unmistakably yours",
-      "subtitle": "Pick a design, remix the colours, add a monogram or your own artwork — and watch it come alive on your exact model.",
+      "subtitle": "Pick a design, remix the colours, add a monogram or your own artwork, and watch it come alive on your exact model.",
       "cta": "Open the studio",
       "browse": "Browse designs"
     },
@@ -22,7 +22,7 @@
     },
     "gallery": {
       "title": "Design catalogue",
-      "subtitle": "Every design is a starting point — remix the palette in the studio.",
+      "subtitle": "Every design is a starting point. Remix the palette in the studio.",
       "all": "All",
       "customize": "Customize",
       "from": "From {price}",
@@ -89,7 +89,7 @@
     },
     "artwork": {
       "title": "Your artwork (optional)",
-      "body": "Upload a photo, logo or illustration (JPEG, PNG or WebP, up to 10 MB). It stays private — only you and our design team can see it.",
+      "body": "Upload a photo, logo or illustration (JPEG, PNG or WebP, up to 10 MB). It stays private: only you and our design team can see it.",
       "choose": "Choose image",
       "replace": "Replace",
       "remove": "Remove",
@@ -119,7 +119,7 @@
     },
     "price": {
       "estimate": "Estimated price",
-      "estimateNote": "Indicative only — the final price is confirmed by our team after review. No payment is taken now.",
+      "estimateNote": "Indicative only. The final price is confirmed by our team after review. No payment is taken now.",
       "base": "Design",
       "finish": "Finish",
       "coverage": "Coverage"
@@ -137,7 +137,7 @@
       "front": "Front",
       "label": "Preview of the custom design on {device}",
       "generic": "Design preview",
-      "illustrative": "Illustrative preview — final colours may vary slightly by material.",
+      "illustrative": "Illustrative preview. Final colours may vary slightly by material.",
       "rotateHint": "Drag to rotate",
       "view3d": "3D view of {device}"
     },
@@ -166,7 +166,7 @@
       "needsInfoTitle": "We need a bit more information",
       "replyLabel": "Your reply",
       "replySend": "Send reply",
-      "replySent": "Thanks — we've received your reply.",
+      "replySent": "Thanks, we've received your reply.",
       "quoteTitle": "Price for your design",
       "quoteBody": "Our team has reviewed your design and set the price below.",
       "accept": "Accept price",
@@ -176,7 +176,7 @@
       "declineTitle": "Decline this price?",
       "declineBody": "Nothing will be made. You can tell us why (optional).",
       "declineReason": "Reason (optional)",
-      "accepted": "Accepted — we'll be in touch about next steps.",
+      "accepted": "Accepted! We'll be in touch about next steps.",
       "declined": "You declined this price.",
       "cancel": "Cancel request",
       "cancelTitle": "Cancel this design request?",

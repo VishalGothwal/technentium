@@ -54,7 +54,7 @@ export default async function CustomizationDetailPage({ params }: PageProps<"/ad
             <div className="flex h-96 items-center justify-center bg-[radial-gradient(circle_at_50%_35%,#2a2352_0%,#0b0c14_75%)] p-6">
               <ConfigPreview configuration={req.configuration} label={`Preview of ${req.reference}`} className="h-full" />
             </div>
-            <p className="px-4 py-2 text-xs text-muted">Rendered from the saved configuration snapshot. Illustrative — check artwork resolution before printing.</p>
+            <p className="px-4 py-2 text-xs text-muted">Rendered from the saved configuration snapshot. Illustrative only: check artwork resolution before printing.</p>
           </Card>
 
           <Card>
@@ -64,7 +64,7 @@ export default async function CustomizationDetailPage({ params }: PageProps<"/ad
                 items={[
                   ["Device", `${c?.device.brand ?? req.deviceModel.brand.name} ${c?.device.name ?? req.deviceModel.name} (${req.deviceModel.category.nameEn})`],
                   ["Design", c?.design ? `${c.design.nameEn} (${c.design.slug})` : "Blank canvas"],
-                  ["Pattern", c ? `${c.style.pattern}, density ${c.style.density}, angle ${c.style.angle}°` : "—"],
+                  ["Pattern", c ? `${c.style.pattern}, density ${c.style.density}, angle ${c.style.angle}°` : "-"],
                   [
                     "Palette",
                     <span key="p" className="flex flex-wrap gap-1.5">
@@ -76,13 +76,13 @@ export default async function CustomizationDetailPage({ params }: PageProps<"/ad
                       ))}
                     </span>,
                   ],
-                  ["Finish", c ? `${c.finish.nameEn}${c.finish.deltaPaise ? ` (+${formatPaise(c.finish.deltaPaise)})` : ""}` : "—"],
-                  ["Coverage", c ? `${c.coverage.nameEn}${c.coverage.deltaPaise ? ` (+${formatPaise(c.coverage.deltaPaise)})` : ""}` : "—"],
+                  ["Finish", c ? `${c.finish.nameEn}${c.finish.deltaPaise ? ` (+${formatPaise(c.finish.deltaPaise)})` : ""}` : "-"],
+                  ["Coverage", c ? `${c.coverage.nameEn}${c.coverage.deltaPaise ? ` (+${formatPaise(c.coverage.deltaPaise)})` : ""}` : "-"],
                   ["Text", c?.text ? `“${c.text.value}” · ${c.text.font}, ${c.text.position}, ${c.text.color}` : "None"],
                   ["Artwork placement", c?.artwork ? `scale ${c.artwork.scale}, x ${c.artwork.x}, y ${c.artwork.y}` : "None"],
-                  ["Estimate (at submission)", req.estimatePaise != null ? formatPaise(req.estimatePaise) : "—"],
+                  ["Estimate (at submission)", req.estimatePaise != null ? formatPaise(req.estimatePaise) : "-"],
                   ["Quoted price", req.quotedPaise != null ? formatPaise(req.quotedPaise) : "Not shared"],
-                  ["Customer notes", req.customerNotes ?? "—"],
+                  ["Customer notes", req.customerNotes ?? "-"],
                 ]}
               />
               {req.artwork.length > 0 && (
@@ -110,8 +110,8 @@ export default async function CustomizationDetailPage({ params }: PageProps<"/ad
               <DescriptionList
                 items={[
                   ["Name", req.customer.name],
-                  ["Phone", req.customer.phoneNumber ?? "—"],
-                  ["Email", req.customer.email.endsWith(".invalid") ? "—" : req.customer.email],
+                  ["Phone", req.customer.phoneNumber ?? "-"],
+                  ["Email", req.customer.email.endsWith(".invalid") ? "-" : req.customer.email],
                 ]}
               />
             </CardBody>

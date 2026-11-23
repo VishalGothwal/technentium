@@ -81,10 +81,10 @@ export function GeneralSettingsForm({ settings, feesOnly, policies }: { settings
             <Field label="Default diagnosis fee (₹)" hint="Used when no fee rule matches." error={fields["booking.defaultDiagnosisFeePaise"]}>
               {(p) => <Input {...p} name="defaultFee" inputMode="decimal" defaultValue={rupees(settings["booking.defaultDiagnosisFeePaise"])} />}
             </Field>
-            <Field label="Return — collection (₹)" hint="Charged if a declined device is collected." error={fields["return.collectionChargePaise"]}>
+            <Field label="Return: collection (₹)" hint="Charged if a declined device is collected." error={fields["return.collectionChargePaise"]}>
               {(p) => <Input {...p} name="collection" inputMode="decimal" defaultValue={rupees(settings["return.collectionChargePaise"])} />}
             </Field>
-            <Field label="Return — delivery (₹)" hint="Charged if a declined device is delivered." error={fields["return.deliveryChargePaise"]}>
+            <Field label="Return: delivery (₹)" hint="Charged if a declined device is delivered." error={fields["return.deliveryChargePaise"]}>
               {(p) => <Input {...p} name="delivery" inputMode="decimal" defaultValue={rupees(settings["return.deliveryChargePaise"])} />}
             </Field>
             <Field label="GST rate (%)" hint="Applied to taxable quote lines." error={fields["tax.gstRateBps"]}>
@@ -230,7 +230,7 @@ export function FeeRulesEditor({ rules, scope, defaultFeePaise }: { rules: FeeRu
       />
       <CardBody className="space-y-4">
         {rules.length === 0 ? (
-          <p className="text-sm text-muted">No rules — the default fee applies to every booking.</p>
+          <p className="text-sm text-muted">No rules. The default fee applies to every booking.</p>
         ) : (
           <ul className="divide-y divide-border">
             {rules.map((r) => (

@@ -180,7 +180,7 @@ function TypeForm({ id, initial, categories, onDone }: { id?: string; initial: D
                     value={String(v.highlights[t] ?? "")}
                     onChange={(e) => setV((p) => ({ ...p, highlights: { ...p.highlights, [t]: e.target.value ? Number(e.target.value) : undefined } }))}
                   >
-                    <option value="">—</option>
+                    <option value="">-</option>
                     {[1, 2, 3, 4, 5].map((n) => (
                       <option key={n} value={n}>
                         {n}

@@ -45,7 +45,7 @@ export default async function CustomersPage({ searchParams }: PageProps<"/admin/
               <li key={c.id}>
                 <Link href={`/admin/customers/${c.id}`} className="block rounded-lg border border-border bg-surface p-3">
                   <p className="font-medium">{c.name}</p>
-                  <p className="text-sm text-muted">{[c.phoneNumber, c.email].filter(Boolean).join(" · ") || "—"}</p>
+                  <p className="text-sm text-muted">{[c.phoneNumber, c.email].filter(Boolean).join(" · ") || "-"}</p>
                   <p className="text-xs text-muted">
                     {c._count.bookings} bookings · joined {formatDate(c.createdAt)}
                   </p>
@@ -73,8 +73,8 @@ export default async function CustomersPage({ searchParams }: PageProps<"/admin/
                         {c.name}
                       </Link>
                     </td>
-                    <td className="px-4 py-2">{c.phoneNumber ?? "—"}</td>
-                    <td className="px-4 py-2">{c.email ?? "—"}</td>
+                    <td className="px-4 py-2">{c.phoneNumber ?? "-"}</td>
+                    <td className="px-4 py-2">{c.email ?? "-"}</td>
                     <td className="px-4 py-2 text-right tabular-nums">{c._count.bookings}</td>
                     <td className="px-4 py-2">{formatDate(c.createdAt)}</td>
                   </tr>

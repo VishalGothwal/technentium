@@ -35,6 +35,7 @@ const STATIC_PAGES: [path: string, priority: number, freq: Entry["changeFrequenc
   ["/specs", 0.7, "weekly"],
   ["/compare", 0.6, "weekly"],
   ["/guide", 0.6, "monthly"],
+  ["/about", 0.5, "monthly"],
   ["/help", 0.5, "monthly"],
   ["/policies/privacy", 0.2, "yearly"],
   ["/policies/terms", 0.2, "yearly"],

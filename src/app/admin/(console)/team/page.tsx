@@ -56,7 +56,7 @@ export default async function TeamPage() {
         </Card>
 
         <Card>
-          <CardHeader title="Role permissions" description="Proposed baseline from PRD §8 — pending approval (D-10). Enforced on the server for every action." />
+          <CardHeader title="Role permissions" description="Proposed baseline from PRD §8, pending approval (D-10). Enforced on the server for every action." />
           <CardBody className="overflow-x-auto">
             <table className="w-full min-w-[40rem] text-sm">
               <thead>
@@ -79,7 +79,7 @@ export default async function TeamPage() {
                       const has = (ROLE_DEFINITIONS[k].permissions as readonly string[]).includes(p);
                       return (
                         <td key={k} className="px-2 py-1.5 text-center">
-                          {has ? <Badge tone="success">Yes</Badge> : <span className="text-muted" aria-label="No">—</span>}
+                          {has ? <Badge tone="success">Yes</Badge> : <span className="text-muted" aria-label="No">-</span>}
                         </td>
                       );
                     })}

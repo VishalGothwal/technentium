@@ -89,7 +89,7 @@ export function DescriptionList({ items, className }: { items: [ReactNode, React
       {items.map(([k, v], i) => (
         <div key={i} className="contents">
           <dt className="text-muted">{k}</dt>
-          <dd className="min-w-0 break-words">{v ?? "—"}</dd>
+          <dd className="min-w-0 break-words">{v ?? "-"}</dd>
         </div>
       ))}
     </dl>

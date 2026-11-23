@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Cpu, Palette, ShieldCheck, Wrench } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Locale } from "@/i18n/config";
@@ -9,55 +10,31 @@ import { readStyle } from "@/lib/customization/style";
 import { HANDOVER_METHODS } from "@/lib/schemas/repair";
 import { cachedDesigns } from "@/server/modules/customization/catalog.cached";
 import { cachedFeaturedProducts } from "@/server/modules/shop/catalog.cached";
+import { cachedHeaderNav } from "@/server/modules/catalog/nav.cached";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ButtonLink } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/surface";
 import { RelatedGuides } from "@/components/content/related-guides";
 import { DevicePreview } from "@/components/customization/device-preview";
 import { ProductCard, ProductGrid } from "@/components/shop/product-card";
+import { DeviceTypeTile } from "@/components/repair/blocks";
+import { RepairProcess } from "@/components/repair/journey";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t, locale } = await getT();
   return { ...pageMetadata({ locale, path: "/", title: t("meta.title"), description: t("meta.description") }), title: { absolute: t("meta.title") } };
 }
 
-const SECTION_ICONS: Record<string, React.ReactNode> = {
-  repairs: <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z" />,
-  protection: <path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6z" />,
-  customize: (
-    <>
-      <circle cx="13.5" cy="6.5" r="1.5" />
-      <circle cx="17.5" cy="10.5" r="1.5" />
-      <circle cx="8.5" cy="7.5" r="1.5" />
-      <path d="M12 22a10 10 0 1 1 10-10c0 2.8-2.2 3-4 3h-2a2 2 0 0 0-1.5 3.3A2 2 0 0 1 12 22z" />
-    </>
-  ),
-  specs: (
-    <>
-      <rect x="6" y="2" width="12" height="20" rx="2" />
-      <path d="M10 18h4" />
-    </>
-  ),
-};
-
-function Icon({ name, className }: { name: string; className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {SECTION_ICONS[name]}
-    </svg>
-  );
-}
+const SECTIONS = [
+  { key: "repairs", path: "/repairs", Icon: Wrench },
+  { key: "protection", path: "/protection", Icon: ShieldCheck },
+  { key: "customize", path: "/customize", Icon: Palette },
+  { key: "specs", path: "/compare", Icon: Cpu },
+] as const;
 
 export default async function HomePage() {
   const { t, locale } = await getT();
   const l = (path: string) => `/${locale}${path}`;
-  const sections = [
-    { key: "repairs", href: l("/repairs"), tone: "from-white/15 to-white/5 text-white" },
-    { key: "protection", href: l("/protection"), tone: "from-white/15 to-white/5 text-white" },
-    { key: "customize", href: l("/customize"), tone: "from-white/15 to-white/5 text-white" },
-    { key: "specs", href: l("/compare"), tone: "from-white/15 to-white/5 text-white" },
-  ];
-  const steps = ["book", "confirm", "quote", "return"] as const;
   const trust = ["pricing", "approval", "tracking", "warranty"] as const;
 
   return (
@@ -69,24 +46,23 @@ export default async function HomePage() {
         ]}
       />
 
-      {/* Hero: the platform at a glance */}
-      <section className="relative isolate overflow-hidden bg-black text-white">
-        <div aria-hidden className="absolute -top-40 -left-32 -z-10 size-[28rem] rounded-full bg-white/10 blur-3xl" />
-        <div aria-hidden className="absolute -right-24 -bottom-48 -z-10 size-[30rem] rounded-full bg-white/5 blur-3xl" />
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-[1.1fr_1fr] md:items-center md:py-20">
+      {/* Hero: what Technentium does, with a card for each part of the site */}
+      <section className="border-b border-border bg-surface-muted">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:py-16 lg:grid-cols-[1fr_1.05fr] lg:items-center">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">{t("site.home.eyebrow")}</p>
-            <h1 className="mt-4 text-4xl font-bold leading-[1.1] tracking-tight text-balance sm:text-5xl lg:text-6xl">{t("site.home.title")}</h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-300">{t("site.home.subtitle")}</p>
+            <p className="text-xs font-semibold tracking-[0.16em] text-muted uppercase">{t("site.home.eyebrow")}</p>
+            <h1 className="mt-3 text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl">{t("site.home.title")}</h1>
+            <span aria-hidden className="mt-5 block h-0.5 w-10 bg-foreground" />
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">{t("site.home.subtitle")}</p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href={l("/repairs/book")} size="lg" variant="inverse" className="rounded-xl">
+              <ButtonLink href={l("/repairs")} size="lg" className="rounded-xl">
                 {t("site.home.ctaRepair")}
               </ButtonLink>
-              <ButtonLink href={l("/protection")} size="lg" variant="secondary" className="rounded-xl border-white/20 bg-white/10 text-white hover:bg-white/20">
+              <ButtonLink href={l("/protection")} size="lg" variant="secondary" className="rounded-xl">
                 {t("site.home.ctaShop")}
               </ButtonLink>
             </div>
-            <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+            <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
               {(
                 [
                   ["/track", "track"],
@@ -95,7 +71,7 @@ export default async function HomePage() {
                 ] as const
               ).map(([href, key]) => (
                 <li key={key}>
-                  <Link href={l(href)} className="text-slate-300 underline-offset-4 hover:text-white hover:underline">
+                  <Link href={l(href)} className="font-medium underline-offset-4 hover:underline">
                     {t(`site.home.quick.${key}`)} →
                   </Link>
                 </li>
@@ -104,17 +80,16 @@ export default async function HomePage() {
           </div>
 
           <ul className="grid grid-cols-2 gap-3">
-            {sections.map((s) => (
-              <li key={s.key}>
-                <Link
-                  href={s.href}
-                  className={`group flex h-full flex-col rounded-2xl border border-white/10 bg-gradient-to-br ${s.tone} p-4 backdrop-blur transition hover:border-white/30 hover:bg-white/5 sm:p-5`}
-                >
-                  <Icon name={s.key} className="size-7" />
-                  <span className="mt-3 font-semibold text-white">{t(`site.home.sections.${s.key}.title`)}</span>
-                  <span className="mt-1 hidden text-sm leading-snug text-slate-300 sm:block">{t(`site.home.sections.${s.key}.body`)}</span>
-                  <span className="mt-auto pt-3 text-sm font-medium">
-                    {t(`site.home.sections.${s.key}.cta`)} <span className="inline-block transition group-hover:translate-x-0.5">→</span>
+            {SECTIONS.map(({ key, path, Icon }) => (
+              <li key={key}>
+                <Link href={l(path)} className="group flex h-full flex-col rounded-2xl border border-border bg-surface p-4 lift hover:border-foreground sm:p-5">
+                  <span className="flex size-11 items-center justify-center rounded-xl bg-surface-muted transition group-hover:bg-foreground group-hover:text-white">
+                    <Icon aria-hidden className="size-5" />
+                  </span>
+                  <span className="mt-4 font-semibold">{t(`site.home.sections.${key}.title`)}</span>
+                  <span className="mt-1 hidden text-sm leading-snug text-muted sm:block">{t(`site.home.sections.${key}.body`)}</span>
+                  <span className="mt-auto pt-4 text-sm font-semibold">
+                    {t(`site.home.sections.${key}.cta`)} <span className="inline-block transition group-hover:translate-x-0.5">→</span>
                   </span>
                 </Link>
               </li>
@@ -123,42 +98,27 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Repairs */}
+      {/* Repairs: device types, then on to the repairs section */}
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.3fr]">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary">{t("home.eyebrow")}</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight">{t("site.home.repairTitle")}</h2>
-            <p className="mt-3 text-muted">{t("site.home.repairBody")}</p>
-            <h3 className="mt-8 text-sm font-semibold uppercase tracking-wide text-muted">{t("site.home.handoverTitle")}</h3>
-            <ul className="mt-3 flex flex-wrap gap-2">
-              {HANDOVER_METHODS.map((m) => (
-                <li key={m} className="rounded-full border border-border bg-surface px-3 py-1.5 text-sm">
-                  {t(`handover.${m}.title`)}
-                </li>
-              ))}
-            </ul>
-            <ButtonLink href={l("/repairs/book")} className="mt-8 rounded-xl">
-              {t("home.cta")}
-            </ButtonLink>
-            <p className="mt-3 text-sm text-muted">{t("home.serviceArea")}</p>
-          </div>
-          <ol className="grid gap-3 sm:grid-cols-2">
-            {steps.map((s, i) => (
-              <li key={s} className="rounded-2xl border border-border bg-surface p-5">
-                <span className="flex size-9 items-center justify-center rounded-full bg-primary-soft font-semibold text-primary">{i + 1}</span>
-                <p className="mt-4 font-semibold">{t(`home.steps.${s}.title`)}</p>
-                <p className="mt-1 text-sm text-muted">{t(`home.steps.${s}.body`)}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
+        <SectionHeading eyebrow={t("home.eyebrow")} title={t("site.home.repairTitle")} body={t("site.home.repairBody")} href={l("/repairs")} linkLabel={t("site.header.allRepairs")} />
+        <Suspense fallback={<Skeleton className="h-40 rounded-2xl" />}>
+          <DeviceTiles locale={locale} />
+        </Suspense>
+        <RepairProcess t={t} className="mt-8" />
+        <ul className="mt-6 flex flex-wrap gap-2">
+          {HANDOVER_METHODS.map((m) => (
+            <li key={m} className="rounded-full border border-border bg-surface px-3 py-1.5 text-sm">
+              {t(`handover.${m}.title`)}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-sm text-muted">{t("home.serviceArea")}</p>
       </section>
 
       {/* Protection */}
-      <section className="border-y border-border bg-surface">
+      <section className="border-y border-border bg-surface-muted">
         <div className="mx-auto max-w-6xl px-4 py-16">
-          <SectionHeading title={t("site.home.shopTitle")} body={t("site.home.shopBody")} href={l("/protection/products")} linkLabel={t("site.home.viewAll")} />
+          <SectionHeading eyebrow={t("site.home.sections.protection.title")} title={t("site.home.shopTitle")} body={t("site.home.shopBody")} href={l("/protection/products")} linkLabel={t("site.home.viewAll")} />
           <Suspense fallback={<GridSkeleton />}>
             <FeaturedProducts locale={locale} />
           </Suspense>
@@ -166,22 +126,36 @@ export default async function HomePage() {
       </section>
 
       {/* Customization */}
-      <section className="relative isolate overflow-hidden bg-black text-white">
-        <div aria-hidden className="absolute top-0 right-0 -z-10 size-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-[1fr_1.2fr]">
+      <section className="mx-auto max-w-6xl px-4 pt-16">
+        <div className="grid items-center gap-10 rounded-3xl border border-border bg-surface-muted p-6 sm:p-10 md:grid-cols-[1fr_1.2fr]">
           <div>
-            <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              {t("site.home.studioTitle")}
-            </h2>
-            <p className="mt-4 max-w-prose text-white/70">{t("site.home.studioBody")}</p>
-            <ButtonLink href={l("/customize/studio")} size="lg" variant="inverse" className="mt-8 rounded-xl">
+            <p className="text-xs font-semibold tracking-[0.16em] text-muted uppercase">{t("site.home.sections.customize.title")}</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight">{t("site.home.studioTitle")}</h2>
+            <p className="mt-4 max-w-prose text-muted">{t("site.home.studioBody")}</p>
+            <ButtonLink href={l("/customize/studio")} size="lg" className="mt-8 rounded-xl">
               {t("site.home.studioCta")}
             </ButtonLink>
           </div>
-          <Suspense fallback={<Skeleton className="h-64 rounded-3xl bg-white/10" />}>
+          <Suspense fallback={<Skeleton className="h-64 rounded-3xl" />}>
             <DesignShowcase locale={locale} />
           </Suspense>
         </div>
+      </section>
+
+      {/* Specs & compare */}
+      <section className="mx-auto max-w-6xl px-4 pt-6">
+        <Link href={l("/compare")} className="group flex flex-col gap-4 rounded-3xl border border-border bg-surface p-6 lift hover:border-foreground sm:flex-row sm:items-center sm:p-8">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
+            <Cpu aria-hidden className="size-6" />
+          </span>
+          <span className="flex-1">
+            <span className="block text-xl font-bold tracking-tight">{t("site.home.sections.specs.title")}</span>
+            <span className="mt-1 block text-muted">{t("site.home.sections.specs.body")}</span>
+          </span>
+          <span className="text-sm font-semibold">
+            {t("site.home.sections.specs.cta")} <span className="inline-block transition group-hover:translate-x-0.5">→</span>
+          </span>
+        </Link>
       </section>
 
       {/* Guides (interlinking into the content hub) */}
@@ -192,7 +166,7 @@ export default async function HomePage() {
       </div>
 
       {/* Trust */}
-      <section className="border-y border-border bg-surface">
+      <section className="border-y border-border bg-surface-muted">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <h2 className="text-2xl font-bold tracking-tight">{t("home.trustTitle")}</h2>
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -222,14 +196,28 @@ export default async function HomePage() {
   );
 }
 
-function SectionHeading({ title, body, href, linkLabel }: { title: string; body: string; href: string; linkLabel: string }) {
+async function DeviceTiles({ locale }: { locale: Locale }) {
+  const nav = await cachedHeaderNav();
+  return (
+    <ul className="mt-5 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-5">
+      {nav.repairs.map((c) => (
+        <li key={c.slug}>
+          <DeviceTypeTile href={`/${locale}/repairs/${c.slug}`} slug={c.slug} name={localized(locale, c.nameEn, c.nameHi)} imageId={c.image} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function SectionHeading({ eyebrow, title, body, href, linkLabel }: { eyebrow?: string; title: string; body: string; href: string; linkLabel: string }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
+        {eyebrow && <p className="mb-2 text-xs font-semibold tracking-[0.16em] text-muted uppercase">{eyebrow}</p>}
         <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
-        <p className="mt-2 text-muted">{body}</p>
+        <p className="mt-2 max-w-2xl text-muted">{body}</p>
       </div>
-      <Link href={href} className="text-sm font-semibold text-primary hover:underline">
+      <Link href={href} className="shrink-0 text-sm font-semibold text-primary hover:underline">
         {linkLabel} →
       </Link>
     </div>
@@ -272,7 +260,7 @@ async function DesignShowcase({ locale }: { locale: Locale }) {
           <li key={d.id} className={i === 1 ? "sm:-translate-y-6" : ""}>
             <Link href={`/${locale}/customize/studio?design=${d.slug}`} className="block transition hover:-translate-y-1">
               <DevicePreview kind="phone" style={readStyle(d.style)} finish="gloss" coverage="camera" label={name} className="mx-auto w-full max-w-40 drop-shadow-2xl" />
-              <span className="mt-3 block text-center text-sm text-white/80">{name}</span>
+              <span className="mt-3 block text-center text-sm text-muted">{name}</span>
             </Link>
           </li>
         );

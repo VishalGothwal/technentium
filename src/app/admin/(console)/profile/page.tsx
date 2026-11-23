@@ -56,7 +56,7 @@ export default async function MyProfilePage() {
               <DescriptionList
                 items={[
                   ["Roles", actor.roles.map((r) => ROLE_DEFINITIONS[r].name).join(", ")],
-                  ["Mobile number", user.phoneNumber ?? "—"],
+                  ["Mobile number", user.phoneNumber ?? "-"],
                 ]}
               />
               <p className="mt-3 text-sm text-muted">

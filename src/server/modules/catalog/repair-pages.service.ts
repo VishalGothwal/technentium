@@ -23,9 +23,20 @@ export function listRepairCatalogue() {
         orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
         select: { id: true, slug: true, name: true, _count: { select: { models: { where: active } } } },
       },
-      issues: { where: active, orderBy: [{ sortOrder: "asc" }, { nameEn: "asc" }], select: { id: true, slug: true, nameEn: true, nameHi: true } },
+      issues: { where: active, orderBy: [{ sortOrder: "asc" }, { nameEn: "asc" }], select: { id: true, slug: true, nameEn: true, nameHi: true, descriptionEn: true, descriptionHi: true } },
     },
   });
+}
+
+/** One product photo per category (popular, then newest model with a photo), keyed by category id. */
+export async function categoryCoverImages() {
+  const rows = await db.deviceModel.findMany({
+    where: { ...active, imageMediaId: { not: null }, brand: active },
+    orderBy: [{ popular: "desc" }, { releaseYear: { sort: "desc", nulls: "last" } }],
+    distinct: ["categoryId"],
+    select: { categoryId: true, imageMediaId: true },
+  });
+  return new Map(rows.map((r) => [r.categoryId, r.imageMediaId!]));
 }
 
 export async function getRepairCategory(slug: string) {

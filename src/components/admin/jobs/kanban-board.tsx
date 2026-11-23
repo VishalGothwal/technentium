@@ -191,7 +191,7 @@ export function KanbanBoard({ cards: initial }: { cards: BoardCard[] }) {
         </div>
       </div>
       <p className="mt-2 text-xs text-muted">
-        Quote stages (prepared, awaiting decision, approved, declined) change automatically when a quote is prepared, sent or decided — open the job to manage its quote.
+        Quote stages (prepared, awaiting decision, approved, declined) change automatically when a quote is prepared, sent or decided. Open the job to manage its quote.
       </p>
 
       <ReasonDialog

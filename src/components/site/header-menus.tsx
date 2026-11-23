@@ -16,6 +16,8 @@ export type NavEntry = Href & {
   key: string;
   icon: NavIconName;
   description?: string;
+  /** A short dropdown list of links (e.g. Company) instead of a full-width mega panel. */
+  menu?: Href[];
   mega?: {
     title: string;
     body?: string;
@@ -82,7 +84,7 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
             active || isOpen ? "text-foreground" : "text-muted hover:text-foreground",
           );
 
-          if (!entry.mega) {
+          if (!entry.mega && !entry.menu) {
             return (
               <li key={entry.key} className="flex">
                 <Link href={entry.href} aria-current={active ? "page" : undefined} className={cn(triggerClass, "group isolate")}>
@@ -96,7 +98,7 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
           return (
             <li
               key={entry.key}
-              className="flex"
+              className={cn("flex", entry.menu && "relative")}
               onPointerEnter={(e) => e.pointerType === "mouse" && schedule(entry.key, open ? 0 : 90)}
               onPointerLeave={(e) => e.pointerType === "mouse" && schedule(null, 160)}
             >
@@ -118,7 +120,7 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
                   data-trigger={entry.key}
                   aria-expanded={isOpen}
                   aria-controls={`mega-${entry.key}`}
-                  aria-label={entry.mega.title}
+                  aria-label={entry.mega?.title ?? entry.label}
                   onClick={() => {
                     clearTimeout(timer.current);
                     setOpen(isOpen ? null : entry.key);
@@ -134,17 +136,38 @@ export function DesktopNav({ entries }: { entries: NavEntry[] }) {
                 inert={!isOpen}
                 onClick={closeOnLink(() => setOpen(null))}
                 className={cn(
-                  "absolute inset-x-0 top-full origin-top border-b border-border bg-surface/95 shadow-[0_24px_48px_-24px_rgb(0_0_0/0.25)] backdrop-blur-xl transition duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+                  "absolute top-full origin-top transition duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+                  entry.mega
+                    ? "inset-x-0 border-b border-border bg-surface/95 shadow-[0_24px_48px_-24px_rgb(0_0_0/0.25)] backdrop-blur-xl"
+                    : "left-0 mt-1 w-60 rounded-2xl border border-border bg-surface p-2 shadow-[0_24px_48px_-20px_rgb(0_0_0/0.3)]",
                   isOpen ? "visible translate-y-0 scale-100 opacity-100" : "invisible -translate-y-2 scale-[0.99] opacity-0",
                 )}
               >
-                <MegaPanel mega={entry.mega} />
+                {entry.mega ? <MegaPanel mega={entry.mega} /> : <MenuList links={entry.menu!} pathname={pathname} />}
               </div>
             </li>
           );
         })}
       </ul>
     </nav>
+  );
+}
+
+function MenuList({ links, pathname }: { links: Href[]; pathname: string }) {
+  return (
+    <ul>
+      {links.map((m) => (
+        <li key={m.href}>
+          <Link
+            href={m.href}
+            aria-current={pathname === m.href ? "page" : undefined}
+            className="block rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition hover:bg-surface-muted aria-[current=page]:bg-surface-muted"
+          >
+            {m.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -313,7 +336,7 @@ export function MobileMenu({
               <ul className="mt-5 divide-y divide-border border-y border-border">
                 {entries.map((entry, i) => {
                   const active = pathname === entry.href || pathname.startsWith(`${entry.href}/`);
-                  return <li key={entry.key} className="rise" style={{ "--i": i + 2 } as CSSProperties}>{entry.mega ? <MobileSection entry={entry} active={active} /> : <MobileRow {...entry} active={active} />}</li>;
+                  return <li key={entry.key} className="rise" style={{ "--i": i + 2 } as CSSProperties}>{entry.mega || entry.menu ? <MobileSection entry={entry} active={active} /> : <MobileRow {...entry} active={active} />}</li>;
                 })}
                 <li>
                   <MobileRow href={track.href} label={track.label} description={track.description} icon="track" active={pathname.startsWith(track.href)} />
@@ -371,7 +394,8 @@ function MobileRow({ href, label, description, icon, active }: Href & { descript
 }
 
 function MobileSection({ entry, active }: { entry: NavEntry; active: boolean }) {
-  const mega = entry.mega!;
+  const mega = entry.mega;
+  const title = mega?.title ?? entry.description ?? entry.label;
   const [expanded, setExpanded] = useState(active);
   const panelId = `mobile-${entry.key}`;
   return (
@@ -384,14 +408,14 @@ function MobileSection({ entry, active }: { entry: NavEntry; active: boolean }) 
           </span>
           <span className="min-w-0 flex-1">
             <span className="block font-semibold">{entry.label}</span>
-            <span className="block truncate text-xs text-muted">{mega.title}</span>
+            <span className="block truncate text-xs text-muted">{title}</span>
           </span>
         </Link>
         <button
           type="button"
           aria-expanded={expanded}
           aria-controls={panelId}
-          aria-label={mega.title}
+          aria-label={title}
           onClick={() => setExpanded((v) => !v)}
           className="flex size-11 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-surface-muted"
         >
@@ -399,22 +423,44 @@ function MobileSection({ entry, active }: { entry: NavEntry; active: boolean }) 
         </button>
       </div>
       <div id={panelId} hidden={!expanded} className="pb-4">
-        <ul className="grid grid-cols-2 gap-2">
-          {mega.columns.map((c) => (
-            <li key={c.href}>
-              <Link href={c.href} className="flex h-full flex-col gap-2 rounded-xl border border-border p-3 transition active:bg-surface-muted">
-                <NavIcon name={c.icon} className="size-5" />
-                <span className="text-sm leading-tight font-semibold">{c.label}</span>
-                <span className="mt-auto text-xs text-muted">{c.meta}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <Link href={mega.all.href} className="mt-3 inline-flex items-center gap-1 text-sm font-semibold">
-          {mega.all.label}
-          <ArrowRight aria-hidden className="size-4" />
-        </Link>
+        {mega ? <MobileMega mega={mega} /> : <MobileLinks links={entry.menu ?? []} />}
       </div>
     </div>
+  );
+}
+
+function MobileLinks({ links }: { links: Href[] }) {
+  return (
+    <ul className="ml-13 space-y-1">
+      {links.map((m) => (
+        <li key={m.href}>
+          <Link href={m.href} className="block py-1.5 text-sm font-medium text-muted transition active:text-foreground">
+            {m.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function MobileMega({ mega }: { mega: NonNullable<NavEntry["mega"]> }) {
+  return (
+    <>
+      <ul className="grid grid-cols-2 gap-2">
+        {mega.columns.map((c) => (
+          <li key={c.href}>
+            <Link href={c.href} className="flex h-full flex-col gap-2 rounded-xl border border-border p-3 transition active:bg-surface-muted">
+              <NavIcon name={c.icon} className="size-5" />
+              <span className="text-sm leading-tight font-semibold">{c.label}</span>
+              <span className="mt-auto text-xs text-muted">{c.meta}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <Link href={mega.all.href} className="mt-3 inline-flex items-center gap-1 text-sm font-semibold">
+        {mega.all.label}
+        <ArrowRight aria-hidden className="size-4" />
+      </Link>
+    </>
   );
 }

@@ -39,7 +39,7 @@ export default async function DesignRequestPage({ params }: PageProps<"/[locale]
   const current = CUSTOMIZATION_STEPS.indexOf(customizationStep(req.status));
   const stopped = TERMINAL_BAD.has(req.status);
   const lastReason = [...req.history].reverse().find((h) => h.toStatus === req.status)?.reason;
-  const opt = (o: { nameEn: string; nameHi: string | null } | undefined | null) => (o ? localized(locale, o.nameEn, o.nameHi) : "—");
+  const opt = (o: { nameEn: string; nameHi: string | null } | undefined | null) => (o ? localized(locale, o.nameEn, o.nameHi) : "-");
 
   return (
     <div className="space-y-5">
@@ -125,7 +125,7 @@ export default async function DesignRequestPage({ params }: PageProps<"/[locale]
               [t("studio.review.finish"), opt(c?.finish)],
               [t("studio.review.coverage"), opt(c?.coverage)],
               [t("studio.review.text"), c?.text?.value ?? t("studio.review.none")],
-              [t("studio.account.estimateLabel"), req.estimatePaise != null ? formatPaise(req.estimatePaise, locale) : "—"],
+              [t("studio.account.estimateLabel"), req.estimatePaise != null ? formatPaise(req.estimatePaise, locale) : "-"],
               ...(req.quotedPaise != null ? [[t("studio.account.quotedLabel"), formatPaise(req.quotedPaise, locale)] as [string, string]] : []),
               ...(req.customerNotes ? [[t("studio.account.yourNotes"), req.customerNotes] as [string, string]] : []),
             ]}

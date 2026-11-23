@@ -326,7 +326,7 @@ export function ContentEditor({ initial, canPublish }: { initial: EditorInitial;
                   )}
                 </>
               ) : (
-                <p className="text-sm text-muted">No {locale === "en" ? "English" : "Hindi"} version yet. Write it and save — the other language stays as it is (FR-CMS-04).</p>
+                <p className="text-sm text-muted">No {locale === "en" ? "English" : "Hindi"} version yet. Write it and save. The other language stays as it is (FR-CMS-04).</p>
               )}
             </section>
           )}
@@ -370,7 +370,7 @@ export function ContentEditor({ initial, canPublish }: { initial: EditorInitial;
             <div className="space-y-1.5">
               <p className="text-sm font-medium">Cover image</p>
               <ImageUpload value={cover} onChange={setCover} label="Cover image" />
-              <p className="text-xs text-muted">Optional — a generated cover is used when empty.</p>
+              <p className="text-xs text-muted">Optional. A generated cover is used when empty.</p>
             </div>
             <Checkbox label="Featured on the listing page" checked={featured} onChange={(e) => setFeatured(e.target.checked)} />
           </section>

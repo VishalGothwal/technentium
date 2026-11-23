@@ -276,7 +276,7 @@ function GlbPanel({ id, file }: { id: string; file: { url: string; sizeBytes: nu
       />
       <CardBody className="space-y-3">
         {(error || uploadError) && <Alert tone="danger">{uploadError ?? error}</Alert>}
-        <p className="text-sm">{file ? `Uploaded: ${(file.sizeBytes / 1048576).toFixed(2)} MB` : "No file — using the generated body."}</p>
+        <p className="text-sm">{file ? `Uploaded: ${(file.sizeBytes / 1048576).toFixed(2)} MB` : "No file, so the generated body is used."}</p>
         <div className="flex flex-wrap items-center gap-3">
           <label className={cn("inline-flex cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover has-[:focus-visible]:outline-2", busy && "pointer-events-none opacity-60")}>
             {file ? "Replace file" : "Upload .glb"}

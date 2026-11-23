@@ -7,7 +7,7 @@ const METHODS = ["get", "post", "put", "patch", "delete"] as const;
 export const ERROR_CODES: { status: number; code: string; meaning: string }[] = [
   { status: 401, code: "UNAUTHENTICATED", meaning: "Missing, expired or invalid session/bearer token." },
   { status: 403, code: "FORBIDDEN", meaning: "Signed in, but the role lacks the required permission." },
-  { status: 404, code: "NOT_FOUND", meaning: "Does not exist — or belongs to someone else (records are never disclosed across accounts)." },
+  { status: 404, code: "NOT_FOUND", meaning: "Does not exist, or belongs to someone else (records are never disclosed across accounts)." },
   { status: 409, code: "CONFLICT", meaning: "The record changed in the meantime. Refresh and retry." },
   { status: 409, code: "INVALID_TRANSITION", meaning: "The requested status change is not allowed from the current status." },
   { status: 409, code: "SLOT_FULL", meaning: "The appointment slot has no capacity left." },
@@ -21,7 +21,7 @@ export const ERROR_CODES: { status: number; code: string; meaning: string }[] = 
 const STATUSES = [...new Set(ERROR_CODES.map((e) => e.status))];
 const describeStatus = (status: number) =>
   ERROR_CODES.filter((e) => e.status === status)
-    .map((e) => `${e.code} — ${e.meaning}`)
+    .map((e) => `${e.code}: ${e.meaning}`)
     .join(" ");
 
 /** Stable operationId: method + path segments, e.g. `get_api_v1_track_reference`. */

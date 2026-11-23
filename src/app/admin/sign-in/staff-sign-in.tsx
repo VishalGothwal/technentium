@@ -10,7 +10,7 @@ const STAFF_ERRORS: Partial<Record<string, string>> = {
   "auth.tooMany": "Too many attempts. Wait a minute and try again.",
   "auth.notStaff": "This account doesn't have staff access. Ask the Owner to invite you.",
   "auth.blocked": "This account is blocked. Ask the Owner to unblock it.",
-  "auth.emailNotVerified": "Confirm your email first — open the link in your invitation email.",
+  "auth.emailNotVerified": "Confirm your email first: open the link in your invitation email.",
   "auth.notConfigured": "Sign-in isn't configured yet: set the Supabase environment variables.",
 };
 

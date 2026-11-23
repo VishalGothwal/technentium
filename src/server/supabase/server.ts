@@ -2,6 +2,7 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createPlainClient, type SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 export const supabaseUrl = () => process.env.NEXT_PUBLIC_SUPABASE_URL!;
 export const supabasePublishableKey = () => process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
@@ -14,6 +15,8 @@ export const supabaseConfigured = () => !!process.env.NEXT_PUBLIC_SUPABASE_URL &
  * In a Server Component cookies are read-only; the proxy refreshes the session so the write can be skipped.
  */
 export async function createSupabaseServerClient() {
+  // Request time only: the auth client reads Date.now() while loading the session, which prerendering rejects.
+  await connection();
   const cookieStore = await cookies();
   return createServerClient(supabaseUrl(), supabasePublishableKey(), {
     cookies: {

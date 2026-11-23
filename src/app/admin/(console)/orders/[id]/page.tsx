@@ -72,10 +72,10 @@ export default async function OrderDetailAdminPage({ params }: PageProps<"/admin
                           </Link>
                           <span className="block text-xs text-muted">{i.skuSnapshot}</span>
                         </td>
-                        <td className="px-3 py-2">{i.deviceModel ? `${i.deviceModel.brand.name} ${i.deviceModel.name}` : <span className="text-muted">—</span>}</td>
+                        <td className="px-3 py-2">{i.deviceModel ? `${i.deviceModel.brand.name} ${i.deviceModel.name}` : <span className="text-muted">-</span>}</td>
                         <td className="px-3 py-2">{formatPaise(i.unitPricePaise)}</td>
                         <td className="px-3 py-2">{i.quantity}</td>
-                        <td className="px-3 py-2">{i.confirmedQuantity ?? <span className="text-muted">—</span>}</td>
+                        <td className="px-3 py-2">{i.confirmedQuantity ?? <span className="text-muted">-</span>}</td>
                         <td className="px-3 py-2">
                           {onHand === undefined ? <span className="text-muted">n/a</span> : <span className={onHand < need ? "font-semibold text-danger" : ""}>{onHand}</span>}
                         </td>
@@ -90,7 +90,7 @@ export default async function OrderDetailAdminPage({ params }: PageProps<"/admin
               <DescriptionList
                 items={[
                   ["Requested subtotal", formatPaise(r.subtotalPaise)],
-                  ["Confirmed subtotal", r.totalPaise !== null ? formatPaise(subtotalConfirmed) : "—"],
+                  ["Confirmed subtotal", r.totalPaise !== null ? formatPaise(subtotalConfirmed) : "-"],
                   ["Shipping", r.shippingPaise !== null ? formatPaise(r.shippingPaise) : "Not set"],
                   ["Total", r.totalPaise !== null ? <strong key="t">{formatPaise(r.totalPaise)}</strong> : "Set on confirmation"],
                 ]}
@@ -155,8 +155,8 @@ export default async function OrderDetailAdminPage({ params }: PageProps<"/admin
                   ["Phone", <a key="p" href={`tel:${r.contactPhone}`} className="text-primary hover:underline">{r.contactPhone}</a>],
                   ["Account", <Link key="a" href={`/admin/customers/${r.customer.id}`} className="text-primary hover:underline">{r.customer.name}</Link>],
                   ["Address", <span key="ad" className="whitespace-pre-line">{[r.addressLine1, r.addressLine2, `${r.city}, ${r.state} ${r.pincode}`].filter(Boolean).join("\n")}</span>],
-                  ["Customer notes", r.customerNotes ?? "—"],
-                  ["Tracking", r.trackingInfo ?? "—"],
+                  ["Customer notes", r.customerNotes ?? "-"],
+                  ["Tracking", r.trackingInfo ?? "-"],
                 ]}
               />
             </CardBody>

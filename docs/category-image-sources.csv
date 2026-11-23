@@ -1,0 +1,5 @@
+category_slug,file,image_url
+tablet,public/devices/tablet.png,https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/ipad-pro-11-select-wifi-spaceblack-202405?wid=600&hei=600&fmt=png-alpha
+laptop,public/devices/laptop.png,https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/mba13-midnight-select-202402?wid=600&hei=600&fmt=png-alpha
+audio,public/devices/audio.png,https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/airpods-pro-2-hero-select-202409?wid=600&hei=600&fmt=png-alpha
+smartwatch,public/devices/smartwatch.png,https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/watch-card-40-s10-202409?wid=600&hei=600&fmt=png-alpha

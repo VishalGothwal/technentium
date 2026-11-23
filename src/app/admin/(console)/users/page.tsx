@@ -82,7 +82,7 @@ export default async function UsersPage({ searchParams }: PageProps<"/admin/user
                       </Link>
                       <p className="text-xs text-muted">joined {formatDate(u.createdAt)}</p>
                     </td>
-                    <td className="px-4 py-2">{[u.phoneNumber, u.email].filter(Boolean).join(" · ") || "—"}</td>
+                    <td className="px-4 py-2">{[u.phoneNumber, u.email].filter(Boolean).join(" · ") || "-"}</td>
                     <td className="px-4 py-2">
                       <span className="flex flex-wrap gap-1">
                         {u.roles.length ? (
@@ -99,7 +99,7 @@ export default async function UsersPage({ searchParams }: PageProps<"/admin/user
                         {!u.authUserId && <Badge tone="warning">No Supabase login yet</Badge>}
                       </span>
                     </td>
-                    <td className="px-4 py-2">{u.lastSignInAt ? formatDate(u.lastSignInAt) : "—"}</td>
+                    <td className="px-4 py-2">{u.lastSignInAt ? formatDate(u.lastSignInAt) : "-"}</td>
                   </tr>
                 ))}
               </tbody>

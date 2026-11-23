@@ -54,7 +54,7 @@ export const paths: PathsObject = {
     get: {
       tags: tagDevices,
       summary: "Full brand and model list for a category",
-      description: "Every active brand with its models in one cached response — the fastest way to fill a device picker.",
+      description: "Every active brand with its models in one cached response: the fastest way to fill a device picker.",
       security: "public",
       parameters: [query("category", str(), "Device category slug, default phone")],
       response: obj({ category: str(), brands: arr(obj({ id: str(), slug: str(), name: str(), models: arr(modelSummary) })) }),

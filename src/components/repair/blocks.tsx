@@ -3,6 +3,7 @@ import type { TFunction } from "@/i18n/translate";
 import { cn } from "@/lib/cn";
 import { mediaUrl } from "@/lib/media";
 import { Rail } from "@/components/shop/rail";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { DeviceArt, IssueIcon } from "./visuals";
 
 /** Building blocks shared by the repair landing, category, brand and model pages. */
@@ -17,20 +18,28 @@ export function SectionTitle({ id, children, className }: { id?: string; childre
   );
 }
 
-/** Brand tiles: a large wordmark (plain text — no third-party logos) over the brand name and model count. */
-export function BrandGrid({ brands, hrefFor, t }: { brands: { id: string; slug: string; name: string; _count?: { models: number } }[]; hrefFor: (slug: string) => string; t: TFunction }) {
+/** Brand tiles: just the brand's logo (or its name when we have none); the model count is in the tooltip. */
+export function BrandGrid({
+  brands,
+  hrefFor,
+  t,
+  className,
+}: {
+  brands: { id: string; slug: string; name: string; _count?: { models: number } }[];
+  hrefFor: (slug: string) => string;
+  t: TFunction;
+  className?: string;
+}) {
   return (
-    <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+    <ul className={cn("grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6", className)}>
       {brands.map((b) => (
         <li key={b.id}>
-          <Link href={hrefFor(b.slug)} className={cn(TILE, "aspect-square p-3")}>
-            <span aria-hidden className="text-xl font-extrabold tracking-tight sm:text-2xl">
-              {b.name}
-            </span>
-            <span className="text-xs text-muted">
-              <span className="sr-only">{b.name} · </span>
-              {b._count ? t("repairFlow.modelsCount", { count: b._count.models }) : b.name}
-            </span>
+          <Link
+            href={hrefFor(b.slug)}
+            title={b._count ? `${b.name} · ${t("repairFlow.modelsCount", { count: b._count.models })}` : b.name}
+            className={cn(TILE, "h-24 px-3 sm:h-28")}
+          >
+            <BrandLogo slug={b.slug} name={b.name} className="max-w-full" fallbackClassName="text-xl font-extrabold tracking-tight" />
           </Link>
         </li>
       ))}
@@ -43,8 +52,8 @@ export function BrandRail({ brands, hrefFor, label }: { brands: { id: string; sl
     <Rail label={label} listClassName="gap-3 py-1">
       {brands.map((b) => (
         <li key={b.id} className="w-32 shrink-0 snap-start">
-          <Link href={hrefFor(b.slug)} className={cn(TILE, "h-24 px-2 text-lg font-extrabold tracking-tight")}>
-            {b.name}
+          <Link href={hrefFor(b.slug)} title={b.name} className={cn(TILE, "h-24 px-3")}>
+            <BrandLogo slug={b.slug} name={b.name} scale={0.85} className="max-w-full" fallbackClassName="text-lg font-extrabold tracking-tight" />
           </Link>
         </li>
       ))}
@@ -68,6 +77,32 @@ export function ServiceRail({ services, href, label }: { services: { id: string;
   );
 }
 
+/** Stock photos for device types whose models have no photo yet (sources in docs/category-image-sources.csv). */
+const TYPE_COVERS: Record<string, string> = {
+  tablet: "/devices/tablet.png",
+  laptop: "/devices/laptop.png",
+  smartwatch: "/devices/smartwatch.png",
+  audio: "/devices/audio.png",
+};
+
+/** A device type (phone, tablet…): a model's photo, else the stock photo, else the drawn outline. */
+export function DeviceTypeTile({ href, slug, name, imageId }: { href: string; slug: string; name: string; imageId?: string | null }) {
+  const src = imageId ? mediaUrl(imageId) : TYPE_COVERS[slug];
+  return (
+    <Link href={href} className={cn(TILE, "h-32 px-2 pt-3 pb-2.5 sm:h-40 sm:px-3 sm:pt-4 sm:pb-3")}>
+      <span className="flex h-16 w-full items-center justify-center sm:h-24">
+        {src ? (
+          // eslint-disable-next-line @next/next/no-img-element -- media route redirects to signed storage URLs
+          <img src={src} alt="" loading="lazy" decoding="async" className="h-full w-full object-contain" />
+        ) : (
+          <DeviceArt category={slug} className="size-16 text-foreground" />
+        )}
+      </span>
+      <span className="text-xs leading-tight font-semibold sm:text-sm">{name}</span>
+    </Link>
+  );
+}
+
 export function ModelTile({ href, name, category, sub, imageId }: { href: string; name: string; category: string; sub?: string; imageId?: string | null }) {
   return (
     <Link href={href} className={cn(TILE, "h-full min-h-40 px-3 py-4")}>
@@ -80,41 +115,6 @@ export function ModelTile({ href, name, category, sub, imageId }: { href: string
       <span className="text-sm leading-snug font-medium">{name}</span>
       {sub && <span className="text-xs text-muted">{sub}</span>}
     </Link>
-  );
-}
-
-const HOW_ICONS = [
-  <path key="1" d="M9 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM11 18h2" />,
-  <path key="2" d="M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-.01M17 19a2 2 0 1 0 0-.01" />,
-  <path key="3" d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z" />,
-  <path key="4" d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6zM9 12l2 2 4-4" />,
-];
-
-/** Four numbered steps with icon badges on the card corner. */
-export function HowItWorks({ t }: { t: TFunction }) {
-  return (
-    <section className="mx-auto mt-16 max-w-6xl px-4" aria-labelledby="how-title">
-      <SectionTitle id="how-title" className="text-center">
-        {t("repairFlow.howTitle")}
-      </SectionTitle>
-      <span aria-hidden className="mx-auto mt-2 block h-1 w-12 rounded-full bg-primary" />
-      <ol className="mt-10 grid gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map((n, i) => (
-          <li key={n} className="relative rounded-xl border border-border bg-surface p-5 pt-6">
-            <span aria-hidden className="absolute -top-5 right-4 flex size-11 items-center justify-center rounded-full bg-foreground text-white ring-4 ring-background">
-              <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                {HOW_ICONS[i]}
-              </svg>
-            </span>
-            <p className="flex items-center gap-2 font-bold text-primary">
-              <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs text-white">{n}</span>
-              {t(`repairFlow.how${n}Title`)}
-            </p>
-            <p className="mt-2 text-sm text-muted">{t(`repairFlow.how${n}Body`)}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
   );
 }
 

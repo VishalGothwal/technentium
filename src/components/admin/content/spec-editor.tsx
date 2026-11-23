@@ -167,7 +167,7 @@ export function SpecEditor({ initial, canPublish }: { initial: SpecEditorInitial
                       value={it.value ?? ""}
                       disabled={it.value === null}
                       onChange={(e) => setItem(gi, ii, { value: e.target.value })}
-                      placeholder={it.value === null ? "Unknown — shown as “Not available”" : "Value, e.g. 6.1-inch or No"}
+                      placeholder={it.value === null ? "Unknown, shown as “Not available”" : "Value, e.g. 6.1-inch or No"}
                       className={cn("h-9 text-sm", it.value === null && "italic")}
                     />
                     <div className="flex items-center gap-3">
@@ -323,7 +323,7 @@ export function ComparisonEditor({ initial, options, canPublish }: { initial: Co
                   }}
                   className="h-10"
                 >
-                  <option value="">—</option>
+                  <option value="">-</option>
                   {options.map((o) => (
                     <option key={o.id} value={o.id}>
                       {o.label}

@@ -7,6 +7,7 @@ import { pageMetadata } from "@/lib/seo";
 import { cn } from "@/lib/cn";
 import { getComparisonList, getSpecBrands, getSpecList } from "@/server/modules/content/content.public";
 import { DeviceIllustration, SpecCard } from "@/components/content/specs";
+import { BrandLogo, hasBrandLogo } from "@/components/ui/brand-logo";
 import { deviceName, specValue } from "@/lib/content/specs";
 import { formatPaise } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
@@ -26,16 +27,23 @@ async function Results({ searchParams }: { searchParams: PageProps<"/[locale]/sp
   const brand = first(sp.brand)?.slice(0, 40) || null;
   const [brands, specs] = await Promise.all([getSpecBrands(), getSpecList({ q, brand })]);
   const base = `/${locale}/specs`;
-  const chip = (href: string, active: boolean, label: string) => (
+  const chip = (href: string, active: boolean, label: string, logo?: string) => (
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
+      title={logo ? label : undefined}
       className={cn(
         "inline-flex h-10 items-center rounded-full border px-4 text-sm font-medium whitespace-nowrap transition",
-        active ? "border-foreground bg-foreground text-background" : "border-border bg-surface hover:border-foreground/40",
+        logo
+          ? active
+            ? "border-foreground bg-surface ring-2 ring-foreground"
+            : "border-border bg-surface hover:border-foreground/40"
+          : active
+            ? "border-foreground bg-foreground text-background"
+            : "border-border bg-surface hover:border-foreground/40",
       )}
     >
-      {label}
+      {logo ? <BrandLogo slug={logo} name={label} scale={0.5} /> : label}
     </Link>
   );
   return (
@@ -45,7 +53,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/[locale]/sp
           <ul className="flex gap-2">
             <li>{chip(q ? `${base}?q=${encodeURIComponent(q)}` : base, !brand, t("specs.allBrands"))}</li>
             {brands.map((b) => (
-              <li key={b.slug}>{chip(`${base}?brand=${b.slug}${q ? `&q=${encodeURIComponent(q)}` : ""}`, brand === b.slug, b.name)}</li>
+              <li key={b.slug}>{chip(`${base}?brand=${b.slug}${q ? `&q=${encodeURIComponent(q)}` : ""}`, brand === b.slug, b.name, hasBrandLogo(b.slug) ? b.slug : undefined)}</li>
             ))}
           </ul>
         </nav>

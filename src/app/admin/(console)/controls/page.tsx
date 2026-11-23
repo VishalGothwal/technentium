@@ -138,7 +138,7 @@ export default async function FeatureControlsPage() {
                 {
                   key: "features.testMode",
                   label: "Test mode",
-                  description: "Sign-in codes are not texted — they appear below instead (no SMS credit used). A “Test mode” strip shows on the site.",
+                  description: "Sign-in codes are not texted; they appear below instead (no SMS credit used). A “Test mode” strip shows on the site.",
                   on: f.testMode,
                 },
                 {

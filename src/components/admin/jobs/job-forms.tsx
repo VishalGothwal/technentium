@@ -45,7 +45,7 @@ export function InspectionForm({ jobId, initial }: { jobId: string; initial: { r
       }}
     >
       {error && <Alert tone="danger">{error}</Alert>}
-      <Field label="Condition at receipt" hint="Visible damage, marks, what powers on — before any work." error={fields.receiptCondition} required>
+      <Field label="Condition at receipt" hint="Visible damage, marks and what powers on, before any work." error={fields.receiptCondition} required>
         {(p) => <Textarea {...p} name="receiptCondition" defaultValue={initial?.receiptCondition ?? ""} />}
       </Field>
       <Field label="Accessories received" error={fields.accessories}>
@@ -221,7 +221,7 @@ export function NoteForm({ jobId }: { jobId: string }) {
         onChange={(e) => setCustomerVisible(e.target.checked)}
         label={
           <>
-            <strong>Visible to customer</strong> — shown on their booking page. Leave unticked for internal notes.
+            <strong>Visible to customer</strong>: shown on their booking page. Leave unticked for internal notes.
           </>
         }
       />

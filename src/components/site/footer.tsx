@@ -37,6 +37,7 @@ export async function SiteFooter() {
     {
       title: t("site.footer.support"),
       links: [
+        [l("/about"), t("site.company.about")],
         [l("/help"), t("site.footer.help")],
         [l("/policies/privacy"), t("footer.privacy")],
         [l("/policies/terms"), t("footer.terms")],

@@ -214,7 +214,7 @@ export function ProductForm({ productId, initial, categories }: { productId?: st
           </Field>
           <div className="flex flex-col justify-end gap-2">
             <Checkbox label="Featured in the store" checked={v.featured} onChange={(e) => set("featured", e.target.checked)} />
-            <Checkbox label="Universal — fits every device" checked={v.universal} onChange={(e) => set("universal", e.target.checked)} />
+            <Checkbox label="Universal (fits every device)" checked={v.universal} onChange={(e) => set("universal", e.target.checked)} />
           </div>
         </CardBody>
       </Card>

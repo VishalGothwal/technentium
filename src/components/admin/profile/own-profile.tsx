@@ -78,7 +78,7 @@ export function OwnEmailForm({ email }: { email: string | null }) {
     >
       {msg && <Alert tone={msg.ok ? "success" : "danger"}>{msg.text}</Alert>}
       <p className="text-sm">
-        Current: <span className="font-medium">{email ?? "—"}</span>
+        Current: <span className="font-medium">{email ?? "-"}</span>
       </p>
       <Field label="New email" required>
         {(p) => <Input {...p} name="email" type="email" autoComplete="email" />}

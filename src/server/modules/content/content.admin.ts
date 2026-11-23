@@ -103,7 +103,7 @@ export async function getContentForEdit(actor: Actor | null, id: string) {
   const names = new Map(authors.map((a) => [a.id, a.name]));
   return {
     ...item,
-    translations: item.translations.map((t) => ({ ...t, body: safeBlocks(t.body), revisions: t.revisions.map((r) => ({ ...r, authorName: names.get(r.authorId) ?? "—" })) })),
+    translations: item.translations.map((t) => ({ ...t, body: safeBlocks(t.body), revisions: t.revisions.map((r) => ({ ...r, authorName: names.get(r.authorId) ?? "-" })) })),
   };
 }
 

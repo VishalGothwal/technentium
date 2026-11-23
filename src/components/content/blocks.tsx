@@ -73,7 +73,7 @@ export function BlockRenderer({ blocks, locale, t, links = [] }: { blocks: Conte
                 <blockquote className="text-[1.15em] font-medium text-foreground italic">
                   <Inline text={b.text} />
                 </blockquote>
-                {b.cite && <figcaption className="mt-2 text-sm text-muted not-italic">— {b.cite}</figcaption>}
+                {b.cite && <figcaption className="mt-2 text-sm text-muted not-italic">{b.cite}</figcaption>}
               </figure>
             );
           case "image":

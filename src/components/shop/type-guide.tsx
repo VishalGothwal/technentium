@@ -82,7 +82,7 @@ export function TypeGuide({ title, types, locale, t }: { title: string; types: P
 }
 
 function Score({ value, t }: { value?: number; t: TFunction }) {
-  if (!value) return <span className="text-muted">—</span>;
+  if (!value) return <span className="text-muted">-</span>;
   return (
     <span className="inline-flex gap-1" role="img" aria-label={t("shop.score", { score: value })}>
       {[1, 2, 3, 4, 5].map((n) => (
