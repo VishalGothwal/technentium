@@ -18,6 +18,7 @@ const BRAND_LOGOS: Record<string, number> = {
   lava: 22,
   lenovo: 23,
   motorola: 44,
+  noise: 23,
   nothing: 22,
   oneplus: 44,
   oppo: 25,
