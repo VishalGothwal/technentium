@@ -335,8 +335,15 @@ const SPEC_CARD_SELECT = {
   specs: true,
   publishedAt: true,
   updatedAt: true,
-  deviceModel: { select: { id: true, name: true, releaseYear: true, frame: true, model3d: MODEL3D_SELECT, brand: { select: { name: true, slug: true } }, category: { select: { slug: true } } } },
+  deviceModel: { select: { id: true, name: true, releaseYear: true, frame: true, imageMediaId: true, model3d: MODEL3D_SELECT, brand: { select: { name: true, slug: true } }, category: { select: { slug: true } } } },
 } as const;
+
+/** A spec card/sheet shows its own photo, else the device's photo (one photo per device across the site). */
+const specRow = <T extends { imageMediaId: string | null; specs: unknown; deviceModel: { imageMediaId: string | null } }>(r: T) => ({
+  ...r,
+  imageMediaId: r.imageMediaId ?? r.deviceModel.imageMediaId,
+  specs: safeSpecs(r.specs),
+});
 
 export async function querySpecList({ q, brand }: { q?: string | null; brand?: string | null }, now = new Date()) {
   const terms = (q ?? "").trim().split(/\s+/).filter(Boolean).slice(0, 5);
@@ -351,7 +358,7 @@ export async function querySpecList({ q, brand }: { q?: string | null; brand?: s
     orderBy: [{ releaseDate: { sort: "desc", nulls: "last" } }, { deviceModel: { name: "asc" } }],
     select: SPEC_CARD_SELECT,
   });
-  return rows.map((r) => ({ ...r, specs: safeSpecs(r.specs) }));
+  return rows.map(specRow);
 }
 
 export async function querySpecBrands(now = new Date()) {
@@ -366,7 +373,7 @@ export async function querySpecDetail(slug: string, now = new Date()) {
     select: { ...SPEC_CARD_SELECT, seoTitle: true, metaDescription: true, comparisons: { where: { comparison: visibleStatus(now) }, select: { comparison: { select: { id: true } } } } },
   });
   if (!spec) return null;
-  return { ...spec, specs: safeSpecs(spec.specs) };
+  return specRow(spec);
 }
 export type SpecDetail = NonNullable<Awaited<ReturnType<typeof querySpecDetail>>>;
 
@@ -387,7 +394,7 @@ export async function queryCompare(ids: string[], now = new Date()) {
     select: SPEC_CARD_SELECT,
   });
   const order = (r: (typeof rows)[number]) => unique.findIndex((u) => u === r.id || u === r.deviceModel.id || u === r.slug);
-  return rows.sort((a, b) => order(a) - order(b)).map((r) => ({ ...r, specs: safeSpecs(r.specs) }));
+  return rows.sort((a, b) => order(a) - order(b)).map(specRow);
 }
 
 export async function queryComparisonDetail(slug: string, now = new Date()) {
@@ -410,7 +417,7 @@ export async function queryComparisonDetail(slug: string, now = new Date()) {
     },
   });
   if (!c) return null;
-  return { ...c, devices: c.devices.map(({ spec }) => ({ ...spec, specs: safeSpecs(spec.specs) })) };
+  return { ...c, devices: c.devices.map(({ spec }) => specRow(spec)) };
 }
 
 export async function queryComparisonList(now = new Date()) {

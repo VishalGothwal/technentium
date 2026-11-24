@@ -33,7 +33,7 @@ import {
   upsertFeeRule,
   upsertWarrantyPolicy,
 } from "@/server/modules/settings/admin-settings.service";
-import { importModelsCsv, upsertBrand, upsertEstimate, upsertIssue, upsertModel, upsertPriceItem } from "@/server/modules/catalog/catalog-admin.service";
+import { addDevice, importModelsCsv, upsertBrand, upsertEstimate, upsertIssue, upsertModel, upsertPriceItem } from "@/server/modules/catalog/catalog-admin.service";
 import { DEVICES_TAG } from "@/server/modules/catalog/devices.cached";
 import { inviteStaff, setStaffActive, setStaffRoles } from "@/server/modules/team/team.service";
 import { dispatchDeliveries } from "@/server/notifications/dispatch";
@@ -86,6 +86,7 @@ async function refreshingDevices<T>(fn: () => Promise<T>) {
 }
 export const upsertBrandAction = async (input: unknown) => runAction((a) => refreshingDevices(() => upsertBrand(a, input)));
 export const upsertModelAction = async (input: unknown) => runAction((a) => refreshingDevices(() => upsertModel(a, input)));
+export const addDeviceAction = async (input: unknown) => runAction((a) => refreshingDevices(() => addDevice(a, input)));
 export const importModelsCsvAction = async (input: unknown) => runAction((a) => refreshingDevices(() => importModelsCsv(a, input)));
 export const upsertIssueAction = async (input: unknown) => runAction((a) => upsertIssue(a, input));
 export const upsertPriceItemAction = async (input: unknown) => runAction((a) => upsertPriceItem(a, input));

@@ -484,6 +484,9 @@
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
+    "catalog": {
+      "modelExists": "This brand already has a model with this name."
+    },
     "unauthenticated": "Please sign in to continue.",
     "forbidden": "You don't have permission to do that.",
     "validation": "Please check the highlighted fields.",

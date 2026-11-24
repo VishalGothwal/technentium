@@ -86,6 +86,43 @@ export async function upsertModel(actor: Actor | null, raw: unknown) {
   });
 }
 
+const addDeviceSchema = z
+  .object({
+    categoryId: z.string().min(1),
+    brandId: z.string().min(1).optional(),
+    brandName: z.string().trim().min(1).max(60).optional(),
+    name: z.string().trim().min(1).max(80),
+    releaseYear: z.int().min(2000).max(2100).nullish(),
+    popular: z.boolean().default(false),
+    imageMediaId: z.string().min(1).max(40).nullish(),
+  })
+  .refine((d) => d.brandId || d.brandName, { path: ["brandName"], message: "required" });
+
+/** Add one device from the Devices hub: an existing brand, or a new one created in the category. Returns the new model id. */
+export async function addDevice(actor: Actor | null, raw: unknown) {
+  assertCan(actor, "catalog.manage");
+  const d = parse(addDeviceSchema, raw);
+  return db.$transaction(async (tx) => {
+    const brand = d.brandId
+      ? await tx.deviceBrand.findFirstOrThrow({ where: { id: d.brandId, categoryId: d.categoryId }, select: { id: true } })
+      : await tx.deviceBrand.upsert({
+          where: { categoryId_slug: { categoryId: d.categoryId, slug: slugify(d.brandName!) } },
+          create: { categoryId: d.categoryId, name: d.brandName!, slug: slugify(d.brandName!) },
+          update: {},
+          select: { id: true },
+        });
+    const slug = deviceSlug(d.name);
+    if (await tx.deviceModel.findUnique({ where: { brandId_slug: { brandId: brand.id, slug } }, select: { id: true } }))
+      throw new AppError("VALIDATION", "errors.validation", { fields: { name: "errors.catalog.modelExists" } });
+    if (d.imageMediaId && !(await tx.mediaAsset.findFirst({ where: { id: d.imageMediaId, purpose: "DEVICE_IMAGE", isPublic: true }, select: { id: true } })))
+      throw new AppError("VALIDATION", "errors.validation", { fields: { imageMediaId: "errors.validation" } });
+    const data = { brandId: brand.id, categoryId: d.categoryId, name: d.name, slug, releaseYear: d.releaseYear ?? null, popular: d.popular, imageMediaId: d.imageMediaId ?? null };
+    const row = await tx.deviceModel.create({ data, select: { id: true } });
+    await audit(tx, actor, { action: "catalog.model", entityType: "DeviceModel", entityId: row.id, after: data });
+    return row;
+  });
+}
+
 export async function upsertIssue(actor: Actor | null, raw: unknown) {
   assertCan(actor, "catalog.manage");
   const { id, ...d } = parse(issueSchema, raw);
