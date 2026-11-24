@@ -74,11 +74,18 @@ async function storeImage(db: PrismaClient, file: string, purpose: "DEVICE_IMAGE
   const ext = file.endsWith(".png") ? "png" : "webp";
   const mime = `image/${ext}`;
   const key = `media/${purpose.toLowerCase()}/${randomUUID()}.${ext}`;
-  try {
-    await put(key, body, mime);
-  } catch (e) {
-    console.warn(`Seed images stopped: ${(e as Error).message}`);
-    return null;
+  // Storage can throttle a long run of uploads during a deploy: retry a few times before giving up.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await put(key, body, mime);
+      break;
+    } catch (e) {
+      if (attempt >= 3) {
+        console.warn(`Seed images stopped at ${path.basename(file)}: ${(e as Error).message}`);
+        return null;
+      }
+      await new Promise((r) => setTimeout(r, attempt * 2000));
+    }
   }
   return db.mediaAsset.create({
     data: { storageKey: key, mime, sizeBytes: body.byteLength, width: meta.width ?? null, height: meta.height ?? null, purpose, isPublic: true, altEn: alt, uploadedById: "seed" },
