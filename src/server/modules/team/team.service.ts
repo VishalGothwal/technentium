@@ -44,6 +44,9 @@ export async function inviteStaff(actor: Actor | null, raw: unknown) {
   const admin = supabaseAdmin();
   const setPassword = authCallbackUrl("/en/auth/reset-password");
   let user = await db.user.findUnique({ where: { email: input.email } });
+  // Re-inviting an existing account replaces its roles: same last-owner rule as setStaffRoles.
+  const wasOwner = user && (await db.userRole.findFirst({ where: { userId: user.id, role: { key: "owner" } } }));
+  if (user && wasOwner && !input.roles.includes("owner") && (await activeOwnerCount(user.id)) === 0) throw new AppError("CONFLICT", "errors.team.lastOwner");
   let invited = false;
   if (!user?.authUserId) {
     const { data, error } = await admin.auth.admin.inviteUserByEmail(input.email, { data: { full_name: input.name }, redirectTo: setPassword });

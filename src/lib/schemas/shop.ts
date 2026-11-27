@@ -88,7 +88,8 @@ export const productListQuerySchema = z.object({
   type: z.string().trim().max(80).optional(),
   deviceModelId: z.string().trim().max(40).optional(),
   sort: z.enum(PRODUCT_SORTS).optional().default("featured"),
-  inStock: z.coerce.boolean().optional().default(false),
+  // Query strings arrive as text: z.coerce.boolean() would read "false" as true. The web page passes a real boolean.
+  inStock: z.union([z.boolean(), z.stringbool()]).optional().default(false),
   page: z.coerce.number().int().min(1).max(500).optional().default(1),
   pageSize: z.coerce.number().int().min(1).max(48).optional().default(12),
 });

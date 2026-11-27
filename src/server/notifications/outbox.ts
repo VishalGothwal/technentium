@@ -3,7 +3,7 @@ import { after } from "next/server";
 import { db, type Tx } from "@/server/db";
 import type { NotificationType } from "@/server/modules/repairs/state-machine";
 import { channelsFor, type Channel } from "./matrix";
-import { dispatchDeliveries } from "./dispatch";
+import { dispatchDeliveries, sweepDeliveries } from "./dispatch";
 
 export type EnqueueInput = {
   type: NotificationType;
@@ -49,6 +49,9 @@ export function dispatchAfterCommit(eventIds: (string | null)[]) {
   const run = async () => {
     const deliveries = await db.notificationDelivery.findMany({ where: { eventId: { in: ids }, status: "PENDING" }, select: { id: true } });
     await dispatchDeliveries(deliveries.map((d) => d.id));
+    // shortcut: earlier failures are retried here, on the next event, because the cron runs only daily
+    // (Vercel Hobby limit). On a Pro plan, set the notifications cron to every 10 minutes in vercel.json.
+    await sweepDeliveries(20);
   };
   try {
     after(run);

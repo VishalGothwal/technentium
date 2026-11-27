@@ -13,6 +13,7 @@ import { parse } from "@/server/validation";
 import { bookingSchema, METHODS_NEEDING_ADDRESS, reasonSchema } from "@/lib/schemas/repair";
 import { formatDate } from "@/lib/format";
 import { resolveDiagnosisFee } from "@/server/modules/pricing/diagnosis-fee";
+import { istNow, slotStartIst } from "@/server/modules/catalog/catalog.service";
 import { findBookingRule } from "./state-machine";
 import { applyJobTransition, JOB_TRANSITION_SELECT } from "./transition";
 
@@ -60,8 +61,9 @@ export async function submitBooking(actor: Actor | null, rawInput: unknown, idem
     if (!area?.active) throw new AppError("UNSERVICEABLE", "errors.unserviceable");
   }
 
-  const slot = await db.appointmentSlot.findFirst({ where: { id: input.slotId, active: true, date: { gte: new Date(new Date().toISOString().slice(0, 10)) } } });
-  if (!slot) throw new AppError("VALIDATION", "errors.validation", { fields: { slotId: "validation.slot" } });
+  const slot = await db.appointmentSlot.findFirst({ where: { id: input.slotId, active: true } });
+  // Same rule as the slot list: in IST, a slot that has started can't be booked.
+  if (!slot || slotStartIst(slot.date, slot.startTime) <= istNow()) throw new AppError("VALIDATION", "errors.validation", { fields: { slotId: "validation.slot" } });
 
   const attachments = input.attachmentIds.length
     ? await db.repairAttachment.findMany({ where: { id: { in: input.attachmentIds }, uploadedById: actor.userId, bookingId: null, jobId: null, purpose: "BOOKING_PHOTO" }, select: { id: true } })
@@ -77,6 +79,7 @@ export async function submitBooking(actor: Actor | null, rawInput: unknown, idem
 
   try {
     const { reference, eventId } = await db.$transaction(async (tx) => {
+      await assertSlotCapacity(tx, slot.id, undefined, SLOT_HOLDING_STATUSES);
       const reference = await nextReference(tx);
       const booking = await tx.repairBooking.create({
         data: {
@@ -280,13 +283,16 @@ async function setBookingStatus(
   });
 }
 
-/** Lock the slot row and verify confirmed bookings stay within capacity (FR-BOOK-07). */
-async function assertSlotCapacity(tx: Tx, slotId: string, excludeBookingId: string) {
+/** Bookings that use up a slot for new customers; the slot list counts the same (catalog.service listAvailableSlots). */
+const SLOT_HOLDING_STATUSES: BookingStatus[] = ["SUBMITTED", "NEEDS_INFO", "CONFIRMED"];
+
+/** Lock the slot row and verify bookings in `statuses` stay within capacity (FR-BOOK-07). */
+async function assertSlotCapacity(tx: Tx, slotId: string, excludeBookingId?: string, statuses: BookingStatus[] = ["CONFIRMED"]) {
   const [slot] = await tx.$queryRaw<{ capacity: number; active: boolean }[]>`
     SELECT capacity, active FROM appointment_slots WHERE id = ${slotId} FOR UPDATE`;
   if (!slot || !slot.active) throw new AppError("SLOT_FULL", "errors.slot.unavailable");
-  const confirmed = await tx.repairBooking.count({ where: { slotId, status: "CONFIRMED", id: { not: excludeBookingId } } });
-  if (confirmed >= slot.capacity) throw new AppError("SLOT_FULL", "errors.slot.full");
+  const taken = await tx.repairBooking.count({ where: { slotId, status: { in: statuses }, id: { not: excludeBookingId } } });
+  if (taken >= slot.capacity) throw new AppError("SLOT_FULL", "errors.slot.full");
 }
 
 export async function confirmBooking(actor: Actor | null, bookingId: string, opts: { technicianId?: string | null } = {}) {

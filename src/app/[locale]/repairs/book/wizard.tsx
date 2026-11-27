@@ -427,9 +427,9 @@ export function BookingWizard({
                     className="sr-only"
                     onChange={(e) => {
                       const files = Array.from(e.target.files ?? []);
-                      const tooBig = files.some((f) => f.size > 10 * 1024 * 1024);
+                      const tooBig = files.some((f) => f.size > 4 * 1024 * 1024);
                       if (tooBig) setFormError(t("errors.upload.tooLarge"));
-                      const ok = files.filter((f) => f.size <= 10 * 1024 * 1024).slice(0, MAX_PHOTOS - photos.length);
+                      const ok = files.filter((f) => f.size <= 4 * 1024 * 1024).slice(0, MAX_PHOTOS - photos.length);
                       setPhotos([...photos, ...ok.map((file) => ({ file, url: URL.createObjectURL(file) }))]);
                       e.target.value = "";
                     }}

@@ -238,7 +238,7 @@ export function ProductForm({ productId, initial, categories }: { productId?: st
       </Card>
 
       <Card>
-        <CardHeader title="Images" description="JPEG, PNG or WebP up to 10 MB. The first image is the main photo. Without images, a category illustration is shown." />
+        <CardHeader title="Images" description="JPEG, PNG or WebP up to 4 MB. The first image is the main photo. Without images, a category illustration is shown." />
         <CardBody className="space-y-3">
           {uploadError && <Alert tone="danger">{uploadError}</Alert>}
           {fields.imageIds && <Alert tone="danger">{fields.imageIds}</Alert>}

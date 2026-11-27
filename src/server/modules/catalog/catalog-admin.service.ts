@@ -255,14 +255,19 @@ export async function importModelsCsv(actor: Actor | null, raw: unknown): Promis
       let updated = 0;
       let brandsCreated = 0;
       const brandIds = new Map<string, string>();
+      // Existing brands and models are loaded once and matched in memory (same rules as before: slug, or name
+      // ignoring case), so a 3000-row file is not 6000 sequential lookups inside one transaction.
+      const categoryIds = [...new Set(rows.map((r) => r.categoryId))];
+      const brands = await tx.deviceBrand.findMany({ where: { categoryId: { in: categoryIds } }, select: { id: true, categoryId: true, slug: true, name: true } });
+      const modelsByBrand = new Map<string, { id: string; slug: string; name: string }[]>();
+      const modelsOf = (brandId: string) => modelsByBrand.get(brandId) ?? modelsByBrand.set(brandId, []).get(brandId)!;
+      for (const m of await tx.deviceModel.findMany({ where: { brand: { categoryId: { in: categoryIds } } }, select: { id: true, brandId: true, slug: true, name: true } })) modelsOf(m.brandId).push(m);
+      const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
       for (const r of rows) {
         const brandKey = `${r.categoryId}:${deviceSlug(r.brand)}`;
         let brandId = brandIds.get(brandKey);
         if (!brandId) {
-          let brand = await tx.deviceBrand.findFirst({
-            where: { categoryId: r.categoryId, OR: [{ slug: slugify(r.brand) }, { name: { equals: r.brand, mode: "insensitive" } }] },
-            select: { id: true },
-          });
+          let brand: { id: string } | undefined = brands.find((b) => b.categoryId === r.categoryId && (b.slug === slugify(r.brand) || same(b.name, r.brand)));
           if (!brand) {
             brandsCreated++;
             if (apply) brand = await tx.deviceBrand.create({ data: { categoryId: r.categoryId, slug: slugify(r.brand), name: r.brand }, select: { id: true } });
@@ -272,15 +277,17 @@ export async function importModelsCsv(actor: Actor | null, raw: unknown): Promis
           brandIds.set(brandKey, brandId);
         }
         const meta = { releaseYear: r.releaseYear, frame: r.frame, popular: r.popular, aliases: r.aliases };
-        const existing = brandId.startsWith("new:")
-          ? null
-          : await tx.deviceModel.findFirst({ where: { brandId, OR: [{ slug: deviceSlug(r.name) }, { name: { equals: r.name, mode: "insensitive" } }] }, select: { id: true } });
+        const known = modelsOf(brandId);
+        const existing = known.find((m) => m.slug === deviceSlug(r.name) || same(m.name, r.name));
         if (existing) {
           updated++;
           if (apply) await tx.deviceModel.update({ where: { id: existing.id }, data: meta });
         } else {
           created++;
-          if (apply) await tx.deviceModel.create({ data: { brandId, categoryId: r.categoryId, slug: deviceSlug(r.name), name: r.name, ...meta } });
+          const slug = deviceSlug(r.name);
+          const id = apply ? (await tx.deviceModel.create({ data: { brandId, categoryId: r.categoryId, slug, name: r.name, ...meta }, select: { id: true } })).id : `new:${r.line}`;
+          // A later row for the same model updates this one, as it did when each row queried the database.
+          known.push({ id, slug, name: r.name });
         }
       }
       if (apply) await audit(tx, actor, { action: "catalog.import", entityType: "DeviceModel", entityId: "bulk", after: { created, updated, brandsCreated, rows: rows.length } });

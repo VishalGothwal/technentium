@@ -14,20 +14,15 @@ export async function hit(key: string, windowSeconds: number, max: number): Prom
   const windowStart = now - windowSeconds * 1000;
   const fullKey = `app:${key}`;
 
-  return db.$transaction(async (tx) => {
-    const row = await tx.rateLimit.findUnique({ where: { key: fullKey } });
-    if (!row || Number(row.lastRequest) < windowStart) {
-      await tx.rateLimit.upsert({
-        where: { key: fullKey },
-        create: { key: fullKey, count: 1, lastRequest: BigInt(now) },
-        update: { count: 1, lastRequest: BigInt(now) },
-      });
-      return true;
-    }
-    if (row.count >= max) return false;
-    await tx.rateLimit.update({ where: { key: fullKey }, data: { count: { increment: 1 } } });
-    return true;
-  });
+  // One atomic statement: parallel requests can't all read the same count and slip past the limit.
+  const [row] = await db.$queryRaw<{ count: number }[]>`
+    INSERT INTO "rate_limits" ("id", "key", "count", "lastRequest")
+    VALUES (gen_random_uuid()::text, ${fullKey}, 1, ${BigInt(now)})
+    ON CONFLICT ("key") DO UPDATE SET
+      "count" = CASE WHEN "rate_limits"."lastRequest" < ${BigInt(windowStart)} THEN 1 ELSE "rate_limits"."count" + 1 END,
+      "lastRequest" = CASE WHEN "rate_limits"."lastRequest" < ${BigInt(windowStart)} THEN ${BigInt(now)} ELSE "rate_limits"."lastRequest" END
+    RETURNING "count"`;
+  return row.count <= max;
 }
 
 export async function enforce(key: string, windowSeconds: number, max: number) {

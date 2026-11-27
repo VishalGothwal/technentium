@@ -273,6 +273,22 @@ export async function signOutEverywhere(actor: Actor | null, userId: string) {
   );
 }
 
+/** Lost phone: remove the account's authenticator factors so the next sign-in needs only the password; set up again on Security. */
+export async function resetTwoFactor(actor: Actor | null, userId: string) {
+  assertCan(actor, "user.manage");
+  const user = await loadTarget(userId);
+  if (user.authUserId && supabaseAdminConfigured()) {
+    const admin = supabaseAdmin().auth.admin;
+    const { data, error } = await admin.mfa.listFactors({ userId: user.authUserId });
+    authFailure(error);
+    for (const f of data?.factors ?? []) authFailure((await admin.mfa.deleteFactor({ userId: user.authUserId, id: f.id })).error);
+  }
+  await db.$transaction(async (tx) => {
+    await tx.user.update({ where: { id: userId }, data: { twoFactorEnabled: false } });
+    await audit(tx, actor, { action: "user.reset_two_factor", entityType: "User", entityId: userId });
+  });
+}
+
 export async function setUserBlocked(actor: Actor | null, userId: string, blocked: boolean, reason?: string) {
   assertCan(actor, "user.manage");
   if (userId === actor.userId) throw new AppError("CONFLICT", "errors.users.self");

@@ -10,7 +10,7 @@ export const paths: PathsObject = {
       tags,
       summary: "Upload an image",
       description:
-        "JPEG/PNG/WebP up to 10 MB, re-encoded to WebP with EXIF removed. `CUSTOM_ARTWORK` can be uploaded by any signed-in customer and stays private; other purposes are public and need the `media.upload` staff permission. Pass a `draftKey` to group artwork for a customization request before it is submitted.",
+        "JPEG/PNG/WebP up to 4 MB, re-encoded to WebP with EXIF removed. `CUSTOM_ARTWORK` can be uploaded by any signed-in customer and stays private; other purposes are public and need the `media.upload` staff permission. Pass a `draftKey` to group artwork for a customization request before it is submitted.",
       security: "bearer",
       requestBody: {
         contentType: "multipart/form-data",

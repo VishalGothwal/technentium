@@ -19,7 +19,7 @@ opts in, and only when `NEXT_PUBLIC_GA_ID` is set.
 ## Stack
 
 Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind CSS v4 · Supabase (Postgres + Auth: mobile OTP via
-Fast2SMS, Google, email/password, TOTP 2FA for owners) · Prisma 7 · Vitest · Playwright. Designed for Vercel.
+Fast2SMS, Google, email/password, TOTP 2FA for staff) · Prisma 7 · Vitest · Playwright. Designed for Vercel.
 
 ## Local setup
 
@@ -67,9 +67,12 @@ user, set automatically on first sign-in — existing accounts are matched by ve
    (`SMS_DRIVER=fast2sms`), or are captured on the Feature controls page in test mode.
 6. **Google**: enable it under Authentication → Providers with your Google OAuth client; the Google redirect URI is the one
    Supabase shows there (`https://<ref>.supabase.co/auth/v1/callback`).
-7. **Two-factor**: Authentication → Multi-Factor → TOTP enabled (default). Owners enrol again after the move (secrets
-   from the previous auth system can't be carried over).
-8. `npm run db:seed` with `SUPABASE_SECRET_KEY` set creates Supabase logins for the demo staff accounts.
+7. **Two-factor**: Authentication → Multi-Factor → TOTP enabled (default). Each staff member turns it on in Admin →
+   Security (QR code + authenticator app); after that the console asks for a code at every new sign-in. A lost phone is
+   reset by the Owner in Users & access.
+8. **Owner**: set `OWNER_EMAIL` (and `APP_URL`) before the first deploy. The deploy seed emails that address a Supabase
+   invitation to set a password; sign-in never links a staff account by email, so nobody else can claim it.
+9. `npm run db:seed` with `SUPABASE_SECRET_KEY` set creates Supabase logins for the demo staff accounts.
 
 **Admin controls** (Owner): *Feature controls* (`/admin/controls`) switches sign-in methods, new sign-ups, site
 sections, test mode, maintenance mode and switch user, and checks the setup above. *Users & access* (`/admin/users`)

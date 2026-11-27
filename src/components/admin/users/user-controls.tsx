@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import {
+  resetTwoFactorAction,
   sendPasswordResetAction,
   setTemporaryPasswordAction,
   setUserBlockedAction,
@@ -87,6 +88,7 @@ type Access = {
   isSelf: boolean;
   linked: boolean;
   adminConfigured: boolean;
+  twoFactor: boolean;
 };
 
 /** Block, passwords and sessions for one account. Each action is audited. */
@@ -117,6 +119,11 @@ export function UserAccessControls({ user }: { user: Access }) {
         <Button size="sm" variant="secondary" pending={pending} onClick={() => act(() => signOutEverywhereAction(user.id), "Signed out on every device.")}>
           Sign out everywhere
         </Button>
+        {user.twoFactor && (
+          <Button size="sm" variant="secondary" pending={pending} onClick={() => act(() => resetTwoFactorAction(user.id), "Two-factor removed. They can set it up again on their Security page.")}>
+            Reset two-factor
+          </Button>
+        )}
         {!user.isSelf &&
           (user.blocked ? (
             <Button size="sm" variant="secondary" pending={pending} onClick={() => act(() => setUserBlockedAction(user.id, false), "Account unblocked.")}>

@@ -41,7 +41,7 @@ export async function checkServiceability(pincode: string) {
 
 /**
  * Upcoming slots with remaining capacity. Remaining counts submitted and confirmed bookings so customers
- * are not offered slots that are already spoken for; capacity is enforced at staff confirmation.
+ * are not offered slots that are already spoken for; booking submit refuses the same, and confirmation re-checks.
  */
 export async function listAvailableSlots(days = 7) {
   const today = new Date();
@@ -73,7 +73,7 @@ export async function listAvailableSlots(days = 7) {
 
 /** Minutes since epoch in IST "wall clock", for comparing slot times (Asia/Kolkata has no DST). */
 const IST_OFFSET_MS = 330 * 60_000;
-const istNow = () => Date.now() + IST_OFFSET_MS;
+export const istNow = () => Date.now() + IST_OFFSET_MS;
 export const slotStartIst = (date: Date, startTime: string) => {
   const [h, m] = startTime.split(":").map(Number);
   return date.getTime() + (h * 60 + m) * 60_000;

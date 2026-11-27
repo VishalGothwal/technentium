@@ -291,7 +291,7 @@
     "otherModelRequired": "Please tell us the brand and model of your device.",
     "descriptionHint": "When did it start? Anything else we should know?",
     "photosLabel": "Photos of the problem",
-    "photosHint": "Up to 6 photos (JPG, PNG or WebP, max 10 MB each). Location data is removed.",
+    "photosHint": "Up to 6 photos (JPG, PNG or WebP, max 4 MB each). Location data is removed.",
     "addPhotos": "Add photos",
     "photoAlt": "Photo {index} of the reported problem",
     "handoverTitle": "How would you like to hand over your device?",
@@ -511,7 +511,8 @@
     },
     "conflict": {
       "stale": "This was changed by someone else. Refresh and try again.",
-      "idempotency": "This request was already used."
+      "idempotency": "This request was already used.",
+      "inUse": "This image is still used on the site. Replace it there first."
     },
     "slot": {
       "full": "That appointment slot is full. Please choose another.",
@@ -556,7 +557,7 @@
     },
     "upload": {
       "empty": "The file is empty.",
-      "tooLarge": "Files must be 10 MB or smaller.",
+      "tooLarge": "Files must be 4 MB or smaller.",
       "type": "Only JPG, PNG or WebP images are allowed.",
       "corrupt": "We couldn't read that image."
     },
@@ -679,7 +680,7 @@
       },
       "uploads": {
         "title": "Images",
-        "body": "Upload JPEG, PNG or WebP up to 10 MB as multipart/form-data. Images are re-encoded and location data is removed."
+        "body": "Upload JPEG, PNG or WebP up to 4 MB as multipart/form-data. Images are re-encoded and location data is removed."
       }
     }
   },

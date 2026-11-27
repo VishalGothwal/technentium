@@ -76,6 +76,7 @@ export default async function UserDetailPage({ params }: PageProps<"/admin/users
                   isSelf,
                   linked: !!u.authUserId,
                   adminConfigured: u.adminConfigured,
+                  twoFactor: !!u.twoFactorEnabled || (u.auth?.factors ?? 0) > 0,
                 }}
               />
             </CardBody>

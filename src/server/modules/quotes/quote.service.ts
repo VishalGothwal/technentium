@@ -44,7 +44,8 @@ export async function openDraft(actor: Actor | null, jobId: string) {
             kind, description, quantity, unitPaise, taxable, priceItemId, partGrade, compatibilityNote, sortOrder,
           }))
         : !job.booking.feeWaivedIfApproved && job.booking.diagnosisFeePaise > 0
-          ? [{ kind: "DIAGNOSIS_FEE" as const, description: "Diagnosis fee", quantity: 1, unitPaise: job.booking.diagnosisFeePaise, taxable: true, sortOrder: 0 }]
+          ? // GST-inclusive: the customer agreed to this exact amount at booking, so no GST is added on top.
+            [{ kind: "DIAGNOSIS_FEE" as const, description: "Diagnosis fee (incl. GST)", quantity: 1, unitPaise: job.booking.diagnosisFeePaise, taxable: false, sortOrder: 0 }]
           : [];
     const totals = computeTotals(initialLines, taxRateBps);
 
@@ -89,6 +90,9 @@ export async function saveDraft(actor: Actor | null, versionId: string, raw: unk
   }
 
   await db.$transaction(async (tx) => {
+    // Guarded write first: it locks the row, so a concurrent Send either waits for this save or makes it fail here.
+    const updated = await tx.quoteVersion.updateMany({ where: { id: versionId, status: "DRAFT" }, data: { ...totals, customerMessage: input.customerMessage || null } });
+    if (updated.count !== 1) throw new AppError("QUOTE_NOT_ACTIONABLE", "errors.quote.notDraft");
     await tx.quoteLineItem.deleteMany({ where: { versionId } });
     await tx.quoteLineItem.createMany({
       data: input.lines.map((l, i) => ({
@@ -104,7 +108,6 @@ export async function saveDraft(actor: Actor | null, versionId: string, raw: unk
         sortOrder: i,
       })),
     });
-    await tx.quoteVersion.update({ where: { id: versionId }, data: { ...totals, customerMessage: input.customerMessage || null } });
     await audit(tx, actor, { action: "quote.save_draft", entityType: "RepairJob", entityId: version.quote.jobId, after: { versionId, totals, lines: input.lines.length } });
   });
   return totals;
@@ -130,10 +133,12 @@ export async function sendQuote(actor: Actor | null, versionId: string) {
   const eventId = await db.$transaction(async (tx) => {
     const updated = await tx.quoteVersion.updateMany({ where: { id: versionId, status: "DRAFT" }, data: { status: "SENT", sentAt, sentById: actor.userId, expiresAt } });
     if (updated.count !== 1) throw new AppError("CONFLICT", "errors.conflict.stale");
-    await audit(tx, actor, { action: "quote.send", entityType: "RepairJob", entityId: version.quote.jobId, after: { versionId, totalPaise: version.totalPaise, expiresAt } });
+    // Re-read after taking the row lock: a draft save may have committed since the read above.
+    const { totalPaise } = await tx.quoteVersion.findUniqueOrThrow({ where: { id: versionId }, select: { totalPaise: true } });
+    await audit(tx, actor, { action: "quote.send", entityType: "RepairJob", entityId: version.quote.jobId, after: { versionId, totalPaise, expiresAt } });
     return applyJobTransition(tx, actor, version.quote.job, "AWAITING_DECISION", {
       system: true,
-      notifyParams: { total: formatPaise(version.totalPaise), expires: formatDate(expiresAt) },
+      notifyParams: { total: formatPaise(totalPaise), expires: formatDate(expiresAt) },
     });
   });
   dispatchAfterCommit([eventId]);
@@ -163,6 +168,11 @@ export async function decideQuote(actor: Actor | null, versionId: string, raw: u
   if (version.expiresAt && version.expiresAt <= new Date()) throw new AppError("QUOTE_NOT_ACTIONABLE", "errors.quote.expired");
 
   const job = version.quote.job;
+  // Same service-area rule as booking (booking.service submitBooking).
+  if (input.decision === "DECLINED" && input.returnMethod === "DELIVERY") {
+    const area = await db.serviceableArea.findUnique({ where: { pincode: input.address!.pincode } });
+    if (!area?.active) throw new AppError("UNSERVICEABLE", "errors.unserviceable");
+  }
   const returnCharge = input.decision === "DECLINED" ? await returnChargeFor(input.returnMethod) : 0;
 
   const eventIds = await db.$transaction(async (tx) => {
@@ -248,6 +258,10 @@ export async function processQuoteExpiry(now = new Date()) {
         const claimed = await tx.quoteVersion.updateMany({ where: { id: v.id, status: "SENT" }, data: { status: "EXPIRED" } });
         if (claimed.count !== 1) return null;
         await audit(tx, null, { action: "quote.expire", entityType: "RepairJob", entityId: v.quote.jobId, after: { versionId: v.id } });
+        // On hold while awaiting a decision: resume to "awaiting customer response", since there is no quote left to decide.
+        if (v.quote.job.status === "ON_HOLD" && v.quote.job.previousStatus === "AWAITING_DECISION") {
+          await tx.repairJob.updateMany({ where: { id: v.quote.jobId, status: "ON_HOLD", previousStatus: "AWAITING_DECISION" }, data: { previousStatus: "AWAITING_CUSTOMER_RESPONSE" } });
+        }
         if (v.quote.job.status !== "AWAITING_DECISION") return null;
         return applyJobTransition(tx, null, v.quote.job, "AWAITING_CUSTOMER_RESPONSE", { system: true, reason: "Quote expired without a decision" });
       }),

@@ -60,6 +60,50 @@ export async function authorizeMedia(actor: Actor | null, id: string) {
   return media;
 }
 
+/**
+ * Daily cron: delete customer uploads never attached to a booking or design request (the wizard or studio was
+ * abandoned). 30 days, because studio drafts are kept in the browser and can be resumed later. The stored file
+ * goes first; if that fails the row stays and the next run retries.
+ */
+export async function purgeAbandonedUploads(now = new Date(), limit = 200) {
+  const before = new Date(now.getTime() - 30 * 86_400_000);
+  const [photos, artwork] = await Promise.all([
+    db.repairAttachment.findMany({ where: { purpose: "BOOKING_PHOTO", bookingId: null, jobId: null, createdAt: { lt: before } }, select: { id: true, storageKey: true }, take: limit }),
+    db.mediaAsset.findMany({ where: { purpose: "CUSTOM_ARTWORK", isPublic: false, customizationRequestId: null, createdAt: { lt: before } }, select: { id: true, storageKey: true }, take: limit }),
+  ]);
+  const purge = async (rows: { id: string; storageKey: string }[], removeRow: (id: string) => Promise<unknown>) => {
+    let n = 0;
+    for (const row of rows) {
+      try {
+        await storage().remove(row.storageKey);
+        await removeRow(row.id);
+        n++;
+      } catch (e) {
+        console.warn(`[uploads] purge ${row.id} failed: ${(e as Error).message}`);
+      }
+    }
+    return n;
+  };
+  return (
+    (await purge(photos, (id) => db.repairAttachment.delete({ where: { id } }))) +
+    (await purge(artwork, (id) => db.mediaAsset.delete({ where: { id } })))
+  );
+}
+
+/** These references are plain id columns (no foreign key), so the database would let a used image be deleted. */
+async function publicMediaInUse(id: string) {
+  const counts = await Promise.all([
+    db.deviceModel.count({ where: { imageMediaId: id } }),
+    db.deviceSpecification.count({ where: { imageMediaId: id } }),
+    db.productType.count({ where: { imageMediaId: id } }),
+    db.design.count({ where: { previewMediaId: id } }),
+    db.contentItem.count({ where: { coverMediaId: id } }),
+    db.device3DModel.count({ where: { fileId: id } }),
+    db.$queryRaw<{ n: number }[]>`SELECT count(*)::int AS n FROM content_translations WHERE body::text LIKE ${`%"${id}"%`}`.then((r) => r[0].n),
+  ]);
+  return counts.some((n) => n > 0);
+}
+
 /** Remove an unattached draft upload (customer artwork before submit) or a public asset (staff). */
 export async function removeMedia(actor: Actor | null, id: string) {
   if (!actor) throw new AppError("UNAUTHENTICATED", "errors.unauthenticated");
@@ -68,6 +112,7 @@ export async function removeMedia(actor: Actor | null, id: string) {
   const ownDraft = !media.isPublic && media.uploadedById === actor.userId && !media.customizationRequestId;
   const staffPublic = media.isPublic && can(actor, "media.upload") && media._count.productImages === 0;
   if (!ownDraft && !staffPublic) throw notFound("media");
+  if (staffPublic && (await publicMediaInUse(id))) throw new AppError("CONFLICT", "errors.conflict.inUse");
   await db.mediaAsset.delete({ where: { id } });
   await storage().remove(media.storageKey);
 }

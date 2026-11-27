@@ -101,10 +101,12 @@ export const getRealActor = cache(async (): Promise<Actor | null> => {
   if (!actor) return null;
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { sessionsRevokedAt: true },
+    select: { sessionsRevokedAt: true, twoFactorEnabled: true },
   });
   // "Sign out everywhere": tokens issued before the revocation stop working at once, not when they expire.
   if (user?.sessionsRevokedAt && identity.issuedAt < user.sessionsRevokedAt.getTime()) return null;
+  // Two-factor on but this session hasn't passed it (aal1): customer access only, until /admin/two-factor.
+  if (actor.isStaff && user?.twoFactorEnabled && identity.aal !== "aal2") return { ...actor, roles: [], permissions: new Set(), isStaff: false, mfaPending: true };
   return actor;
 });
 

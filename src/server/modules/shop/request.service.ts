@@ -55,6 +55,7 @@ export async function submitProductRequest(actor: Actor | null, rawInput: unknow
       items: {
         orderBy: { createdAt: "asc" },
         select: {
+          id: true,
           quantity: true,
           deviceModelId: true,
           product: { select: { id: true, nameEn: true, sku: true, pricePaise: true, status: true, lowStockThreshold: true, category: { select: { active: true } }, inventory: { select: { onHand: true } } } },
@@ -80,6 +81,10 @@ export async function submitProductRequest(actor: Actor | null, rawInput: unknow
 
   try {
     const { reference, eventId } = await db.$transaction(async (tx) => {
+      // Remove exactly the lines read above, first: a parallel checkout (web + app) or a cart edit since the read
+      // makes the count differ, so nothing is ordered twice and nothing unordered is deleted.
+      const removed = await tx.cartItem.deleteMany({ where: { cartId: cart.id, OR: cart.items.map((i) => ({ id: i.id, quantity: i.quantity })) } });
+      if (removed.count !== cart.items.length) throw new AppError("CONFLICT", "errors.conflict.stale");
       const reference = await nextReference(tx);
       const request = await tx.productRequest.create({
         data: {
@@ -99,7 +104,6 @@ export async function submitProductRequest(actor: Actor | null, rawInput: unknow
           history: { create: { toStatus: "SUBMITTED", actorId: actor.userId, customerVisible: true } },
         },
       });
-      await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
       await audit(tx, actor, { action: "product_request.submit", entityType: "ProductRequest", entityId: request.id, after: { reference, subtotalPaise, lines: lines.length } });
       const eventId = await enqueue(tx, {
         type: "order.submitted",
@@ -113,7 +117,8 @@ export async function submitProductRequest(actor: Actor | null, rawInput: unknow
     dispatchAfterCommit([eventId]);
     return { reference, duplicate: false };
   } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+    // A concurrent retry with the same key lost the race (unique key, or the cart was already emptied by the winner).
+    if ((err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") || (err instanceof AppError && err.code === "CONFLICT")) {
       const winner = await db.productRequest.findUnique({ where: { idempotencyKey }, select: { reference: true, customerId: true } });
       if (winner && winner.customerId === actor.userId) return { reference: winner.reference, duplicate: true };
     }

@@ -64,7 +64,7 @@ export function ImageUpload({
           disabled={busy}
           className="flex h-28 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-sm text-muted hover:border-primary hover:text-primary disabled:opacity-60"
         >
-          {busy ? "Uploading…" : `Upload ${label.toLowerCase()} (JPEG, PNG or WebP, max 10 MB)`}
+          {busy ? "Uploading…" : `Upload ${label.toLowerCase()} (JPEG, PNG or WebP, max 4 MB)`}
         </button>
       )}
       <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label={`Upload ${label}`} onChange={(e) => onFile(e.target.files?.[0])} />

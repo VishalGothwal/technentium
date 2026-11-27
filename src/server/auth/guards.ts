@@ -17,6 +17,7 @@ export async function requireStaffPage(): Promise<Actor> {
   const actor = await getActor();
   // Switched into a customer account: show their storefront account (where the "switch back" bar is).
   if (actor?.impersonator && !actor.isStaff) redirect("/en/account");
+  if (actor?.mfaPending) redirect("/admin/two-factor");
   if (!actor || !actor.isStaff) redirect("/admin/sign-in");
   return actor;
 }

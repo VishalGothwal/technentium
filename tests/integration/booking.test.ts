@@ -54,6 +54,19 @@ describe("booking submission", () => {
     expect(ok.reference).toBeTruthy();
   });
 
+  it("refuses a slot that is full, counting bookings still awaiting confirmation", async () => {
+    const slot = await newSlot(1);
+    await submitBooking(await newCustomer(), await bookingInput({ slotId: slot.id }), key());
+    await expect(submitBooking(await newCustomer(), await bookingInput({ slotId: slot.id }), key())).rejects.toMatchObject({ code: "SLOT_FULL" });
+  });
+
+  it("refuses a slot that has already started in IST", async () => {
+    const date = new Date(Date.now() + 330 * 60_000);
+    date.setUTCHours(0, 0, 0, 0);
+    const slot = await db.appointmentSlot.upsert({ where: { date_startTime: { date, startTime: "00:00" } }, create: { date, startTime: "00:00", endTime: "00:30", capacity: 4 }, update: {} });
+    await expect(submitBooking(await newCustomer(), await bookingInput({ slotId: slot.id }), key())).rejects.toMatchObject({ code: "VALIDATION" });
+  });
+
   it("requires policy acceptance", async () => {
     const customer = await newCustomer();
     const input = { ...(await bookingInput()), acceptPolicy: false } as never;
@@ -77,11 +90,12 @@ describe("staff confirmation", () => {
   });
 
   it("enforces slot capacity at confirmation", async () => {
-    const slot = await newSlot(1);
+    const slot = await newSlot(2);
     const s = await staff();
     const a = await submitBooking(await newCustomer(), await bookingInput({ slotId: slot.id }), key());
     const b = await submitBooking(await newCustomer(), await bookingInput({ slotId: slot.id }), key());
     const [ba, bb] = await Promise.all([a, b].map((x) => db.repairBooking.findUniqueOrThrow({ where: { reference: x.reference } })));
+    await db.appointmentSlot.update({ where: { id: slot.id }, data: { capacity: 1 } });
 
     await confirmBooking(s, ba.id);
     await expect(confirmBooking(s, bb.id)).rejects.toMatchObject({ code: "SLOT_FULL" });

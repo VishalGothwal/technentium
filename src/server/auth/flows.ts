@@ -1,6 +1,7 @@
 import "server-only";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type { AuthError, SupabaseClient, User as AuthUser } from "@supabase/supabase-js";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { db } from "@/server/db";
 import { getFeatures } from "@/server/features";
 import { hit } from "@/server/rate-limit";
@@ -167,7 +168,8 @@ export async function sendPhoneOtp(rawPhone: string): Promise<AuthResult> {
   const phone = normalizeIndianMobile(rawPhone);
   if (!phone) return fail("validation.phone");
   // Per-number limit on top of Supabase's own: 5 codes per hour, one per 30 seconds.
-  if (!(await hit(`otp:${phone}`, 3600, 5)) || !(await hit(`otp-30s:${phone}`, 30, 1))) return fail("auth.tooMany");
+  // Per IP too, so a script can't buy SMS for thousands of numbers. Loose because mobile carriers share IPs (CGNAT).
+  if (!(await hit(`otp:${phone}`, 3600, 5)) || !(await hit(`otp-30s:${phone}`, 30, 1)) || !(await hit(`otp-ip:${await clientIp()}`, 3600, 30))) return fail("auth.tooMany");
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithOtp({
@@ -219,7 +221,7 @@ export async function startGoogleSignIn(next: string): Promise<AuthResult<{ url:
 export async function requestPasswordReset(rawEmail: string, locale: string): Promise<AuthResult> {
   if (!supabaseConfigured()) return fail("auth.notConfigured");
   const email = rawEmail.trim().toLowerCase();
-  if (!(await hit(`reset:${email}`, 300, 3))) return fail("auth.tooMany");
+  if (!(await hit(`reset:${email}`, 300, 3)) || !(await hit(`reset-ip:${await clientIp()}`, 3600, 20))) return fail("auth.tooMany");
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: authCallbackUrl(`/${locale}/auth/reset-password`),
@@ -228,14 +230,73 @@ export async function requestPasswordReset(rawEmail: string, locale: string): Pr
   return { ok: true };
 }
 
-/** Sets a new password for the session opened by a reset link (or any signed-in session). */
+/**
+ * Reset and invite links set this signed, 30-minute cookie in the callback. Without it a signed-in session must use
+ * `changePassword` (current password required), so an unlocked browser can't silently take over the account.
+ * No SUPABASE_SECRET_KEY (local dev): not enforced.
+ */
+const RESET_COOKIE = "tn_pw_reset";
+const resetSig = (authUserId: string, exp: string) =>
+  createHmac("sha256", `technentium:pw-reset:${process.env.SUPABASE_SECRET_KEY}`).update(`${authUserId}.${exp}`).digest("base64url");
+
+export async function grantPasswordReset(authUserId: string) {
+  const exp = String(Date.now() + 30 * 60_000);
+  (await cookies()).set(RESET_COOKIE, `${exp}.${resetSig(authUserId, exp)}`, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 30 * 60 });
+}
+
+async function hasPasswordReset(authUserId: string) {
+  if (!process.env.SUPABASE_SECRET_KEY) return true;
+  const [exp = "", sig = ""] = ((await cookies()).get(RESET_COOKIE)?.value ?? "").split(".");
+  const expected = Buffer.from(resetSig(authUserId, exp));
+  return Number(exp) > Date.now() && sig.length === expected.length && timingSafeEqual(Buffer.from(sig), expected);
+}
+
+/** Sets a new password for the session opened by a reset or invite link. */
 export async function setNewPassword(password: string): Promise<AuthResult> {
   if (password.length < 8 || password.length > 128) return fail("auth.weakPassword");
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
-  if (!data.user) return fail("auth.resetInvalid");
+  if (!data.user || !(await hasPasswordReset(data.user.id))) return fail("auth.resetInvalid");
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return fail(mapError(error, "auth.resetInvalid"));
+  (await cookies()).delete(RESET_COOKIE);
+  return { ok: true };
+}
+
+/**
+ * Staff two-factor: an authenticator-app code (TOTP, Supabase MFA). `users.twoFactorEnabled` records that it is on,
+ * so every request can enforce it (session.ts getRealActor) without asking Supabase.
+ */
+export async function startTotpEnrolment(): Promise<AuthResult<{ factorId: string; qrCode: string; secret: string }>> {
+  const supabase = await createSupabaseServerClient();
+  const { data: factors } = await supabase.auth.mfa.listFactors();
+  // A set-up that was started but never confirmed would block a new one.
+  for (const f of factors?.all ?? []) if (f.factor_type === "totp" && f.status === "unverified") await supabase.auth.mfa.unenroll({ factorId: f.id });
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: `Technentium ${Date.now()}` });
+  if (error) return fail(mapError(error, "errors.generic"));
+  return { ok: true, factorId: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret };
+}
+
+/** Check a code: confirms a new factor (`factorId` from enrolment) or completes sign-in with the existing one. */
+export async function verifyTotp(code: string, factorId?: string): Promise<AuthResult> {
+  if (!/^\d{6}$/.test(code.trim())) return fail("auth.codeInvalid");
+  const supabase = await createSupabaseServerClient();
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return fail("auth.failed");
+  if (!(await hit(`mfa:${u.user.id}`, 300, 10))) return fail("auth.tooMany");
+  let id = factorId;
+  if (!id) {
+    const { data } = await supabase.auth.mfa.listFactors();
+    id = data?.totp[0]?.id;
+    // The factor was deleted in the Supabase dashboard (lost phone): two-factor is off for this account.
+    if (!id) {
+      await db.user.updateMany({ where: { authUserId: u.user.id }, data: { twoFactorEnabled: false } });
+      return { ok: true };
+    }
+  }
+  const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: id, code: code.trim() });
+  if (error) return fail(error.status === 429 ? "auth.tooMany" : "auth.codeInvalid");
+  await db.user.updateMany({ where: { authUserId: u.user.id }, data: { twoFactorEnabled: true } });
   return { ok: true };
 }
 

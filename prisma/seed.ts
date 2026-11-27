@@ -369,14 +369,21 @@ async function seedDemoUsers() {
 }
 
 /**
- * Make OWNER_EMAIL the Owner. No password is created: the person signs up (or signs in with Google) with that
- * email, and the first sign-in with it confirmed links to this account.
+ * Make OWNER_EMAIL the Owner. No password is created: Supabase emails an invitation whose link sets one.
+ * Sign-in never links a staff account by email (see provision.ts), so only this invite can claim it.
  */
 async function bootstrapOwner() {
   const email = process.env.OWNER_EMAIL?.trim().toLowerCase();
   if (!email) return;
   const owner = await db.role.findUniqueOrThrow({ where: { key: "owner" } });
-  const user = await db.user.upsert({ where: { email }, create: { email, name: "Owner", customerProfile: { create: {} } }, update: {} });
+  let user = await db.user.upsert({ where: { email }, create: { email, name: "Owner", customerProfile: { create: {} } }, update: {} });
+  if (!user.authUserId && supabase && process.env.APP_URL) {
+    const redirectTo = `${process.env.APP_URL.replace(/\/$/, "")}/api/auth/callback?next=${encodeURIComponent("/en/auth/reset-password")}`;
+    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, { data: { full_name: user.name }, redirectTo });
+    if (data.user) user = await db.user.update({ where: { id: user.id }, data: { authUserId: data.user.id } });
+    // An existing login with this email may not be the owner's: never link it automatically.
+    else console.warn(`Owner invite not sent (${error?.message}). If ${email} already has a Supabase login, delete it under Authentication → Users and redeploy.`);
+  }
   await db.staffProfile.upsert({ where: { userId: user.id }, create: { userId: user.id, displayName: user.name }, update: { active: true, deactivatedAt: null } });
   await db.userRole.upsert({ where: { userId_roleId: { userId: user.id, roleId: owner.id } }, create: { userId: user.id, roleId: owner.id }, update: {} });
   console.log(`Owner: ${email}`);

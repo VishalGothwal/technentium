@@ -119,7 +119,7 @@ export const paths: PathsObject = {
     post: {
       tags: tagRepairs,
       summary: "Upload an issue photo before submitting a booking",
-      description: "JPEG/PNG/WebP up to 10 MB. The image is re-encoded and EXIF (including location) removed. Pass the returned ids as `attachmentIds` when submitting the booking.",
+      description: "JPEG/PNG/WebP up to 4 MB. The image is re-encoded and EXIF (including location) removed. Pass the returned ids as `attachmentIds` when submitting the booking.",
       security: "bearer",
       requestBody: { contentType: "multipart/form-data", schema: obj({ file: str("Image file", { format: "binary" }) }, ["file"]) },
       response: uploaded,

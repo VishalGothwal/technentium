@@ -75,6 +75,7 @@ export async function AdminShell({ children }: { children: ReactNode }) {
   const actor = await getActor();
   // Switched into a customer account: the console isn't theirs; show their storefront account instead.
   if (actor?.impersonator && !actor.isStaff) redirect("/en/account");
+  if (actor?.mfaPending) redirect("/admin/two-factor");
   if (!actor || !actor.isStaff) redirect("/admin/sign-in");
 
   const groups: NavGroup[] = NAV.map((g) => ({

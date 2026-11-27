@@ -15,6 +15,8 @@ export type Actor = {
   phoneNumber?: string | null;
   /** The admin who switched into this account ("view as"); every audit entry records them too. */
   impersonator?: { userId: string; name: string } | null;
+  /** Staff with two-factor on who haven't entered the code this session: staff roles are withheld until they do. */
+  mfaPending?: boolean;
 };
 
 export const can = (actor: Actor | null | undefined, permission: Permission): boolean =>

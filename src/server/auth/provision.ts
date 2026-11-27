@@ -39,7 +39,8 @@ export async function appUserIdFor(authUserId: string, fetchUser: () => Promise<
   if (phoneOk) match.push({ phoneNumber: phone });
   if (match.length) {
     const existing = await db.user.findFirst({
-      where: { authUserId: null, OR: match },
+      // Staff rows are linked only by invite: whoever confirms an unlinked staff email first must not inherit its roles.
+      where: { authUserId: null, OR: match, staffProfile: { is: null } },
       select: { id: true },
     });
     if (existing) {

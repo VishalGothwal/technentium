@@ -53,7 +53,7 @@ type Draft = {
 const STORAGE_KEY = "tn_studio_draft_v1";
 const CUSTOMIZABLE = ["phone", "tablet", "laptop"];
 const BLANK_PALETTE = ["#1b1d2b", "#c4b5fd"];
-const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_BYTES = 4 * 1024 * 1024; // matches MAX_UPLOAD_BYTES (Vercel body limit)
 
 export function Studio({
   designs,

@@ -89,7 +89,7 @@
     },
     "artwork": {
       "title": "Your artwork (optional)",
-      "body": "Upload a photo, logo or illustration (JPEG, PNG or WebP, up to 10 MB). It stays private: only you and our design team can see it.",
+      "body": "Upload a photo, logo or illustration (JPEG, PNG or WebP, up to 4 MB). It stays private: only you and our design team can see it.",
       "choose": "Choose image",
       "replace": "Replace",
       "remove": "Remove",

@@ -163,6 +163,8 @@ export async function addToCart(identity: CartIdentity, rawInput: unknown) {
         cart = await tx.cart.create({ data: { guestToken }, select: { id: true } });
       }
     }
+    // Touch the cart first: the row lock makes a double tap's second add wait and then see the first one's line.
+    await tx.cart.update({ where: { id: cart.id }, data: { updatedAt: new Date() } });
     const lines = await tx.cartItem.findMany({ where: { cartId: cart.id }, select: { id: true, productId: true, deviceModelId: true, quantity: true } });
     const existing = lines.find((l) => l.productId === product.id && l.deviceModelId === deviceModelId);
     if (existing) {
@@ -171,7 +173,6 @@ export async function addToCart(identity: CartIdentity, rawInput: unknown) {
       if (lines.length >= MAX_LINES) throw new AppError("VALIDATION", "shopErrors.cartFull");
       await tx.cartItem.create({ data: { cartId: cart.id, productId: product.id, deviceModelId, quantity: input.quantity } });
     }
-    await tx.cart.update({ where: { id: cart.id }, data: { updatedAt: new Date() } });
   });
   const cart = await getCart({ actor: identity.actor, guestToken });
   return { cart, issuedToken };

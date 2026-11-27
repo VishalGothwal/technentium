@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { changePasswordAction } from "@/app/admin/(security)/security/actions";
+import { changePasswordAction, startTotpEnrolmentAction, verifyTotpAction } from "@/app/admin/(security)/security/actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Alert } from "@/components/ui/surface";
@@ -12,6 +12,78 @@ const ERRORS: Partial<Record<string, string>> = {
   "auth.weakPassword": "Choose a stronger password (at least 8 characters).",
 };
 const message = (key: string) => ERRORS[key] ?? "Something went wrong. Please try again.";
+
+/** Six-digit code field, shared by set-up and the sign-in check. */
+export function TotpCodeField() {
+  return (
+    <Field label="6-digit code from your authenticator app" required>
+      {(p) => <Input {...p} name="code" inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" maxLength={6} className="tracking-[0.3em]" />}
+    </Field>
+  );
+}
+
+/** Two-factor set-up: scan the QR code (or type the key), then confirm with a code. */
+export function TwoFactorSetup({ enabled }: { enabled: boolean }) {
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [setup, setSetup] = useState<{ factorId: string; qrCode: string; secret: string } | null>(null);
+  const [done, setDone] = useState(enabled);
+
+  if (done)
+    return (
+      <Alert tone="success">
+        Two-factor is on. Each new sign-in asks for a code from your authenticator app. Lost your phone? Ask the Owner to use “Reset two-factor” in
+        Users &amp; access, then set it up again here.
+      </Alert>
+    );
+  if (!setup)
+    return (
+      <div className="space-y-3">
+        {error && <Alert tone="danger">{error}</Alert>}
+        <p className="text-sm text-muted">Use an authenticator app such as Google Authenticator, Microsoft Authenticator or 1Password.</p>
+        <Button
+          pending={pending}
+          onClick={async () => {
+            setPending(true);
+            setError(null);
+            const res = await startTotpEnrolmentAction();
+            setPending(false);
+            if (!res.ok) return setError(message(res.error));
+            if ("factorId" in res) setSetup({ factorId: res.factorId, qrCode: res.qrCode, secret: res.secret });
+          }}
+        >
+          Set up two-factor
+        </Button>
+      </div>
+    );
+  return (
+    <form
+      className="space-y-3"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setPending(true);
+        setError(null);
+        const res = await verifyTotpAction(String(new FormData(e.currentTarget).get("code")), setup.factorId);
+        setPending(false);
+        if (!res.ok) return setError(message(res.error));
+        setDone(true);
+      }}
+    >
+      {error && <Alert tone="danger">{error}</Alert>}
+      <p className="text-sm">1. Scan this QR code with your authenticator app.</p>
+      {/* eslint-disable-next-line @next/next/no-img-element -- QR code is an SVG data URL from Supabase */}
+      <img src={setup.qrCode} alt="QR code for your authenticator app" className="size-44 rounded-lg border border-border bg-white p-2" />
+      <p className="text-xs text-muted">
+        Can&apos;t scan? Enter this key instead: <code className="break-all select-all">{setup.secret}</code>
+      </p>
+      <p className="text-sm">2. Enter the code the app shows.</p>
+      <TotpCodeField />
+      <Button type="submit" pending={pending}>
+        Turn on two-factor
+      </Button>
+    </form>
+  );
+}
 
 
 export function ChangePasswordForm() {

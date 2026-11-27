@@ -1,6 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
-import { completeSignIn, appOrigin } from "@/server/auth/flows";
+import { completeSignIn, appOrigin, grantPasswordReset } from "@/server/auth/flows";
 import { createSupabaseServerClient } from "@/server/supabase/server";
 import { isLocale } from "@/i18n/config";
 import { safeNext } from "@/lib/safe-redirect";
@@ -47,5 +47,7 @@ export async function GET(req: NextRequest) {
 
   const done = await completeSignIn(supabase, data.user);
   if (!done.ok) return back(done.error === "auth.blocked" ? "blocked" : done.error === "auth.signUpOff" ? "signup" : "link");
+  // Only a real reset or invite link may set a password without the current one (PKCE resets report redirectType).
+  if (setsPassword || ("redirectType" in data && data.redirectType === "recovery")) await grantPasswordReset(data.user.id);
   return NextResponse.redirect(new URL(next, appOrigin()));
 }

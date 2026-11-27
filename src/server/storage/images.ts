@@ -4,7 +4,8 @@ import { fileTypeFromBuffer } from "file-type";
 import sharp from "sharp";
 import { AppError } from "@/server/errors";
 
-export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+// Vercel refuses request bodies over 4.5 MB before our code runs, so the limit must stay under that.
+export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 export const MAX_IMAGE_EDGE = 2000;
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
