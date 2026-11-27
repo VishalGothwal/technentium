@@ -5,13 +5,22 @@ import { assertCan, type Actor } from "@/server/rbac/actor";
 import { isDeliverableEmail } from "@/server/providers/email";
 
 /** Admin customer views. Full contact details need `customer.view` (staff/owner). */
-export async function listCustomers(actor: Actor | null, filter: { q?: string; page?: number } = {}) {
+/** Admin sections with their own customer list: people with at least one booking / order / design request there. */
+export type CustomerSection = "repairs" | "protection" | "customization";
+const SECTION_WHERE = {
+  repairs: { bookings: { some: {} } },
+  protection: { productRequests: { some: {} } },
+  customization: { customizationRequests: { some: {} } },
+} as const;
+
+export async function listCustomers(actor: Actor | null, filter: { q?: string; page?: number; section?: CustomerSection } = {}) {
   assertCan(actor, "customer.view");
   const pageSize = 25;
   const page = Math.max(1, filter.page ?? 1);
   const where = {
     customerProfile: { isNot: null },
     staffProfile: null,
+    ...(filter.section ? SECTION_WHERE[filter.section] : {}),
     ...(filter.q
       ? { OR: [{ name: { contains: filter.q, mode: "insensitive" as const } }, { email: { contains: filter.q, mode: "insensitive" as const } }, { phoneNumber: { contains: filter.q } }] }
       : {}),
@@ -22,7 +31,7 @@ export async function listCustomers(actor: Actor | null, filter: { q?: string; p
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      select: { id: true, name: true, email: true, phoneNumber: true, createdAt: true, _count: { select: { bookings: true } } },
+      select: { id: true, name: true, email: true, phoneNumber: true, createdAt: true, _count: { select: { bookings: true, productRequests: true, customizationRequests: true } } },
     }),
     db.user.count({ where }),
   ]);

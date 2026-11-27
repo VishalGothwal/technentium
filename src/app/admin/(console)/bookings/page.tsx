@@ -10,7 +10,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Badge, EmptyState, PageHeader } from "@/components/ui/surface";
 import { BOOKING_TONE } from "@/components/repair/status";
 
-export const metadata = { title: "Booking queue" };
+export const metadata = { title: "Repair orders" };
 export const instant = false;
 
 const t = createT("en");
@@ -29,7 +29,7 @@ export default async function BookingQueuePage({ searchParams }: PageProps<"/adm
 
   return (
     <>
-      <PageHeader title="Booking queue" description="Every booking is confirmed by staff before the device is handed over." />
+      <PageHeader title="Repair orders" description="Every booking is confirmed by staff before the device is handed over." />
 
       <form className="mb-4 flex flex-wrap items-end gap-2" method="get">
         <label className="flex flex-col gap-1 text-sm">

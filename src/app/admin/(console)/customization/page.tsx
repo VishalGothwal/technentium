@@ -13,7 +13,7 @@ import { NoAccess } from "@/components/admin/no-access";
 import { Pagination } from "@/components/admin/pagination";
 import { ConfigPreview } from "@/components/customization/config-preview";
 
-export const metadata = { title: "Custom design requests" };
+export const metadata = { title: "Design orders" };
 export const instant = false;
 
 const t = createT("en");
@@ -30,7 +30,7 @@ export default async function CustomizationQueuePage({ searchParams }: PageProps
 
   return (
     <>
-      <PageHeader title="Custom design requests" description="Review feasibility, share a price and keep the customer updated. Customers accept or decline the price themselves." />
+      <PageHeader title="Design orders" description="Review feasibility, share a price and keep the customer updated. Customers accept or decline the price themselves." />
 
       <form className="mb-4 flex flex-wrap items-end gap-2" method="get">
         <label className="flex flex-col gap-1 text-sm">

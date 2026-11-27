@@ -12,7 +12,7 @@ import { Pagination, pageParam, strParam } from "@/components/admin/pagination";
 import { NoAccess } from "@/components/admin/no-access";
 import { ORDER_TONE } from "@/components/shop/order-status";
 
-export const metadata = { title: "Product requests" };
+export const metadata = { title: "Product orders" };
 export const instant = false;
 
 const t = createT("en");
@@ -42,7 +42,7 @@ export default async function OrderQueuePage({ searchParams }: PageProps<"/admin
 
   return (
     <>
-      <PageHeader title="Product requests" description="Order requests from the protection store. Confirm availability and shipping before fulfilment. Nothing is paid online." />
+      <PageHeader title="Product orders" description="Order requests from the protection store. Confirm availability and shipping before fulfilment. Nothing is paid online." />
 
       <nav aria-label="Status" className="mb-4 flex gap-1 overflow-x-auto">
         {FILTERS.map((f) => {

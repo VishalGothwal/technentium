@@ -17,18 +17,26 @@ const NAV: { label: string | null; items: NavItem[] }[] = [
   {
     label: "Repairs",
     items: [
-      { href: "/admin/bookings", label: "Booking queue", icon: "inbox", anyOf: ["booking.view_all"] },
+      { href: "/admin/bookings", label: "Repair orders", icon: "inbox", anyOf: ["booking.view_all"] },
       { href: "/admin/jobs", label: "Repair jobs", icon: "wrench", anyOf: ["job.view_all", "job.view_assigned"] },
       { href: "/admin/jobs/board", label: "Repair board", icon: "board", anyOf: ["job.view_all", "job.view_assigned"] },
+      { href: "/admin/bookings/customers", label: "Repair customers", icon: "users", anyOf: ["customer.view"] },
     ],
   },
   {
-    label: "Store",
+    label: "Protection",
     items: [
-      { href: "/admin/orders", label: "Product requests", icon: "bag", anyOf: ["product_request.manage"] },
+      { href: "/admin/orders", label: "Product orders", icon: "bag", anyOf: ["product_request.manage"] },
       { href: "/admin/products", label: "Products & stock", icon: "box", anyOf: ["product.manage", "inventory.manage"] },
-      { href: "/admin/customization", label: "Custom designs", icon: "brush", anyOf: ["customization.manage", "customization.technical_input"] },
+      { href: "/admin/orders/customers", label: "Product customers", icon: "users", anyOf: ["customer.view"] },
+    ],
+  },
+  {
+    label: "Customization",
+    items: [
+      { href: "/admin/customization", label: "Design orders", icon: "brush", anyOf: ["customization.manage", "customization.technical_input"] },
       { href: "/admin/designs", label: "Design catalogue", icon: "palette", anyOf: ["customization.manage"] },
+      { href: "/admin/customization/customers", label: "Design customers", icon: "users", anyOf: ["customer.view"] },
     ],
   },
   {
@@ -41,7 +49,7 @@ const NAV: { label: string | null; items: NavItem[] }[] = [
   {
     label: "People",
     items: [
-      { href: "/admin/customers", label: "Customers", icon: "users", anyOf: ["customer.view"] },
+      { href: "/admin/customers", label: "All customers", icon: "users", anyOf: ["customer.view"] },
       { href: "/admin/team", label: "Team & roles", icon: "team", anyOf: ["team.manage"] },
       { href: "/admin/users", label: "Users & access", icon: "key", anyOf: ["user.manage"] },
     ],
