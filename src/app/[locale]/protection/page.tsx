@@ -116,7 +116,7 @@ export default async function ProtectionLandingPage() {
         <ol className="mt-6 grid gap-px overflow-hidden rounded-lg bg-border md:grid-cols-3">
           {how.map((s) => (
             <li key={s.n} className="bg-surface p-6">
-              <span aria-hidden className="font-display text-4xl font-bold text-muted/40">
+              <span aria-hidden className="font-display text-4xl font-bold text-muted/70">
                 0{s.n}
               </span>
               <p className="mt-2 font-semibold">{s.title}</p>

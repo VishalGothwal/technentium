@@ -9,10 +9,32 @@ import { customerStep, CUSTOMER_STEPS, type NotificationType } from "@/server/mo
 import type { Actor } from "@/server/rbac/actor";
 import { createT } from "@/i18n/translate";
 import { LOCALES, type Locale } from "@/i18n/config";
-import { isDeliverableEmail } from "@/server/providers/email";
+import { emailAdapter, isDeliverableEmail } from "@/server/providers/email";
+import { audit } from "@/server/audit";
+import { enforce } from "@/server/rate-limit";
+import { getSetting } from "@/server/settings";
 
 function requireUser(actor: Actor | null): asserts actor is Actor {
   if (!actor) throw new AppError("UNAUTHENTICATED", "errors.unauthenticated");
+}
+
+// ───────────── Data deletion request (DPDP Act 2023) ─────────────
+
+/**
+ * Record the customer's request in Audit history and email the support inbox. Staff then remove or
+ * anonymise the account in Users & access, keeping only records the law requires (e.g. invoices).
+ */
+export async function requestAccountDeletion(actor: Actor | null) {
+  requireUser(actor);
+  await enforce(`deletion:${actor.userId}`, 86_400, 3);
+  await db.$transaction((tx) => audit(tx, actor, { action: "account.deletion_requested", entityType: "User", entityId: actor.userId }));
+  const to = await getSetting("business.supportEmail");
+  if (!to) return;
+  const text = [`${actor.name} asked us to delete their account and personal data.`, `Phone: ${actor.phoneNumber ?? "-"}`, `Email: ${actor.email ?? "-"}`, `${process.env.APP_URL ?? ""}/admin/users/${actor.userId}`].join("\n");
+  // The audit entry is the record; a mail failure must not lose the request.
+  await emailAdapter()
+    .send({ to, subject: "Account deletion request", text })
+    .catch((e) => console.error(`[account] deletion email failed: ${(e as Error).message}`));
 }
 
 // ───────────── Profile ─────────────

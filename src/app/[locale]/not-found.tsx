@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { getT } from "@/i18n/server";
 import { ButtonLink } from "@/components/ui/button";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return { title: t("site.notFound.title"), robots: { index: false } };
+}
 
 /** Branded 404 inside the site header and footer: unknown slugs (`notFound()`) and unmatched URLs (`[...missing]`). */
 export default async function NotFound() {

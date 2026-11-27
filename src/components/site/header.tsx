@@ -137,7 +137,7 @@ export async function SiteHeader() {
               </a>
             )}
             {wa && (
-              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-[#128c4a] transition hover:underline">
+              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-[#0e7a3c] transition hover:underline">
                 <WhatsAppIcon className="size-3.5" />
                 {t("site.header.chatShort")}
               </a>
@@ -194,7 +194,7 @@ export async function SiteHeader() {
                     rel="noopener noreferrer"
                     aria-label={t("site.header.chatToBook")}
                     title={t("site.header.chatToBook")}
-                    className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold text-[#128c4a] transition hover:bg-surface hover:shadow-sm"
+                    className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold text-[#0e7a3c] transition hover:bg-surface hover:shadow-sm"
                   >
                     <WhatsAppIcon className="size-4" />
                   </a>

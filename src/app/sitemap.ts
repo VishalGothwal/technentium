@@ -40,6 +40,8 @@ const STATIC_PAGES: [path: string, priority: number, freq: Entry["changeFrequenc
   ["/policies/privacy", 0.2, "yearly"],
   ["/policies/terms", 0.2, "yearly"],
   ["/policies/repair", 0.3, "yearly"],
+  ["/policies/refund", 0.2, "yearly"],
+  ["/policies/cookies", 0.1, "yearly"],
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

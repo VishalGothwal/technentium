@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import "../globals.css";
 import { fontVariables } from "@/lib/fonts";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { LOCALES } from "@/i18n/config";
 import { I18nProvider } from "@/i18n/client";
 import { getT } from "@/i18n/server";
@@ -22,7 +23,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: t("meta.title"), template: `%s · ${t("common.brand")}` },
     description: t("meta.description"),
     alternates: { languages: { en: "/en", hi: "/hi" } },
-    openGraph: { locale: locale === "hi" ? "hi_IN" : "en_IN", siteName: "Technentium" },
+    openGraph: { locale: locale === "hi" ? "hi_IN" : "en_IN", siteName: "Technentium", images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }] },
+    twitter: { card: "summary_large_image", images: [DEFAULT_OG_IMAGE] },
   };
 }
 

@@ -4,6 +4,8 @@ import type { Locale } from "@/i18n/config";
 /** Absolute site origin for canonical URLs, sitemaps and structured data. */
 export const SITE_URL = (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
 export const SITE_NAME = "Technentium";
+/** Social preview (1200×630) for pages without their own image. */
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
 
 export const absoluteUrl = (path: string) => (/^https?:\/\//.test(path) ? path : `${SITE_URL}${path.startsWith("/") ? "" : "/"}${path}`);
 
@@ -40,7 +42,8 @@ export function pageMetadata({
   const languages: Record<string, string> = {};
   for (const l of availableLocales) languages[l === "hi" ? "hi-IN" : "en-IN"] = absoluteUrl(`/${l}${clean}`);
   if (availableLocales.includes("en")) languages["x-default"] = absoluteUrl(`/en${clean}`);
-  const images = image ? [{ url: absoluteUrl(image) }] : undefined;
+  // A page-level openGraph replaces the layout one entirely, so the default image is set here too.
+  const images = [image ? { url: absoluteUrl(image) } : { url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }];
   return {
     title,
     description: description ?? undefined,
@@ -55,7 +58,7 @@ export function pageMetadata({
       images,
       ...(type === "article" ? { publishedTime: publishedTime?.toISOString(), modifiedTime: modifiedTime?.toISOString() } : {}),
     },
-    twitter: { card: image ? "summary_large_image" : "summary", title, description: description ?? undefined, images: image ? [absoluteUrl(image)] : undefined },
+    twitter: { card: "summary_large_image", title, description: description ?? undefined, images: [image ? absoluteUrl(image) : DEFAULT_OG_IMAGE] },
     robots: noIndex ? { index: false, follow: true } : undefined,
   };
 }

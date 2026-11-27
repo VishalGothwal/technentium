@@ -7,6 +7,7 @@ import { parse } from "@/server/validation";
 import { OPTIONAL_CHANNELS } from "@/server/notifications/matrix";
 import { cancelMyBooking, respondToInfoRequest } from "@/server/modules/repairs/booking.service";
 import { decideQuote } from "@/server/modules/quotes/quote.service";
+import { requestAccountDeletion } from "@/server/modules/account/account.service";
 import { LOCALES } from "@/i18n/config";
 
 export async function decideQuoteAction(versionId: string, input: unknown) {
@@ -19,6 +20,10 @@ export async function cancelBookingAction(reference: string) {
 
 export async function replyToInfoRequestAction(reference: string, message: string) {
   return runAction((actor) => respondToInfoRequest(actor, reference, message));
+}
+
+export async function requestAccountDeletionAction() {
+  return runAction((actor) => requestAccountDeletion(actor), { refresh: false });
 }
 
 const profileSchema = z.object({

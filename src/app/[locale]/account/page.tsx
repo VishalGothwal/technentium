@@ -5,7 +5,7 @@ import { db } from "@/server/db";
 import { isDeliverableEmail } from "@/server/providers/email";
 import { OPTIONAL_CHANNELS } from "@/server/notifications/matrix";
 import { Badge, Card, CardBody, CardHeader, DescriptionList, PageHeader } from "@/components/ui/surface";
-import { PreferencesForm, ProfileForm } from "./profile-forms";
+import { DeletionRequest, PreferencesForm, ProfileForm } from "./profile-forms";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -40,6 +40,12 @@ export default async function ProfilePage() {
         <CardHeader title={t("account.preferencesTitle")} description={t("account.preferencesHint")} />
         <CardBody>
           <PreferencesForm channels={OPTIONAL_CHANNELS.map((c) => ({ channel: c, enabled: !disabled.has(c) }))} />
+        </CardBody>
+      </Card>
+      <Card>
+        <CardHeader title={t("account.deletion.title")} description={t("account.deletion.body")} />
+        <CardBody>
+          <DeletionRequest />
         </CardBody>
       </Card>
     </div>

@@ -5,7 +5,33 @@ import { LOCALES, LOCALE_LABELS } from "@/i18n/config";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Field, Input, Select } from "@/components/ui/field";
 import { Alert } from "@/components/ui/surface";
-import { setChannelPreferenceAction, updateProfileAction } from "./actions";
+import { requestAccountDeletionAction, setChannelPreferenceAction, updateProfileAction } from "./actions";
+
+/** "Request account deletion": asks once, then shows the result in place. */
+export function DeletionRequest() {
+  const { t } = useI18n();
+  const [pending, start] = useTransition();
+  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+  if (result?.ok) return <Alert tone="success">{result.text}</Alert>;
+  return (
+    <div className="space-y-3">
+      {result && <Alert tone="danger">{result.text}</Alert>}
+      <Button
+        variant="danger"
+        pending={pending}
+        onClick={() => {
+          if (!window.confirm(t("account.deletion.confirm"))) return;
+          start(async () => {
+            const res = await requestAccountDeletionAction();
+            setResult(res.ok ? { ok: true, text: t("account.deletion.done") } : { ok: false, text: t(res.messageKey) });
+          });
+        }}
+      >
+        {t("account.deletion.button")}
+      </Button>
+    </div>
+  );
+}
 
 export function ProfileForm({ name, preferredLocale }: { name: string; preferredLocale: string }) {
   const { t } = useI18n();

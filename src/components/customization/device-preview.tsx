@@ -368,7 +368,7 @@ export function DevicePreview({ kind, frame, aspect, view = "back", style, finis
   );
 
   return (
-    <svg viewBox={`-24 -24 ${w + 48} ${h + 48}`} role="img" aria-label={label} className={className} xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox={`-24 -24 ${w + 48} ${h + 48}`} role={label ? "img" : undefined} aria-label={label || undefined} aria-hidden={label ? undefined : true} className={className} xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id={`${uid}-shadow`} x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="0" dy="10" stdDeviation="12" floodColor="#000" floodOpacity="0.35" />

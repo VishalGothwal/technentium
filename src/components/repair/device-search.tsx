@@ -46,7 +46,7 @@ export function RepairDeviceSearch({ className }: { className?: string }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={t("repairFlow.searchPlaceholder")}
-          aria-controls={listId}
+          aria-controls={shown ? listId : undefined}
           autoComplete="off"
           className="h-14 w-full rounded-xl border border-border bg-surface pr-4 pl-12 text-base text-foreground shadow-lg shadow-black/10"
         />

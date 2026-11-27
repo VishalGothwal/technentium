@@ -51,7 +51,9 @@
     "privacy": "Privacy policy",
     "terms": "Terms & conditions",
     "repairPolicy": "Repair, return & warranty policy",
-    "rights": "© {year} Technentium. All rights reserved."
+    "rights": "© {year} Technentium. All rights reserved.",
+    "refundPolicy": "Refund & cancellation",
+    "cookiePolicy": "Cookie policy"
   },
   "home": {
     "eyebrow": "Repairs in Jaipur",
@@ -159,15 +161,23 @@
   "policies": {
     "privacy": {
       "title": "Privacy policy",
-      "body": "We collect only what we need to provide repairs: your name, phone number, email (optional), service address, and device photos you choose to upload. Photos and records are stored privately and are visible only to you and authorised staff. We use your contact details to send booking and repair updates. You can ask us to export or delete your data. Detailed retention periods will be published after legal review."
+      "body": "## What we collect\n- Account: your name, mobile number, email (optional), how you sign in (phone code, Google, or email and password) and your language.\n- Repairs: your device model, the problem you describe, photos you upload, the pickup or return address, your appointment slot, and the quotes you approve or decline.\n- Orders and custom designs: your delivery address, the products you ask for, and artwork you upload.\n- Security records: your IP address and browser type when you sign in or decide on a quote, to prevent fraud and settle disputes.\n- Analytics: only if you allow it in the cookie banner (Google Analytics, with IP anonymisation).\n\n## Why we use it\nTo book, repair, deliver and support your devices and orders, and to send you updates by SMS, email and in your account. You can switch off SMS and email updates in your account. We do not sell your data or use it for advertising.\n\n## Who we share it with\nOnly the services that run this website for us: Supabase (database, sign-in and file storage), Vercel (hosting), Fast2SMS (sign-in codes and SMS updates), our email provider, and Google (only if you sign in with Google or allow analytics). Videos load from YouTube or Vimeo only when you press play.\n\n## How long we keep it\nPhotos and artwork that were never attached to a booking or request are deleted after 30 days. Booking, order and quote records are kept for as long as the law requires for tax and consumer purposes (exact periods to be confirmed).\n\n## Your rights\nUnder India's Digital Personal Data Protection Act, 2023 you can ask to see, correct or delete your personal data, and raise a grievance. Correct your details on your account page. To delete your account, use \"Request account deletion\" on your account page or write to us.\n\n## Children\nOur services are meant for adults. If you are under 18, please ask a parent or guardian to book for you. (Age rules to be confirmed after legal review.)\n\n## Contact and grievances\nEmail {email}, call {phone}, or visit {address}."
     },
     "terms": {
       "title": "Terms & conditions",
-      "body": "Bookings are requests until confirmed by our team. Repairs begin only after you approve an itemised quote. Quotes are valid until the expiry date shown. Prices include applicable taxes as shown on the quote."
+      "body": "## Bookings\nA booking is a request until our team confirms it. You can cancel it from your account until it is confirmed.\n\n## Quotes and prices\nRepairs begin only after you approve an itemised quote. Quotes are valid until the expiry date shown. Prices include applicable taxes as shown on the quote. The diagnosis fee shown at booking includes GST.\n\n## Orders\nOrdering a product sends a request: we confirm availability and delivery before you pay. No payment is taken on this website.\n\n## Your account\nKeep your sign-in details private. You are responsible for activity on your account. We may block accounts that misuse the service.\n\n## Uploads\nOnly upload photos and artwork you have the right to use. You keep ownership; you allow us to use them to carry out your repair or design.\n\n## Policies\nSee also our Privacy, Refund & cancellation, Cookie, and Repair, return & warranty policies.\n\n## Contact\nEmail {email} or call {phone}."
     },
     "repair": {
       "title": "Repair, return & warranty policy",
       "body": "A diagnosis fee may apply and is disclosed before booking. If you decline a quote, we return your device unrepaired; any diagnosis fee and return charge are shown before you confirm. Repaired devices carry a warranty on replaced parts and workmanship as stated on your repair record. Physical and liquid damage after return are not covered."
+    },
+    "refund": {
+      "title": "Refund & cancellation policy",
+      "body": "## Payments\nWe do not take payments on this website. Repair charges follow the quote you approve; product orders are paid only after we confirm availability and delivery.\n\n## Cancelling\n- Repair bookings: cancel from your account until we confirm the booking. After that, contact us.\n- Product orders: cancel from your account until we confirm the order. After that, contact us.\n- Custom design requests: cancel from your account until work starts.\n\n## Declining a repair quote\nIf you decline a quote, we return your device unrepaired. Any diagnosis fee and return charge are shown before you confirm.\n\n## Refunds\nIf you have paid for something we cannot deliver, or that we cancel, we refund the amount you paid. How and how fast refunds are paid will be confirmed here (to be confirmed by Technentium).\n\n## Warranty\nRepair warranty terms are in our Repair, return & warranty policy.\n\n## Contact\nEmail {email} or call {phone}."
+    },
+    "cookies": {
+      "title": "Cookie policy",
+      "body": "## Cookies we always use\nThese are needed for the site to work, so they cannot be switched off:\n- Sign-in session (sb-…-auth-token): keeps you signed in.\n- tn_cart: your basket if you are not signed in (30 days).\n- tn_locale: your language (1 year).\n- tn_consent: your cookie choice (1 year).\n- tn_pw_reset: lets you set a new password after a reset link (30 minutes).\n\n## Optional analytics cookies\nOnly if you choose \"Allow analytics\": Google Analytics cookies (_ga…), which help us understand how the site is used. We anonymise IP addresses.\n\n## Changing your choice\nUse \"Cookie settings\" at the bottom of any page to change your choice at any time.\n\n## Videos\nYouTube and Vimeo load only when you press play. YouTube videos use its privacy-enhanced mode."
     }
   },
   "auth": {
@@ -366,7 +376,14 @@
       "in_app": "In-app"
     },
     "ordersTitle": "Product orders",
-    "designsTitle": "Custom designs"
+    "designsTitle": "Custom designs",
+    "deletion": {
+      "title": "Delete my account",
+      "body": "Ask us to delete your account and personal data. Records the law requires us to keep (such as invoices) are kept only for that purpose. We'll confirm by email or SMS.",
+      "button": "Request account deletion",
+      "confirm": "Send a deletion request for this account?",
+      "done": "Request received. We'll contact you to confirm."
+    }
   },
   "tracking": {
     "reference": "Reference",

@@ -103,7 +103,10 @@ async function deliver(channel: string, event: EventRow): Promise<Outcome> {
       if (!isDeliverableEmail(user.email)) return { status: "SKIPPED", provider: "none", note: "no deliverable email" };
       const adapter = emailAdapter();
       const link = payload.href ? `\n\n${process.env.APP_URL ?? ""}${payload.href}` : "";
-      const res = await adapter.send({ to: user.email, subject: msg.title, text: `${msg.body}${link}` });
+      const locale = user.preferredLocale === "hi" ? "hi" : "en";
+      // Every email says how to stop them (account → email updates switch).
+      const manage = `\n\n—\n${locale === "hi" ? "ईमेल अपडेट बंद करने के लिए" : "To stop these emails, switch off email updates in your account"}: ${process.env.APP_URL ?? ""}/${locale}/account`;
+      const res = await adapter.send({ to: user.email, subject: msg.title, text: `${msg.body}${link}${manage}` });
       return { status: "SENT", provider: adapter.name, providerMessageId: res.providerMessageId };
     }
     case "sms":

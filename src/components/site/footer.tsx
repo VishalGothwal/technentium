@@ -42,6 +42,8 @@ export async function SiteFooter() {
         [l("/policies/privacy"), t("footer.privacy")],
         [l("/policies/terms"), t("footer.terms")],
         [l("/policies/repair"), t("footer.repairPolicy")],
+        [l("/policies/refund"), t("footer.refundPolicy")],
+        [l("/policies/cookies"), t("footer.cookiePolicy")],
         [l("/developers"), t("site.footer.developers")],
       ],
     },
