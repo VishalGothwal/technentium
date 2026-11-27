@@ -109,15 +109,19 @@ export async function signInWithPassword(
   const done = await completeSignIn(supabase, data.user);
   if (!done.ok) return done;
 
-  if (opts.staff) {
-    const staff = await db.staffProfile.findUnique({
-      where: { userId: done.userId },
-      select: { active: true },
-    });
-    if (!staff?.active) {
-      await supabase.auth.signOut();
-      return fail("auth.notStaff");
-    }
+  if (opts.staff) return requireStaff(supabase, done.userId);
+  return { ok: true };
+}
+
+/** Admin console sign-ins (password or Google): only active staff keep the session. */
+export async function requireStaff(supabase: SupabaseClient, userId: string): Promise<AuthResult> {
+  const staff = await db.staffProfile.findUnique({
+    where: { userId },
+    select: { active: true },
+  });
+  if (!staff?.active) {
+    await supabase.auth.signOut();
+    return fail("auth.notStaff");
   }
   return { ok: true };
 }
@@ -201,9 +205,10 @@ export async function verifyPhoneOtp(rawPhone: string, code: string): Promise<Au
 }
 
 /** Starts Google sign-in. Returns the Google URL; the PKCE verifier is kept in a cookie for the callback. */
-export async function startGoogleSignIn(next: string): Promise<AuthResult<{ url: string }>> {
+/** `staff`: the admin console's button, which (like staff password sign-in) ignores the customer switch; the callback checks staff access. */
+export async function startGoogleSignIn(next: string, opts: { staff?: boolean } = {}): Promise<AuthResult<{ url: string }>> {
   if (!supabaseConfigured()) return fail("auth.notConfigured");
-  if (!(await getFeatures()).signIn.google) return fail("auth.methodOff");
+  if (!opts.staff && !(await getFeatures()).signIn.google) return fail("auth.methodOff");
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

@@ -1,6 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
-import { completeSignIn, appOrigin, grantPasswordReset } from "@/server/auth/flows";
+import { completeSignIn, appOrigin, grantPasswordReset, requireStaff } from "@/server/auth/flows";
 import { createSupabaseServerClient } from "@/server/supabase/server";
 import { isLocale } from "@/i18n/config";
 import { safeNext } from "@/lib/safe-redirect";
@@ -23,10 +23,16 @@ export async function GET(req: NextRequest) {
   const first = next.split("/")[1];
   const locale = isLocale(first) ? first : "en";
   const isReset = setsPassword || next.includes("/auth/reset-password");
+  // Google sign-in started from the admin console (next=/admin…): staff only, errors shown on the staff sign-in.
+  const isAdmin = !isReset && (next === "/admin" || next.startsWith("/admin/"));
   const back = (error: string) =>
     NextResponse.redirect(
       new URL(
-        isReset ? `/${locale}/auth/reset-password?error=${error}` : `/${locale}/auth/sign-in?error=${error}&next=${encodeURIComponent(next)}`,
+        isReset
+          ? `/${locale}/auth/reset-password?error=${error}`
+          : isAdmin
+            ? `/admin/sign-in?error=${error}`
+            : `/${locale}/auth/sign-in?error=${error}&next=${encodeURIComponent(next)}`,
         appOrigin(),
       ),
     );
@@ -47,6 +53,7 @@ export async function GET(req: NextRequest) {
 
   const done = await completeSignIn(supabase, data.user);
   if (!done.ok) return back(done.error === "auth.blocked" ? "blocked" : done.error === "auth.signUpOff" ? "signup" : "link");
+  if (isAdmin && !(await requireStaff(supabase, done.userId)).ok) return back("notStaff");
   // Only a real reset or invite link may set a password without the current one (PKCE resets report redirectType).
   if (setsPassword || ("redirectType" in data && data.redirectType === "recovery")) await grantPasswordReset(data.user.id);
   return NextResponse.redirect(new URL(next, appOrigin()));

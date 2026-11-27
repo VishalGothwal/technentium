@@ -4,8 +4,11 @@ import { startGoogleSignInAction } from "@/app/[locale]/auth/actions";
 import { useI18n } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
 
-/** One-tap "Continue with Google" (Supabase Auth); returns to the current page (or `callbackURL`, a site path) signed in. */
-export function GoogleButton({ callbackURL }: { callbackURL?: string }) {
+/**
+ * One-tap "Continue with Google" (Supabase Auth); returns to the current page (or `callbackURL`, a site path) signed in.
+ * `start` replaces the customer action (the admin console passes its staff one).
+ */
+export function GoogleButton({ callbackURL, start }: { callbackURL?: string; start?: () => ReturnType<typeof startGoogleSignInAction> }) {
   const { t } = useI18n();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +24,7 @@ export function GoogleButton({ callbackURL }: { callbackURL?: string }) {
         onClick={async () => {
           setPending(true);
           setError(null);
-          const res = await startGoogleSignInAction(callbackURL ?? `${window.location.pathname}${window.location.search}`);
+          const res = start ? await start() : await startGoogleSignInAction(callbackURL ?? `${window.location.pathname}${window.location.search}`);
           if (!res.ok) {
             setPending(false);
             return setError(t(res.error));

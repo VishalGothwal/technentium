@@ -5,6 +5,9 @@ import * as flows from "@/server/auth/flows";
 export const staffSignInAction = async (email: string, password: string) =>
   flows.signInWithPassword({ email: withTestDomain(email), password }, { staff: true });
 
+/** "Continue with Google" on the staff sign-in; the auth callback lets only active staff in. */
+export const staffGoogleSignInAction = async () => flows.startGoogleSignIn("/admin", { staff: true });
+
 /** Outside production a bare username ("admin") means the seeded test account <username>@technentium.test. */
 function withTestDomain(login: string) {
   const value = login.trim();
