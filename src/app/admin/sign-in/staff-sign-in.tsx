@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { staffSignInAction } from "./actions";
@@ -46,6 +47,11 @@ export function StaffSignIn() {
       <Field label="Password" required>
         {(p) => <Input {...p} name="password" type="password" autoComplete="current-password" />}
       </Field>
+      <div className="-mt-1 text-right">
+        <Link href="/en/auth/forgot-password" className="text-sm font-medium text-primary hover:underline">
+          Forgot password?
+        </Link>
+      </div>
       <Button type="submit" block pending={pending}>
         Sign in
       </Button>
