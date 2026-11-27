@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { staffGoogleSignInAction, staffSignInAction } from "./actions";
 import { GoogleButton } from "@/components/auth/google-button";
+import { PasswordInput } from "@/components/auth/password-input";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Alert } from "@/components/ui/surface";
@@ -56,7 +57,7 @@ export function StaffSignIn({ google }: { google: boolean }) {
           {(p) => <Input {...p} name="email" type="text" inputMode="email" autoCapitalize="none" spellCheck={false} autoComplete="username" />}
         </Field>
         <Field label="Password" required>
-          {(p) => <Input {...p} name="password" type="password" autoComplete="current-password" />}
+          {(p) => <PasswordInput {...p} name="password" autoComplete="current-password" />}
         </Field>
         <Button type="submit" block size="lg" pending={pending}>
           Login
