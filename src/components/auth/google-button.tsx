@@ -3,12 +3,21 @@ import { useState } from "react";
 import { startGoogleSignInAction } from "@/app/[locale]/auth/actions";
 import { useI18n } from "@/i18n/client";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
 
 /**
  * One-tap "Continue with Google" (Supabase Auth); returns to the current page (or `callbackURL`, a site path) signed in.
- * `start` replaces the customer action (the admin console passes its staff one).
+ * `start` replaces the customer action (the admin console passes its staff one); `className` restyles the button.
  */
-export function GoogleButton({ callbackURL, start }: { callbackURL?: string; start?: () => ReturnType<typeof startGoogleSignInAction> }) {
+export function GoogleButton({
+  callbackURL,
+  start,
+  className,
+}: {
+  callbackURL?: string;
+  start?: () => ReturnType<typeof startGoogleSignInAction>;
+  className?: string;
+}) {
   const { t } = useI18n();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +29,7 @@ export function GoogleButton({ callbackURL, start }: { callbackURL?: string; sta
         block
         size="lg"
         pending={pending}
-        className="rounded-xl border-foreground/20 font-semibold"
+        className={cn("rounded-xl border-foreground/20 font-semibold", className)}
         onClick={async () => {
           setPending(true);
           setError(null);
@@ -33,7 +42,7 @@ export function GoogleButton({ callbackURL, start }: { callbackURL?: string; sta
         }}
       >
         {!pending && (
-          <svg viewBox="0 0 24 24" className="size-5" aria-hidden>
+          <svg viewBox="0 0 24 24" className="size-6 rounded-sm bg-white p-0.5" aria-hidden>
             <path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6a5.1 5.1 0 0 1-2.2 3.4v2.8h3.6c2-1.9 3.2-4.7 3.2-8.3Z" />
             <path fill="#34A853" d="M12 23c3 0 5.5-1 7.4-2.7l-3.6-2.8c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.4-2-6.3-4.6H2v2.9A11 11 0 0 0 12 23Z" />
             <path fill="#FBBC05" d="M5.7 14c-.2-.7-.4-1.3-.4-2s.1-1.4.4-2V7.1H2A11 11 0 0 0 1 12c0 1.8.4 3.4 1.2 4.9L5.7 14Z" />

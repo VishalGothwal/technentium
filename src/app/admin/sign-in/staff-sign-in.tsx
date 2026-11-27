@@ -38,12 +38,6 @@ export function StaffSignIn() {
 
   return (
     <div className="space-y-4">
-      <GoogleButton start={staffGoogleSignInAction} />
-      <div className="flex items-center gap-3 text-xs text-muted">
-        <span className="h-px flex-1 bg-border" />
-        or with email
-        <span className="h-px flex-1 bg-border" />
-      </div>
       <form
         className="space-y-4"
         onSubmit={async (e) => {
@@ -64,18 +58,20 @@ export function StaffSignIn() {
         <Field label="Password" required>
           {(p) => <Input {...p} name="password" type="password" autoComplete="current-password" />}
         </Field>
-        <div className="-mt-1 text-right">
-          <Link href="/en/auth/forgot-password" className="text-sm font-medium text-primary hover:underline">
-            Forgot password?
-          </Link>
-        </div>
-        <Button type="submit" block pending={pending}>
-          Sign in
+        <Button type="submit" block size="lg" pending={pending}>
+          Login
         </Button>
-        <p className="text-center text-xs text-muted">
-          New staff accounts receive a set-password email from the Owner&apos;s invitation.
-        </p>
       </form>
+      <p className="text-center text-sm text-muted">…or login using</p>
+      <div className="mx-auto max-w-xs">
+        <GoogleButton start={staffGoogleSignInAction} className="rounded-md border-transparent bg-[#3367d6] text-white hover:bg-[#2a56b8]" />
+      </div>
+      <p className="text-center">
+        <Link href="/en/auth/forgot-password" className="text-sm font-medium text-primary hover:underline">
+          Forgot your password?
+        </Link>
+      </p>
+      <p className="text-center text-xs text-muted">New staff accounts receive a set-password email from the Owner&apos;s invitation.</p>
     </div>
   );
 }
