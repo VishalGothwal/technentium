@@ -25,7 +25,7 @@ const CALLBACK_ERRORS: Partial<Record<string, string>> = {
 };
 
 /** Staff sign-in: Google, or email and password. */
-export function StaffSignIn() {
+export function StaffSignIn({ google }: { google: boolean }) {
   const router = useRouter();
   const callbackError = useSearchParams().get("error");
   const [error, setError] = useState<string | null>(callbackError ? (CALLBACK_ERRORS[callbackError] ?? null) : null);
@@ -62,10 +62,14 @@ export function StaffSignIn() {
           Login
         </Button>
       </form>
-      <p className="text-center text-sm text-muted">…or login using</p>
-      <div className="mx-auto max-w-xs">
-        <GoogleButton start={staffGoogleSignInAction} className="rounded-md border-transparent bg-[#3367d6] text-white hover:bg-[#2a56b8]" />
-      </div>
+      {google && (
+        <>
+          <p className="text-center text-sm text-muted">…or login using</p>
+          <div className="mx-auto max-w-xs">
+            <GoogleButton start={staffGoogleSignInAction} className="rounded-md border-transparent bg-[#3367d6] text-white hover:bg-[#2a56b8]" />
+          </div>
+        </>
+      )}
       <p className="text-center">
         <Link href="/en/auth/forgot-password" className="text-sm font-medium text-primary hover:underline">
           Forgot your password?

@@ -259,10 +259,14 @@ async function AccountButton({ locale }: { locale: string }) {
   const href = session ? `/${locale}/account` : `/${locale}/auth/sign-in`;
   const label = session ? t("common.myAccount") : t("common.signIn");
   return (
-    <Link href={href} aria-label={label} title={label} className={`${HEADER_ICON_BUTTON} hidden lg:flex`}>
-      <User aria-hidden className="size-5" strokeWidth={1.75} />
-      {session && <span aria-hidden className="absolute top-2 right-2 size-2 rounded-full bg-success ring-2 ring-surface" />}
-    </Link>
+    <>
+      <Link href={href} aria-label={label} title={label} className={`${HEADER_ICON_BUTTON} hidden lg:flex`}>
+        <User aria-hidden className="size-5" strokeWidth={1.75} />
+        {session && <span aria-hidden className="absolute top-2 right-2 size-2 rounded-full bg-success ring-2 ring-surface" />}
+      </Link>
+      {/* Desktop only: on phones sign-out is in the menu sheet (MobileAccount). */}
+      {session && <SignOutButton label={t("common.signOut")} redirectTo={`/${locale}`} className="hidden shrink-0 lg:inline-flex" />}
+    </>
   );
 }
 

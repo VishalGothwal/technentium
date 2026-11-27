@@ -77,6 +77,23 @@ export async function cachedFeatures(): Promise<Features> {
   return readFeatures();
 }
 
+/**
+ * Which sign-in providers Supabase actually has switched on (its public settings, cached for minutes).
+ * A Google or phone button whose provider is off would only lead to Supabase's raw "provider is not enabled" error.
+ */
+export async function cachedAuthProviders(): Promise<{ google: boolean; phone: boolean }> {
+  "use cache";
+  cacheLife("minutes");
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return { google: false, phone: false };
+  const res = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } }).catch(() => null);
+  const settings = (await res?.json().catch(() => null)) as { external?: { google?: boolean; phone?: boolean } } | null;
+  // Unknown (network error): keep the Owner's switches rather than hide working buttons.
+  if (!settings?.external) return { google: true, phone: true };
+  return { google: !!settings.external.google, phone: !!settings.external.phone };
+}
+
 /** Refuse a customer-facing action while its site section is switched off. */
 export async function assertSection(section: Section) {
   const features = await getFeatures();

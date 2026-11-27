@@ -11,7 +11,7 @@ import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader } from "@/components/site/header";
 import { MaintenanceGate, MaintenanceNotice, TestModeStrip, ViewAsBar } from "@/components/site/platform";
 import { AuthMethodsProvider } from "@/components/auth/auth-methods";
-import { cachedFeatures } from "@/server/features";
+import { cachedAuthProviders, cachedFeatures } from "@/server/features";
 
 export async function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -29,8 +29,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LocaleLayout({ children }: LayoutProps<"/[locale]">) {
-  const [{ locale, t }, features] = await Promise.all([getT(), cachedFeatures()]);
-  const authMethods = { ...features.signIn, signUp: features.signUp };
+  const [{ locale, t }, features, providers] = await Promise.all([getT(), cachedFeatures(), cachedAuthProviders()]);
+  // A method shows only when the Owner switched it on AND Supabase has the provider enabled.
+  const authMethods = {
+    ...features.signIn,
+    google: features.signIn.google && providers.google,
+    phoneOtp: features.signIn.phoneOtp && providers.phone,
+    signUp: features.signUp,
+  };
   return (
     <html lang={locale} className={`${fontVariables} h-full antialiased`}>
       <body className="flex min-h-full flex-col">

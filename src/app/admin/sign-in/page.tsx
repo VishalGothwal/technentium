@@ -1,7 +1,14 @@
 import { Suspense } from "react";
 import { Logo } from "@/components/site/logo";
 import { Skeleton } from "@/components/ui/surface";
+import { cachedAuthProviders } from "@/server/features";
 import { StaffSignIn } from "./staff-sign-in";
+
+/** The Google button shows only once Google is enabled in Supabase. */
+async function StaffSignInForm() {
+  const { google } = await cachedAuthProviders();
+  return <StaffSignIn google={google} />;
+}
 
 export const metadata = { title: "Staff sign in" };
 
@@ -43,7 +50,7 @@ export default function AdminSignInPage() {
           <p className="mt-1 mb-6 text-sm text-muted">Use your Technentium staff account.</p>
           <div className="rounded-2xl border border-border bg-surface p-6 shadow-xl shadow-foreground/5">
             <Suspense fallback={<Skeleton className="h-40" />}>
-              <StaffSignIn />
+              <StaffSignInForm />
             </Suspense>
           </div>
         </div>
